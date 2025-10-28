@@ -1,16 +1,46 @@
-// Service for interacting with Claude API via Vercel proxy server
+// Service for interacting with Claude API via async job queue
 import { ClaudeRequest, ClaudeResponse, DesignSystemData, GenerationResult, LayoutNode, SerializedFrame, IterationResult } from './types';
 import { config } from './config';
 
 // Backend API endpoints (configured in config.ts)
-const PROXY_SERVER_URL = config.USE_MULTI_PHASE
-  ? config.BACKEND_URL_MULTI_PHASE
-  : config.BACKEND_URL;
+const START_JOB_URL = config.BACKEND_URL.replace('/api/generate', '/api/start-job');
+const JOB_STATUS_URL = config.BACKEND_URL.replace('/api/generate', '/api/job-status');
 
-const ITERATE_URL = config.BACKEND_URL.replace('/generate', '/iterate');
+// Polling configuration
+const POLL_INTERVAL_MS = 3000; // Poll every 3 seconds
+const MAX_POLL_ATTEMPTS = 60; // Max 3 minutes (60 * 3s)
+
+/**
+ * Helper function to poll job status
+ */
+async function pollJobStatus(jobId: string): Promise<any> {
+  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+    const response = await fetch(`${JOB_STATUS_URL}?job_id=${jobId}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to check job status: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'done') {
+      return data.output;
+    }
+
+    if (data.status === 'error') {
+      throw new Error(data.error || 'Job failed');
+    }
+
+    // Job still processing, wait and retry
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  throw new Error('Job timed out. Please try again.');
+}
 
 /**
  * Generates a layout using Claude API based on the design system and user prompt
+ * Uses async job queue to avoid timeouts
  */
 export async function generateLayout(
   prompt: string,
@@ -22,48 +52,41 @@ export async function generateLayout(
     return generateMockLayout(prompt, designSystem);
   }
 
-  // Call via proxy server (which has the API key)
   try {
-    const response = await fetch(PROXY_SERVER_URL, {
+    // Start the job
+    const startResponse = await fetch(START_JOB_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        mode: 'generate',
         prompt,
         designSystem,
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-
-      // Provide user-friendly error messages based on error type
-      let userMessage = errorData.message || errorData.error || 'Failed to generate layout';
-
-      // Add helpful suggestions
-      if (response.status === 400) {
-        userMessage += '\n\nSuggestion: Try removing special characters or emoji from your component names.';
-      } else if (response.status === 429 || response.status === 420) {
-        userMessage += '\n\nSuggestion: Your design system might be too large. Try using fewer components or a simpler prompt.';
-      } else if (response.status >= 500) {
-        userMessage += '\n\nSuggestion: The AI service is temporarily unavailable. Please try again in a moment or enable Mock Mode.';
-      }
-
-      throw new Error(userMessage);
+    if (!startResponse.ok) {
+      const errorData = await startResponse.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to start generation job');
     }
 
-    const layoutResult: GenerationResult = await response.json();
-    return layoutResult;
+    const { job_id } = await startResponse.json();
+
+    console.log('Generation job started:', job_id);
+
+    // Poll for results
+    const output = await pollJobStatus(job_id);
+
+    return output as GenerationResult;
   } catch (error) {
-    console.error('Error calling proxy server:', error);
+    console.error('Error generating layout:', error);
 
-    // Provide helpful error message
     if (error instanceof Error) {
-      throw error; // Re-throw with our enhanced message
+      throw error;
     }
 
-    throw new Error('Network error: Could not connect to the AI service. Please check your internet connection.');
+    throw new Error('Network error: Could not connect to the AI service.');
   }
 }
 
@@ -201,6 +224,7 @@ function generateMockLayout(prompt: string, designSystem: DesignSystemData): Gen
 
 /**
  * Iterates on an existing layout using Claude API
+ * Uses async job queue to avoid timeouts
  */
 export async function iterateLayout(
   frameData: SerializedFrame,
@@ -208,39 +232,40 @@ export async function iterateLayout(
   designSystem: DesignSystemData
 ): Promise<IterationResult> {
   try {
-    const response = await fetch(ITERATE_URL, {
+    // Start the job
+    const startResponse = await fetch(START_JOB_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         mode: 'iterate',
+        prompt: userPrompt,
         frameData,
-        userPrompt,
         designSystem,
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      let userMessage = errorData.message || errorData.error || 'Failed to iterate layout';
-
-      if (response.status >= 500) {
-        userMessage += '\n\nSuggestion: The AI service is temporarily unavailable. Please try again in a moment.';
-      }
-
-      throw new Error(userMessage);
+    if (!startResponse.ok) {
+      const errorData = await startResponse.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to start iteration job');
     }
 
-    const result: IterationResult = await response.json();
-    return result;
+    const { job_id } = await startResponse.json();
+
+    console.log('Iteration job started:', job_id);
+
+    // Poll for results
+    const output = await pollJobStatus(job_id);
+
+    return output as IterationResult;
   } catch (error) {
-    console.error('Error calling iterate endpoint:', error);
+    console.error('Error iterating layout:', error);
 
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('Network error: Could not connect to the AI service. Please check your internet connection.');
+    throw new Error('Network error: Could not connect to the AI service.');
   }
 }
