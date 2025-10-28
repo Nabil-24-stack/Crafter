@@ -1,0 +1,34 @@
+# Ignore Figma plugin files
+src/
+dist/
+node_modules/
+code.js
+code.ts
+ui.html
+ui.tsx
+ui.css
+manifest.json
+tsconfig.json
+webpack.config.js
+
+# Ignore proxy server
+proxy-server/
+
+# Ignore Vercel files
+server/
+
+# Ignore docs
+*.md
+README.md
+
+# Ignore Supabase files
+supabase/
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore Vercel files
+.vercel/
+vercel.json
+.vercelignore
