@@ -1,0 +1,27 @@
+{
+  "name": "crafter-backend",
+  "version": "1.0.0",
+  "description": "Secure backend proxy for Crafter Figma plugin - handles Claude API calls",
+  "main": "api/generate.ts",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "figma",
+    "claude",
+    "ai",
+    "proxy",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/node": "^3.0.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "vercel": "^33.0.0"
+  }
+}
