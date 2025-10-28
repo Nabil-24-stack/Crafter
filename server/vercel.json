@@ -12,6 +12,14 @@
     "api/iterate.ts": {
       "maxDuration": 60,
       "memory": 1024
+    },
+    "api/start-job.ts": {
+      "maxDuration": 10,
+      "memory": 512
+    },
+    "api/job-status.ts": {
+      "maxDuration": 10,
+      "memory": 512
     }
   },
   "headers": [

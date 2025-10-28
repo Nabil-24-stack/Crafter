@@ -1,0 +1,23 @@
+# Ignore Figma plugin source files
+src/
+dist/
+code.js
+code.ts
+ui.html
+manifest.json
+tsconfig.json
+webpack.config.js
+
+# Ignore proxy server
+proxy-server/
+
+# Ignore worker
+worker.js
+worker-package.json
+
+# Ignore docs
+*.md
+!server/**/*.md
+
+# Ignore Supabase files
+supabase/
