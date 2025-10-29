@@ -227,7 +227,9 @@ IMPORTANT RULES:
 ⚠️ ALWAYS use Auto Layout (layoutMode) for container frames
 ⚠️ Use spacing values from the scale: 4, 8, 12, 16, 24, 32, 48, 64
 ⚠️ Set ALL padding values (Left, Right, Top, Bottom)
-⚠️ Children inside auto layout frames should NOT have x/y coordinates (auto layout handles positioning)`;
+⚠️ Children inside auto layout frames should NOT have x/y coordinates (auto layout handles positioning)
+⚠️ Keep layouts focused and essential - prioritize quality over quantity of components
+⚠️ For complex designs, create a clean MVP structure with key components rather than every detail`;
 }
 
 /**
@@ -243,7 +245,7 @@ async function callClaude(systemPrompt, userPrompt) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 8192,
+      max_tokens: 16384, // Increased to handle complex layouts (Claude Sonnet 4.5 supports up to 16k output)
       messages: [
         {
           role: 'user',
@@ -304,6 +306,12 @@ Please generate a Figma layout that fulfills this request using the available de
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
   const responseText = claudeResponse.content[0]?.text || '{}';
 
+  // Check if we hit the token limit
+  if (claudeResponse.stop_reason === 'max_tokens') {
+    console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
+    console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+  }
+
   // Extract and parse the layout JSON
   const jsonText = extractJSON(responseText);
 
@@ -335,6 +343,12 @@ async function processIterateJob(job) {
 
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
   const responseText = claudeResponse.content[0]?.text || '{}';
+
+  // Check if we hit the token limit
+  if (claudeResponse.stop_reason === 'max_tokens') {
+    console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
+    console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+  }
 
   // Extract and parse the updated layout JSON
   const jsonText = extractJSON(responseText);
