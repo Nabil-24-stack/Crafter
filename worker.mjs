@@ -172,9 +172,10 @@ CRITICAL FIGMA AUTO LAYOUT RULES:
 5. **Sizing Modes**:
    - primaryAxisSizingMode: "AUTO" (grows with content) or "FIXED" (fixed size)
    - counterAxisSizingMode: "AUTO" (hugs content) or "FIXED" (fixed size)
-6. **Alignment**:
-   - primaryAxisAlignItems: "MIN" (start), "CENTER", "MAX" (end), "SPACE_BETWEEN"
-   - counterAxisAlignItems: "MIN", "CENTER", "MAX"
+6. **Alignment** (CRITICAL - use exact values):
+   - primaryAxisAlignItems: MUST be one of: "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN"
+   - counterAxisAlignItems: MUST be one of: "MIN" | "CENTER" | "MAX" (NO "STRETCH" - not supported!)
+   ⚠️ NEVER use "STRETCH" for counterAxisAlignItems - it will cause errors
 
 LAYOUT BEST PRACTICES:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -204,7 +205,7 @@ REQUIRED JSON SCHEMA:
     "width": number (if FIXED),
     "height": number (if FIXED),
     "primaryAxisAlignItems": "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN",
-    "counterAxisAlignItems": "MIN" | "CENTER" | "MAX",
+    "counterAxisAlignItems": "MIN" | "CENTER" | "MAX",  // ⚠️ NEVER use "STRETCH"
     "itemSpacing": number,
     "paddingLeft": number,
     "paddingRight": number,

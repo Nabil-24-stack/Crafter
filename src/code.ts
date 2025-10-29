@@ -30,6 +30,21 @@ async function initPlugin() {
 // Initialize
 initPlugin();
 
+/**
+ * Validates and sanitizes counterAxisAlignItems values
+ * Figma only accepts: 'MIN' | 'MAX' | 'CENTER' | 'BASELINE'
+ * Claude sometimes returns 'STRETCH' which is invalid
+ */
+function sanitizeCounterAxisAlignItems(value: string): 'MIN' | 'MAX' | 'CENTER' | 'BASELINE' {
+  const validValues = ['MIN', 'MAX', 'CENTER', 'BASELINE'];
+  if (validValues.includes(value)) {
+    return value as 'MIN' | 'MAX' | 'CENTER' | 'BASELINE';
+  }
+  // Default to CENTER if invalid value (like STRETCH)
+  console.warn(`Invalid counterAxisAlignItems value "${value}", defaulting to "CENTER"`);
+  return 'CENTER';
+}
+
 // Handle messages from the UI
 figma.ui.onmessage = async (msg: Message) => {
   console.log('Received message:', msg.type);
@@ -270,7 +285,7 @@ async function createNodeFromLayout(layoutNode: LayoutNode): Promise<SceneNode |
           frame.primaryAxisAlignItems = layoutNode.primaryAxisAlignItems;
         }
         if (layoutNode.counterAxisAlignItems) {
-          frame.counterAxisAlignItems = layoutNode.counterAxisAlignItems;
+          frame.counterAxisAlignItems = sanitizeCounterAxisAlignItems(layoutNode.counterAxisAlignItems);
         }
 
         // Set spacing
@@ -748,7 +763,7 @@ async function applyIteration(frame: FrameNode, updatedLayout: any) {
   }
 
   if (updatedLayout.counterAxisAlignItems) {
-    frame.counterAxisAlignItems = updatedLayout.counterAxisAlignItems;
+    frame.counterAxisAlignItems = sanitizeCounterAxisAlignItems(updatedLayout.counterAxisAlignItems);
   }
 
   if (typeof updatedLayout.itemSpacing === 'number') {
