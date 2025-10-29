@@ -233,6 +233,110 @@ IMPORTANT RULES:
 }
 
 /**
+ * Build system prompt for iteration
+ */
+function buildIterationSystemPrompt(designSystem) {
+  const MAX_DETAILED_COMPONENTS = 30;
+  const totalComponents = designSystem.components.length;
+
+  let componentsInfo;
+
+  if (totalComponents <= MAX_DETAILED_COMPONENTS) {
+    componentsInfo = designSystem.components.map(comp => {
+      return `- ${comp.name} (${comp.category || 'component'})
+  Key: ${comp.key}
+  Size: ${comp.width}x${comp.height}px
+  ${comp.description ? `Description: ${comp.description}` : ''}`;
+    }).join('\n');
+  } else {
+    const topComponents = designSystem.components.slice(0, MAX_DETAILED_COMPONENTS);
+    const remainingComponents = designSystem.components.slice(MAX_DETAILED_COMPONENTS);
+
+    const detailedInfo = topComponents.map(comp => {
+      return `- ${comp.name} (${comp.category || 'component'})
+  Key: ${comp.key}
+  Size: ${comp.width}x${comp.height}px
+  ${comp.description ? `Description: ${comp.description}` : ''}`;
+    }).join('\n');
+
+    const summaryInfo = remainingComponents.map(comp =>
+      `- ${comp.name} (${comp.category}, ${comp.width}x${comp.height}px, key: ${comp.key})`
+    ).join('\n');
+
+    componentsInfo = `PRIORITY COMPONENTS (with details):\n${detailedInfo}\n\nADDITIONAL COMPONENTS (available):\n${summaryInfo}`;
+  }
+
+  return `You are Crafter — an expert product designer who iterates on existing layouts using Auto Layout principles.
+
+Available Design System:
+
+COMPONENTS (${totalComponents} total, details below):
+${componentsInfo}
+
+COLORS: ${designSystem.colors.length} available
+TEXT STYLES: ${designSystem.textStyles.length} available
+
+YOUR TASK:
+Given an existing layout JSON and a designer's iteration request, modify the layout to improve or adjust it while:
+✓ Keeping it clean, consistent, and aligned with the design system
+✓ Maintaining hierarchy and naming consistency
+✓ Using Auto Layout principles (no absolute coordinates)
+✓ Following an 8px spacing grid
+✓ Setting relevant text content (never use placeholders)
+✓ You can ADD new components from the design system
+✓ You can REMOVE existing components
+✓ You can CHANGE component types by replacing them
+✓ You can EDIT text in existing text nodes and component instances
+
+CRITICAL RULES:
+⚠️ Return ONLY the updated layout JSON - NO markdown, NO explanations outside JSON
+⚠️ You can modify the children array (add, remove, reorder components)
+⚠️ When adding components, CAREFULLY match the component name and description to what the user requested
+⚠️ ALWAYS use the EXACT componentKey and componentName from the design system above
+⚠️ Use type: "COMPONENT_INSTANCE" for component instances
+⚠️ DO NOT create placeholder frames - only use actual components from the design system
+⚠️ If a component doesn't exist in the design system, do not add it
+⚠️ When user asks to change text, include "text" field in the node object with the new text
+⚠️ For text nodes: type: "TEXT", text: "new content"
+⚠️ For component instances with text: type: "COMPONENT_INSTANCE", text: "new content"
+⚠️ Only modify what the user requested
+⚠️ Use layoutMode: "HORIZONTAL" or "VERTICAL" for containers
+⚠️ Use spacing values: 4, 8, 12, 16, 24, 32, 48, 64
+⚠️ Keep layouts focused and essential - prioritize quality over quantity of components
+
+ADDING COMPONENTS:
+To add a component instance, include it in the children array:
+{
+  "type": "COMPONENT_INSTANCE",
+  "name": "Submit Button",
+  "componentKey": "component-key-from-design-system",
+  "componentName": "Button/Primary",
+  "text": "Click me" // optional text override
+}
+
+EDITING TEXT:
+To change text in existing nodes, include the "text" field:
+- Text node: { "type": "TEXT", "name": "Title", "text": "New Title Text" }
+- Component with text: { "type": "COMPONENT_INSTANCE", "name": "Button", "text": "New Button Label" }
+
+RESPONSE FORMAT:
+{
+  "reasoning": "Brief explanation of changes made",
+  "updatedLayout": {
+    "name": "Frame Name",
+    "type": "FRAME",
+    "layoutMode": "VERTICAL",
+    "itemSpacing": 16,
+    "paddingLeft": 24,
+    "paddingRight": 24,
+    "paddingTop": 24,
+    "paddingBottom": 24,
+    "children": [...]
+  }
+}`;
+}
+
+/**
  * Call Claude API
  */
 async function callClaude(systemPrompt, userPrompt) {
@@ -338,8 +442,14 @@ Please generate a Figma layout that fulfills this request using the available de
 async function processIterateJob(job) {
   const { prompt, frameData, designSystem } = job.input;
 
-  const systemPrompt = buildSystemPrompt(designSystem);
-  const userPrompt = `Existing layout:\n${JSON.stringify(frameData, null, 2)}\n\nUser request:\n"${prompt}"\n\nPlease modify the layout according to the user's request.`;
+  const systemPrompt = buildIterationSystemPrompt(designSystem);
+  const userPrompt = `Existing layout:
+${JSON.stringify(frameData, null, 2)}
+
+User request:
+"${prompt}"
+
+Please modify the layout according to the user's request. Return the updated layout JSON.`;
 
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
   const responseText = claudeResponse.content[0]?.text || '{}';
