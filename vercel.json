@@ -1,33 +1,27 @@
 {
   "version": 2,
   "functions": {
-    "server/api/generate.ts": {
+    "api/generate.ts": {
       "maxDuration": 60,
       "memory": 1024
     },
-    "server/api/generate-multi-phase.ts": {
+    "api/generate-multi-phase.ts": {
       "maxDuration": 60,
       "memory": 1024
     },
-    "server/api/iterate.ts": {
+    "api/iterate.ts": {
       "maxDuration": 60,
       "memory": 1024
     },
-    "server/api/start-job.ts": {
+    "api/start-job.ts": {
       "maxDuration": 10,
       "memory": 512
     },
-    "server/api/job-status.ts": {
+    "api/job-status.ts": {
       "maxDuration": 10,
       "memory": 512
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/server/api/:path*"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
