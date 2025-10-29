@@ -5,7 +5,7 @@
     "buildCommand": "rm -f package.json && cp worker-package.json package.json && npm install"
   },
   "deploy": {
-    "startCommand": "node worker.js",
+    "startCommand": "node worker.mjs",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

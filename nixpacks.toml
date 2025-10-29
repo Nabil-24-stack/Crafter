@@ -8,4 +8,4 @@ cmds = [
 ]
 
 [start]
-cmd = "node worker.js"
+cmd = "node worker.mjs"
