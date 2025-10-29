@@ -135,6 +135,27 @@ async function callClaude(systemPrompt, userPrompt) {
 }
 
 /**
+ * Extract JSON from Claude's response (handles comments, markdown, etc.)
+ */
+function extractJSON(responseText) {
+  let text = responseText.trim();
+
+  // Remove markdown code blocks
+  text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+
+  // Remove lines starting with # (comments)
+  text = text.split('\n').filter(line => !line.trim().startsWith('#')).join('\n');
+
+  // Try to find JSON object
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    text = jsonMatch[0];
+  }
+
+  return text.trim();
+}
+
+/**
  * Process a generate job
  */
 async function processGenerateJob(job) {
@@ -146,10 +167,8 @@ async function processGenerateJob(job) {
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
   const responseText = claudeResponse.content[0]?.text || '{}';
 
-  // Parse the layout
-  let jsonText = responseText.trim();
-  jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-
+  // Extract and parse the layout JSON
+  const jsonText = extractJSON(responseText);
   const parsed = JSON.parse(jsonText);
 
   return {
@@ -170,10 +189,8 @@ async function processIterateJob(job) {
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
   const responseText = claudeResponse.content[0]?.text || '{}';
 
-  // Parse the updated layout
-  let jsonText = responseText.trim();
-  jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-
+  // Extract and parse the updated layout JSON
+  const jsonText = extractJSON(responseText);
   const parsed = JSON.parse(jsonText);
 
   return {
