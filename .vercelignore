@@ -1,23 +1,33 @@
-# Ignore Figma plugin source files
-src/
-dist/
-code.js
-code.ts
-ui.html
-manifest.json
-tsconfig.json
-webpack.config.js
+# Ignore Figma plugin source files ONLY (not api directory)
+/src/
+/dist/
+/code.js
+/code.ts
+/ui.html
+/ui.tsx
+/ui.css
+/manifest.json
+/tsconfig.json
+/webpack.config.js
 
 # Ignore proxy server
-proxy-server/
+/proxy-server/
 
-# Ignore worker
-worker.js
-worker-package.json
+# Ignore Railway worker files
+/worker.js
+/worker.mjs
+/worker-package.json
+/railway.json
+/nixpacks.toml
+/.railwayignore
 
 # Ignore docs
 *.md
+!api/**/*.md
 !server/**/*.md
 
 # Ignore Supabase files
-supabase/
+/supabase/
+
+# Ignore server directory (we use /api instead)
+/server/
