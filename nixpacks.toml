@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs-18_x"]
+
+[phases.install]
+cmds = [
+  "cp worker-package.json package.json",
+  "npm install"
+]
+
+[start]
+cmd = "node worker.js"
