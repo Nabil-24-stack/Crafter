@@ -276,13 +276,16 @@ function extractJSON(responseText) {
   // Remove lines starting with # (comments)
   text = text.split('\n').filter(line => !line.trim().startsWith('#')).join('\n');
 
-  // Try to find JSON object (greedy match to get the whole object)
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    text = jsonMatch[0];
+  // Find the first opening brace and last closing brace for a complete JSON object
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    text = text.substring(firstBrace, lastBrace + 1);
   }
 
   console.log('Extracted JSON (first 500 chars):', text.substring(0, 500));
+  console.log('Extracted JSON (last 500 chars):', text.substring(Math.max(0, text.length - 500)));
 
   return text.trim();
 }
@@ -308,9 +311,11 @@ Please generate a Figma layout that fulfills this request using the available de
   try {
     parsed = JSON.parse(jsonText);
   } catch (error) {
-    console.error('JSON parse error:', error.message);
-    console.error('Failed JSON text:', jsonText);
-    throw new Error(`Failed to parse Claude response: ${error.message}. Response: ${jsonText.substring(0, 200)}`);
+    console.error('❌ JSON parse error:', error.message);
+    console.error('Failed JSON length:', jsonText.length, 'characters');
+    console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
+    console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
+    throw new Error(`Failed to parse Claude response: ${error.message}`);
   }
 
   return {
@@ -338,9 +343,11 @@ async function processIterateJob(job) {
   try {
     parsed = JSON.parse(jsonText);
   } catch (error) {
-    console.error('JSON parse error:', error.message);
-    console.error('Failed JSON text:', jsonText);
-    throw new Error(`Failed to parse Claude response: ${error.message}. Response: ${jsonText.substring(0, 200)}`);
+    console.error('❌ JSON parse error:', error.message);
+    console.error('Failed JSON length:', jsonText.length, 'characters');
+    console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
+    console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
+    throw new Error(`Failed to parse Claude response: ${error.message}`);
   }
 
   return {
