@@ -140,17 +140,22 @@ async function callClaude(systemPrompt, userPrompt) {
 function extractJSON(responseText) {
   let text = responseText.trim();
 
+  // Log the raw response for debugging
+  console.log('Raw Claude response (first 500 chars):', text.substring(0, 500));
+
   // Remove markdown code blocks
   text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
 
   // Remove lines starting with # (comments)
   text = text.split('\n').filter(line => !line.trim().startsWith('#')).join('\n');
 
-  // Try to find JSON object
+  // Try to find JSON object (greedy match to get the whole object)
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     text = jsonMatch[0];
   }
+
+  console.log('Extracted JSON (first 500 chars):', text.substring(0, 500));
 
   return text.trim();
 }
@@ -169,7 +174,15 @@ async function processGenerateJob(job) {
 
   // Extract and parse the layout JSON
   const jsonText = extractJSON(responseText);
-  const parsed = JSON.parse(jsonText);
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonText);
+  } catch (error) {
+    console.error('JSON parse error:', error.message);
+    console.error('Failed JSON text:', jsonText);
+    throw new Error(`Failed to parse Claude response: ${error.message}. Response: ${jsonText.substring(0, 200)}`);
+  }
 
   return {
     layout: parsed.layout,
@@ -191,7 +204,15 @@ async function processIterateJob(job) {
 
   // Extract and parse the updated layout JSON
   const jsonText = extractJSON(responseText);
-  const parsed = JSON.parse(jsonText);
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonText);
+  } catch (error) {
+    console.error('JSON parse error:', error.message);
+    console.error('Failed JSON text:', jsonText);
+    throw new Error(`Failed to parse Claude response: ${error.message}. Response: ${jsonText.substring(0, 200)}`);
+  }
 
   return {
     updatedLayout: parsed.updatedLayout,
