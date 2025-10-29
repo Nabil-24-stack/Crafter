@@ -4,7 +4,8 @@
   "description": "The AI Twin for Designers - Generate Figma layouts with Claude AI",
   "main": "code.js",
   "scripts": {
-    "build": "echo 'Skipping build - Vercel will build API functions separately'",
+    "build": "webpack --mode=production",
+    "vercel-build": "echo 'Skipping build - Vercel will build API functions separately'",
     "watch": "webpack --mode=development --watch",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix ."
