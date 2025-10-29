@@ -1,11 +1,4 @@
 {
-  "version": 2,
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
