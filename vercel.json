@@ -1,16 +1,42 @@
 {
   "version": 2,
-  "name": "crafter-backend",
-  "builds": [
+  "functions": {
+    "server/api/generate.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "server/api/generate-multi-phase.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "server/api/iterate.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "server/api/start-job.ts": {
+      "maxDuration": 10,
+      "memory": 512
+    },
+    "server/api/job-status.ts": {
+      "maxDuration": 10,
+      "memory": 512
+    }
+  },
+  "rewrites": [
     {
-      "src": "server/api/**/*.ts",
-      "use": "@vercel/node"
+      "source": "/api/:path*",
+      "destination": "/server/api/:path*"
     }
   ],
-  "routes": [
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "server/api/$1"
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+      ]
     }
   ]
 }
