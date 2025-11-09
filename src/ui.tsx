@@ -22,7 +22,12 @@ const App = () => {
   const [frameId, setFrameId] = React.useState<string | null>(null);
   const [iterationPrompt, setIterationPrompt] = React.useState('');
   const [isIterating, setIsIterating] = React.useState(false);
-  const [mode, setMode] = React.useState<'generate' | 'iterate'>('generate');
+  const [mode, setMode] = React.useState<'ideation' | 'iterate'>('ideation');
+
+  // Ideation mode state
+  const [isGeneratingIdeas, setIsGeneratingIdeas] = React.useState(false);
+  const [concepts, setConcepts] = React.useState<any[]>([]);
+  const [selectedConcept, setSelectedConcept] = React.useState<any | null>(null);
 
   // Set up message listener on mount
   React.useEffect(() => {
@@ -49,7 +54,7 @@ const App = () => {
           } else {
             setSelectedFrame(null);
             setFrameId(null);
-            setMode('generate');
+            setMode('ideation');
           }
           break;
 
@@ -95,10 +100,10 @@ const App = () => {
     }, '*');
   };
 
-  // Handle generate button click
-  const handleGenerate = async () => {
+  // Handle generate ideas button click
+  const handleGenerateIdeas = async () => {
     if (!prompt.trim()) {
-      setPromptError('Provide a prompt to generate a design.');
+      setPromptError('Provide a prompt to generate ideas.');
       return;
     }
 
@@ -107,15 +112,59 @@ const App = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsGeneratingIdeas(true);
     setError('');
     setResult('');
     setPromptError('');
+    setConcepts([]);
 
     try {
-      // Call proxy server (which calls Claude API)
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-ideas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          designSystem,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate ideas');
+      }
+
+      const data = await response.json();
+      setConcepts(data.concepts || []);
+      setIsGeneratingIdeas(false);
+    } catch (err) {
+      setIsGeneratingIdeas(false);
+      setError(err instanceof Error ? err.message : 'Failed to generate ideas');
+      console.error('Ideation error:', err);
+    }
+  };
+
+  // Handle concept selection
+  const handleSelectConcept = async (concept: any) => {
+    if (!designSystem) {
+      setError('Design system not loaded');
+      return;
+    }
+
+    setSelectedConcept(concept);
+    setIsLoading(true);
+    setError('');
+    setResult('');
+
+    try {
+      // Build a more detailed prompt based on the concept
+      const detailedPrompt = `${prompt}
+
+Layout concept: ${concept.caption}
+Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area}`).join(', ')}`;
+
       const apiKey = 'USE_PROXY';
-      const generationResult = await generateLayout(prompt, designSystem, apiKey);
+      const generationResult = await generateLayout(detailedPrompt, designSystem, apiKey);
 
       // Send the generated layout to the plugin code for rendering
       parent.postMessage(
@@ -127,6 +176,10 @@ const App = () => {
         },
         '*'
       );
+
+      // Clear concepts after successful generation
+      setConcepts([]);
+      setSelectedConcept(null);
 
       // The plugin will send back generation-complete or generation-error
     } catch (err) {
@@ -140,8 +193,8 @@ const App = () => {
     if (e.key === 'Enter' && e.metaKey) {
       if (mode === 'iterate') {
         handleIterate();
-      } else {
-        handleGenerate();
+      } else if (concepts.length === 0) {
+        handleGenerateIdeas();
       }
     }
   };
@@ -250,8 +303,8 @@ const App = () => {
             </div>
           )}
 
-          {/* Generate Mode */}
-          {mode === 'generate' && (
+          {/* Ideation Mode */}
+          {mode === 'ideation' && (
             <>
               {/* Prompt Input */}
               <div className="input-group">
@@ -267,22 +320,73 @@ const App = () => {
                     setPromptError('');
                   }}
                   onKeyDown={handleKeyPress}
-                  placeholder="e.g., Create a dashboard layout with navigation, header, and card grid"
+                  placeholder="e.g., Create a banking dashboard with account overview and transactions"
                   rows={4}
-                  disabled={isLoading}
+                  disabled={isGeneratingIdeas || isLoading}
                 />
                 {promptError && <p className="error-text">{promptError}</p>}
               </div>
 
-              {/* Generate Button */}
-              <button
-                className="button button-generate"
-                onClick={handleGenerate}
-                disabled={isLoading}
-              >
-                {isLoading && <div className="spinner" />}
-                {isLoading ? 'Generating...' : 'Generate Design'}
-              </button>
+              {/* Generate Ideas Button - Only show if no concepts yet */}
+              {concepts.length === 0 && (
+                <button
+                  className="button button-generate"
+                  onClick={handleGenerateIdeas}
+                  disabled={isGeneratingIdeas || isLoading}
+                >
+                  {isGeneratingIdeas && <div className="spinner" />}
+                  {isGeneratingIdeas ? 'Generating 10 concepts...' : 'Generate Ideas'}
+                </button>
+              )}
+
+              {/* Concepts Grid */}
+              {concepts.length > 0 && (
+                <div className="concepts-section">
+                  <div className="concepts-header">
+                    <h3 className="concepts-title">Choose a concept</h3>
+                    <button
+                      className="button-link"
+                      onClick={() => {
+                        setConcepts([]);
+                        setSelectedConcept(null);
+                      }}
+                    >
+                      Start over
+                    </button>
+                  </div>
+                  <div id="concepts-grid">
+                    {concepts.map((concept) => (
+                      <div
+                        key={concept.id}
+                        className={`concept ${selectedConcept?.id === concept.id ? 'selected' : ''}`}
+                        onClick={() => !isLoading && handleSelectConcept(concept)}
+                      >
+                        <div className="layout">
+                          {concept.layout.map((item: any, idx: number) => {
+                            const className = item.component.toLowerCase().replace(/\s+/g, '');
+                            return (
+                              <div
+                                key={idx}
+                                className={`layout-item ${className}`}
+                                style={{
+                                  width: item.width || 'auto',
+                                  height: item.height || 'auto',
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+                        <p className="concept-caption">{concept.caption}</p>
+                        {isLoading && selectedConcept?.id === concept.id && (
+                          <div className="concept-loading">
+                            <div className="spinner" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
 
