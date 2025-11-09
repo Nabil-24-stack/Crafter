@@ -628,7 +628,8 @@ body {
 
 /* Form/input areas */
 .layout-item.form,
-.layout-item.inputarea {
+.layout-item.inputarea,
+.layout-item.is-form {
   flex: 1 !important;
   background: #fafafa;
   padding: 4px;
@@ -636,7 +637,8 @@ body {
 }
 
 .layout-item.form::before,
-.layout-item.inputarea::before {
+.layout-item.inputarea::before,
+.layout-item.is-form::before {
   content: '';
   position: absolute;
   top: 4px;
@@ -648,6 +650,129 @@ body {
   box-shadow:
     0 10px 0 #e8e8e8,
     0 20px 0 #e8e8e8;
+}
+
+/* Area-based positioning */
+.layout-item.area-top {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.layout-item.area-left,
+.layout-item.is-sidebar {
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.layout-item.area-right,
+.layout-item.is-drawer {
+  flex-shrink: 0;
+  align-self: stretch;
+  background: linear-gradient(to left, #e8e8e8, #e0e0e0);
+}
+
+.layout-item.area-bottom {
+  width: 100%;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.layout-item.area-center {
+  flex: 1;
+  min-height: 50px;
+}
+
+/* Component type styles */
+.layout-item.is-hero {
+  background: linear-gradient(135deg, #d0d0d0, #c8c8c8);
+}
+
+.layout-item.is-hero::after {
+  content: '';
+  width: 60%;
+  height: 4px;
+  background: #999;
+  box-shadow: 0 8px 0 #aaa, 0 16px 0 #bbb;
+  border-radius: 1px;
+  position: absolute;
+  left: 20%;
+  top: 40%;
+}
+
+.layout-item.is-grid::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #ddd 0px,
+      #ddd 1px,
+      transparent 1px,
+      transparent 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #ddd 0px,
+      #ddd 1px,
+      transparent 1px,
+      transparent 100%
+    );
+  background-size: 33.33% 50%;
+}
+
+.layout-item.is-nav {
+  background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+}
+
+.layout-item.is-nav::after {
+  content: '';
+  width: 12px;
+  height: 3px;
+  background: #999;
+  border-radius: 1px;
+  box-shadow: 0 5px 0 #999, 0 10px 0 #999;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.layout-item.is-tabs::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 30%;
+  height: 3px;
+  background: #19a198;
+  border-bottom: 2px solid #19a198;
+  box-shadow: 32% 0 0 #ccc, 64% 0 0 #ccc;
+}
+
+.layout-item.is-column {
+  background: #f8f8f8;
+  border-right: 1px solid #d8d8d8;
+}
+
+.layout-item.is-column:last-child {
+  border-right: none;
+}
+
+/* Drawer specific styling */
+.layout-item.is-drawer::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #999;
+  border-right: 2px solid #999;
+  transform: rotate(45deg);
 }
 
 .concept-caption {

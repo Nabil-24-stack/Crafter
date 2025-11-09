@@ -89,6 +89,86 @@ const App = () => {
     };
   }, []);
 
+  // Render concept layout with intelligent positioning
+  const renderConceptLayout = (concept: any) => {
+    const items = concept.layout || [];
+
+    return items.map((item: any, idx: number) => {
+      const area = item.area || 'center';
+      const component = item.component || 'Container';
+
+      // Determine visual style based on area and component
+      let className = 'layout-item';
+      let style: React.CSSProperties = {};
+
+      // Map area to position
+      if (area === 'top') {
+        className += ' area-top';
+        style.width = item.width || '100%';
+        style.height = item.height || '16px';
+        style.order = -10;
+      } else if (area === 'left') {
+        className += ' area-left';
+        style.width = item.width || '30%';
+        style.height = 'calc(100% - 20px)';
+        style.order = 0;
+      } else if (area === 'right') {
+        className += ' area-right';
+        style.width = item.width || '25%';
+        style.height = 'calc(100% - 20px)';
+        style.order = 2;
+      } else if (area === 'bottom') {
+        className += ' area-bottom';
+        style.width = item.width || '100%';
+        style.height = item.height || '12px';
+        style.order = 10;
+      } else if (area === 'center' || area === 'main') {
+        className += ' area-center';
+        style.flex = '1';
+        style.order = 1;
+      }
+
+      // Add component type class for styling
+      const componentClass = component.toLowerCase().replace(/[\s/]+/g, '-');
+      className += ` component-${componentClass}`;
+
+      // Special handling for specific components
+      if (component.toLowerCase().includes('hero')) {
+        className += ' is-hero';
+        style.minHeight = '50px';
+      } else if (component.toLowerCase().includes('grid') || component.toLowerCase().includes('card')) {
+        className += ' is-grid';
+      } else if (component.toLowerCase().includes('nav')) {
+        className += ' is-nav';
+      } else if (component.toLowerCase().includes('sidebar')) {
+        className += ' is-sidebar';
+      } else if (component.toLowerCase().includes('form') || component.toLowerCase().includes('input')) {
+        className += ' is-form';
+      } else if (component.toLowerCase().includes('tabs') || component.toLowerCase().includes('tab')) {
+        className += ' is-tabs';
+      } else if (component.toLowerCase().includes('drawer')) {
+        className += ' is-drawer';
+        style.width = '35%';
+      } else if (component.toLowerCase().includes('column')) {
+        className += ' is-column';
+        if (component.toLowerCase().includes('three')) {
+          style.width = '33%';
+        } else if (component.toLowerCase().includes('two')) {
+          style.width = '50%';
+        }
+      }
+
+      return (
+        <div
+          key={idx}
+          className={className}
+          style={style}
+          title={component}
+        />
+      );
+    });
+  };
+
   // Handle scan design system button click
   const handleScanDesignSystem = () => {
     setIsScanning(true);
@@ -362,19 +442,7 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
                         onClick={() => !isLoading && handleSelectConcept(concept)}
                       >
                         <div className="layout">
-                          {concept.layout.map((item: any, idx: number) => {
-                            const className = item.component.toLowerCase().replace(/\s+/g, '');
-                            return (
-                              <div
-                                key={idx}
-                                className={`layout-item ${className}`}
-                                style={{
-                                  width: item.width || 'auto',
-                                  height: item.height || 'auto',
-                                }}
-                              />
-                            );
-                          })}
+                          {renderConceptLayout(concept)}
                         </div>
                         <p className="concept-caption">{concept.caption}</p>
                         {isLoading && selectedConcept?.id === concept.id && (
