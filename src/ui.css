@@ -413,69 +413,241 @@ body {
 }
 
 .layout {
-  height: 120px;
-  background: #f9f9f9;
+  height: 140px;
+  background: #ffffff;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
   position: relative;
   border-radius: 4px;
   overflow: hidden;
-  padding: 4px;
+  padding: 6px;
   gap: 4px;
+  border: 1px solid #e8e8e8;
 }
 
 .layout-item {
-  background: #e0e0e0;
+  background: #f5f5f5;
   border-radius: 2px;
+  border: 1px solid #d4d4d4;
+  position: relative;
+}
+
+/* Add subtle inner shadows for depth */
+.layout-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Specific layout component styles */
 .layout-item.topnav,
 .layout-item.header {
   width: 100% !important;
-  height: 12px !important;
-  background: #bdbdbd;
-  margin-bottom: 2px;
+  height: 16px !important;
+  background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+/* Add logo/menu indicators to nav */
+.layout-item.topnav::after,
+.layout-item.header::after {
+  content: '';
+  width: 12px;
+  height: 3px;
+  background: #999;
+  border-radius: 1px;
+  box-shadow: 0 5px 0 #999, 0 10px 0 #999;
+  margin-left: auto;
 }
 
 .layout-item.sidebar {
   width: 30% !important;
-  height: calc(100% - 16px) !important;
-  background: #d4d4d4;
+  height: calc(100% - 22px) !important;
+  background: linear-gradient(to right, #e8e8e8, #e0e0e0);
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  gap: 3px;
+}
+
+/* Add menu items to sidebar */
+.layout-item.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  height: 3px;
+  background: #bbb;
+  box-shadow:
+    0 6px 0 #bbb,
+    0 12px 0 #bbb,
+    0 18px 0 #bbb,
+    0 24px 0 #bbb;
 }
 
 .layout-item.maingrid,
 .layout-item.contentarea,
 .layout-item.mainarea {
   flex: 1 !important;
-  background: #e8e8e8;
+  background: #f8f8f8;
   min-height: 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  padding: 3px;
+}
+
+/* Add mini card indicators */
+.layout-item.maingrid::before,
+.layout-item.contentarea::before,
+.layout-item.mainarea::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background:
+    linear-gradient(#d8d8d8 2px, transparent 2px) 0 0,
+    linear-gradient(90deg, #d8d8d8 2px, transparent 2px) 0 0;
+  background-size: 50% 50%;
+  border-radius: 1px;
 }
 
 .layout-item.hero {
   width: 100% !important;
   height: 50px !important;
-  background: #c0c0c0;
+  background: linear-gradient(135deg, #d0d0d0, #c8c8c8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+/* Add hero content indicators */
+.layout-item.hero::after {
+  content: '';
+  width: 60%;
+  height: 4px;
+  background: #999;
+  box-shadow: 0 8px 0 #aaa, 0 16px 0 #bbb;
+  border-radius: 1px;
 }
 
 .layout-item.cardgrid {
   flex: 1 !important;
-  background: repeating-linear-gradient(
-    45deg,
-    #e8e8e8,
-    #e8e8e8 10px,
-    #f2f2f2 10px,
-    #f2f2f2 20px
-  );
+  background: #f8f8f8;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 2px;
+  padding: 3px;
+}
+
+/* Add card indicators */
+.layout-item.cardgrid::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #ddd 0px,
+      #ddd 1px,
+      transparent 1px,
+      transparent 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #ddd 0px,
+      #ddd 1px,
+      transparent 1px,
+      transparent 100%
+    );
+  background-size: 33.33% 50%;
+  border-radius: 1px;
 }
 
 .layout-item.bottomnav,
 .layout-item.footer {
   width: 100% !important;
-  height: 10px !important;
-  background: #bdbdbd;
+  height: 12px !important;
+  background: linear-gradient(to bottom, #d8d8d8, #c8c8c8);
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+/* Add bottom nav icons */
+.layout-item.bottomnav::after,
+.layout-item.footer::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: #999;
+  border-radius: 50%;
+  box-shadow: 8px 0 0 #999, 16px 0 0 #999, 24px 0 0 #999;
+}
+
+/* Add button/form components */
+.layout-item.buttongroup,
+.layout-item.buttons {
+  width: 100% !important;
+  height: 18px !important;
+  background: #f0f0f0;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  justify-content: flex-end;
+}
+
+.layout-item.buttongroup::after,
+.layout-item.buttons::after {
+  content: '';
+  width: 20px;
+  height: 10px;
+  background: linear-gradient(to bottom, #19a198, #16958d);
+  border-radius: 2px;
+  box-shadow: -24px 0 0 #e0e0e0;
+}
+
+/* Form/input areas */
+.layout-item.form,
+.layout-item.inputarea {
+  flex: 1 !important;
+  background: #fafafa;
+  padding: 4px;
+  min-height: 50px;
+}
+
+.layout-item.form::before,
+.layout-item.inputarea::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  height: 6px;
+  background: #e8e8e8;
+  border-radius: 2px;
+  box-shadow:
+    0 10px 0 #e8e8e8,
+    0 20px 0 #e8e8e8;
 }
 
 .concept-caption {
