@@ -126,7 +126,7 @@ const App = () => {
     return variations.slice(0, n);
   };
 
-  // Handle generate variations - directly generates designs without concept selection
+  // Handle generate variations - renders each as soon as it's ready
   const handleGenerateVariations = async () => {
     if (!prompt.trim()) {
       setPromptError('Provide a prompt to generate designs.');
@@ -150,26 +150,40 @@ const App = () => {
       // Generate variation prompts
       const variationPrompts = generateVariationPrompts(prompt, numberOfVariations);
 
-      // Generate all variations in parallel
-      const variationResults = await Promise.all(
-        variationPrompts.map(varPrompt => generateLayout(varPrompt, designSystem, apiKey))
-      );
+      // Start all variations in parallel, but render each as soon as it's ready
+      variationPrompts.forEach(async (varPrompt, index) => {
+        try {
+          const variationResult = await generateLayout(varPrompt, designSystem, apiKey);
 
-      // Send all variations to the plugin code for rendering
-      parent.postMessage(
-        {
-          pluginMessage: {
-            type: 'generate-variations',
-            payload: {
-              variations: variationResults,
-              numberOfVariations,
+          // Send this variation to the plugin immediately for rendering
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: 'generate-single-variation',
+                payload: {
+                  variation: variationResult,
+                  variationIndex: index,
+                  totalVariations: numberOfVariations,
+                },
+              },
             },
-          },
-        },
-        '*'
-      );
+            '*'
+          );
+        } catch (err) {
+          console.error(`Error generating variation ${index + 1}:`, err);
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: 'generation-error',
+                payload: { error: `Variation ${index + 1} failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
+              },
+            },
+            '*'
+          );
+        }
+      });
 
-      // The plugin will send back generation-complete or generation-error
+      // The plugin will send back generation-complete or generation-error for each
     } catch (err) {
       setIsGeneratingVariations(false);
       setIsLoading(false);

@@ -17,6 +17,14 @@ figma.showUI(__html__, { width: 400, height: 600 });
 
 console.log('Crafter plugin loaded');
 
+// Global state for tracking variations in current generation session
+let currentVariationsSession: {
+  basePosition: { x: number; y: number };
+  createdNodes: SceneNode[];
+  totalVariations: number;
+  completedCount: number;
+} | null = null;
+
 // Load all pages on startup (required for dynamic-page access)
 async function initPlugin() {
   try {
@@ -134,6 +142,10 @@ figma.ui.onmessage = async (msg: Message) => {
 
       case 'generate-variations':
         await handleGenerateVariations(msg.payload);
+        break;
+
+      case 'generate-single-variation':
+        await handleGenerateSingleVariation(msg.payload);
         break;
 
       case 'iterate-design':
@@ -412,6 +424,108 @@ async function handleGenerateVariations(payload: { variations: Array<{ layout: L
       payload: { error: error instanceof Error ? error.message : 'Failed to create variations' },
     });
     figma.notify('❌ Failed to generate variations', { error: true });
+  }
+}
+
+/**
+ * Handles a single variation as soon as it's ready (streaming approach)
+ */
+async function handleGenerateSingleVariation(payload: {
+  variation: { layout: LayoutNode; reasoning?: string };
+  variationIndex: number;
+  totalVariations: number;
+}) {
+  console.log(`Generating variation ${payload.variationIndex + 1} of ${payload.totalVariations} on canvas...`);
+
+  const { variation, variationIndex, totalVariations } = payload;
+  const { layout, reasoning } = variation;
+  const VARIATION_SPACING = 1200;
+
+  try {
+    // Initialize session on first variation
+    if (currentVariationsSession === null || currentVariationsSession.totalVariations !== totalVariations) {
+      // Calculate base position for first variation
+      const nodes = figma.currentPage.children;
+      let baseX: number;
+      let baseY: number;
+
+      if (nodes.length > 0) {
+        // Position to the right of existing content
+        const rightmostNode = nodes.reduce((rightmost, node) => {
+          const nodeRight = node.x + node.width;
+          const rightmostRight = rightmost.x + rightmost.width;
+          return nodeRight > rightmostRight ? node : rightmost;
+        });
+        baseX = rightmostNode.x + rightmostNode.width + 100;
+        baseY = rightmostNode.y;
+      } else {
+        // Center in viewport
+        baseX = figma.viewport.center.x - 600; // Offset to account for multiple variations
+        baseY = figma.viewport.center.y - 400;
+      }
+
+      currentVariationsSession = {
+        basePosition: { x: baseX, y: baseY },
+        createdNodes: [],
+        totalVariations,
+        completedCount: 0,
+      };
+    }
+
+    // Create the layout node
+    const rootNode = await createNodeFromLayout(layout);
+
+    if (rootNode) {
+      // Add to current page
+      figma.currentPage.appendChild(rootNode);
+
+      // Update the name to include variation number
+      rootNode.name = `${layout.name} - Variation ${variationIndex + 1}`;
+
+      // Position based on variation index
+      rootNode.x = currentVariationsSession.basePosition.x + (variationIndex * VARIATION_SPACING);
+      rootNode.y = currentVariationsSession.basePosition.y;
+
+      // Track the created node
+      currentVariationsSession.createdNodes.push(rootNode);
+      currentVariationsSession.completedCount++;
+
+      console.log(`Variation ${variationIndex + 1} created successfully:`, rootNode.name);
+
+      // Select and zoom to show all created variations so far
+      figma.currentPage.selection = currentVariationsSession.createdNodes;
+      figma.viewport.scrollAndZoomIntoView(currentVariationsSession.createdNodes);
+
+      // Check if all variations are complete
+      if (currentVariationsSession.completedCount === totalVariations) {
+        const message = `Generated ${totalVariations} design variation${totalVariations > 1 ? 's' : ''}. ${reasoning || ''}`;
+
+        figma.ui.postMessage({
+          type: 'generation-complete',
+          payload: {
+            success: true,
+            reasoning: message,
+          },
+        });
+
+        figma.notify(`✨ All ${totalVariations} variation${totalVariations > 1 ? 's' : ''} generated successfully!`);
+
+        // Reset session
+        currentVariationsSession = null;
+      } else {
+        // Partial completion notification
+        figma.notify(`✅ Variation ${variationIndex + 1} of ${totalVariations} ready`);
+      }
+    } else {
+      throw new Error(`Failed to create variation ${variationIndex + 1} node`);
+    }
+  } catch (error) {
+    console.error(`Error creating variation ${variationIndex + 1}:`, error);
+    figma.ui.postMessage({
+      type: 'generation-error',
+      payload: { error: error instanceof Error ? error.message : `Failed to create variation ${variationIndex + 1}` },
+    });
+    figma.notify(`❌ Failed to generate variation ${variationIndex + 1}`, { error: true });
   }
 }
 
