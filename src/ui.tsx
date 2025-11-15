@@ -85,6 +85,21 @@ const App = () => {
           setError(`Error: ${msg.payload.error}`);
           setResult('');
           break;
+
+        case 'frame-json-exported':
+          // Download the JSON file
+          const { json, fileName } = msg.payload;
+          const jsonString = JSON.stringify(json, null, 2);
+          const blob = new Blob([jsonString], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.click();
+          URL.revokeObjectURL(url);
+          setResult('Frame exported successfully!');
+          setError('');
+          break;
       }
     };
   }, []);
@@ -325,6 +340,18 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
     }
   };
 
+  // Handle export button click
+  const handleExport = () => {
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: 'export-frame-json',
+        },
+      },
+      '*'
+    );
+  };
+
   return (
     <div className="container">
       {/* Step 1: Centered initial screen */}
@@ -478,15 +505,25 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
             </div>
           </div>
 
-          {/* Re-scan Button (Secondary) */}
-          <button
-            className="button button-secondary button-rescan"
-            onClick={handleScanDesignSystem}
-            disabled={isScanning || isLoading}
-          >
-            {isScanning && <div className="spinner" />}
-            {isScanning ? 'Scanning...' : 'Re-scan Design System'}
-          </button>
+          {/* Action Buttons */}
+          <div className="button-group">
+            <button
+              className="button button-secondary"
+              onClick={handleExport}
+              disabled={isScanning || isLoading}
+            >
+              Export Frame to JSON
+            </button>
+
+            <button
+              className="button button-secondary"
+              onClick={handleScanDesignSystem}
+              disabled={isScanning || isLoading}
+            >
+              {isScanning && <div className="spinner" />}
+              {isScanning ? 'Scanning...' : 'Re-scan Design System'}
+            </button>
+          </div>
         </>
       )}
     </div>

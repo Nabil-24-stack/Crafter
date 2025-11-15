@@ -7,6 +7,8 @@ export type MessageType =
   | 'iterate-design'
   | 'get-design-system'
   | 'get-selected-frame'
+  | 'export-frame-json'
+  | 'frame-json-exported'
   | 'selected-frame-data'
   | 'design-system-data'
   | 'generation-complete'

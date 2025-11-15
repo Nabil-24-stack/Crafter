@@ -267,7 +267,11 @@ body {
   margin-top: -4px;
 }
 
-.button-rescan {
+/* Button group for actions */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-top: -4px;
 }
 

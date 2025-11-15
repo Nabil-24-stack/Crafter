@@ -124,6 +124,10 @@ figma.ui.onmessage = async (msg: Message) => {
         await handleGetSelectedFrame();
         break;
 
+      case 'export-frame-json':
+        await handleExportFrameJson();
+        break;
+
       case 'generate-layout':
         await handleGenerateLayout(msg.payload);
         break;
@@ -678,6 +682,50 @@ async function handleGetSelectedFrame() {
     type: 'selected-frame-data',
     payload: { frame: serializedFrame, frameId: selectedNode.id },
   });
+}
+
+/**
+ * Handles export frame to JSON request
+ * Downloads the selected frame as a JSON file
+ */
+async function handleExportFrameJson() {
+  const selection = figma.currentPage.selection;
+
+  if (selection.length === 0) {
+    figma.ui.postMessage({
+      type: 'generation-error',
+      payload: { error: 'Please select a frame to export' },
+    });
+    return;
+  }
+
+  const selectedNode = selection[0];
+
+  if (selectedNode.type !== 'FRAME') {
+    figma.ui.postMessage({
+      type: 'generation-error',
+      payload: { error: 'Please select a frame (not a component or other node type)' },
+    });
+    return;
+  }
+
+  try {
+    const serializedFrame = await serializeFrame(selectedNode as FrameNode);
+
+    figma.ui.postMessage({
+      type: 'frame-json-exported',
+      payload: {
+        json: serializedFrame,
+        fileName: `${selectedNode.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`
+      },
+    });
+  } catch (error) {
+    console.error('Error exporting frame:', error);
+    figma.ui.postMessage({
+      type: 'generation-error',
+      payload: { error: error instanceof Error ? error.message : 'Failed to export frame' },
+    });
+  }
 }
 
 /**
