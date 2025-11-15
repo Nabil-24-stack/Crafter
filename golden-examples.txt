@@ -1,0 +1,104 @@
+====================================================
+📌 GOLDEN DESIGN EXAMPLES — REFERENCE ONLY
+====================================================
+
+Below are curated examples of high-quality UI structures exported from Figma.
+These examples demonstrate:
+
+- Excellent auto-layout usage
+- Clean hierarchy
+- Realistic spacing values
+- Logical section grouping
+- Proper usage of components and frames
+- Strong typographic and layout decisions
+- Modern product-grade dashboard patterns
+- Ideal structure for real-world SaaS screens
+
+THESE EXAMPLES ARE NOT TO BE COPIED OR CLONED.
+They are provided ONLY to influence the model's sense of structure, quality, and layout patterns.
+Generated output MUST still follow the user prompt and the available design system components.
+
+------------------------------------------
+✨ GOLDEN EXAMPLE 1 — Dashboard Structure
+------------------------------------------
+
+Demonstrates: Full-width desktop app with top nav, sub-nav, metrics section, and data table.
+
+Key patterns:
+• Header navigation → Main content split
+• Container frames with consistent 32px horizontal padding
+• Metric cards in horizontal group with 24px spacing
+• Complex table structure with columnar organization
+• Proper nesting: Container → Section → Content → Components
+• Realistic spacing: 4, 8, 12, 16, 24, 32, 48 px values
+• Clean hierarchy with named sections (Header, Main, Section)
+
+Structure overview:
+- Root Frame (VERTICAL, 0 padding, itemSpacing: 0)
+  - Header navigation (VERTICAL)
+    - Container (HORIZONTAL, 32px H-padding, large itemSpacing for justified layout)
+      - Logo + Navigation items
+      - Actions + Avatar dropdown
+    - Dividers
+    - Sub navigation with tabs
+  - Main (VERTICAL, 48px top, 96px bottom, 32px itemSpacing)
+    - Header section (24px itemSpacing)
+      - Page header with title + buttons
+    - Section (24px itemSpacing)
+      - Container (32px H-padding)
+        - Metric group (HORIZONTAL, 24px spacing, 3 metric cards)
+    - Section (table area)
+      - Filters bar
+      - Table (VERTICAL, columnar structure)
+      - Pagination
+
+------------------------------------------
+✨ GOLDEN EXAMPLE 2 — Table-Focused Layout
+------------------------------------------
+
+Demonstrates: Same header structure with focus on data table and filter controls.
+
+Key patterns:
+• Reusable header navigation pattern
+• Filter bar with dropdowns and search
+• Table with multiple column types (checkboxes, avatars, badges, text, actions)
+• Proper use of INSTANCE nodes for table cells
+• Pagination at bottom
+
+------------------------------------------
+✨ GOLDEN EXAMPLE 3 — Sidebar + Form Layout
+------------------------------------------
+
+Demonstrates: Sidebar navigation with settings form.
+
+Key patterns:
+• Sidebar navigation (VERTICAL, fixed width)
+  - Logo + Search at top
+  - Navigation items (expandable with chevrons)
+  - Footer with support links + user account
+• Main content area (VERTICAL, 32px itemSpacing)
+  - Header with tabs
+  - Form with labeled sections
+  - Dividers between form rows
+  - Two-column inputs where appropriate
+  - File upload components
+  - Footer action buttons
+
+Form structure pattern:
+• Content (HORIZONTAL, 32px spacing)
+  - Label (LEFT, fixed width ~280px)
+  - Input field(s) (RIGHT, fills remaining space)
+• Divider
+• Next row...
+
+Key observations:
+• Zero padding at section level, padding applied at container level
+• Consistent use of 0 padding on wrapper frames
+• itemSpacing handles all vertical rhythm
+• Horizontal spacing via itemSpacing, not margin/padding tricks
+• Components maintain natural sizes (no forced resizing)
+• Descriptive naming: "Content", "Actions", "Text and supporting text"
+
+====================================================
+📌 END OF GOLDEN EXAMPLES
+====================================================

@@ -292,6 +292,40 @@ DO NOT create:
   }
 }
 
+📌 GOLDEN DESIGN PATTERNS — LEARN FROM THESE
+
+Study these high-quality layout patterns and apply similar structural thinking to your designs:
+
+**Pattern 1: Dashboard with Metrics**
+- Root: VERTICAL, 0 padding, itemSpacing: 0
+  - Header (VERTICAL, 0 padding, 0 spacing): Nav containers + dividers
+    - Container (HORIZONTAL, 32px H-padding): Logo + Nav items (left) | Actions + Avatar (right)
+  - Main (VERTICAL, 48px top, 96px bottom, 32px itemSpacing)
+    - Section → Container (32px H-padding) → Metric group (HORIZONTAL, 24px spacing)
+    - Section → Container → Filters + Table
+
+**Pattern 2: Sidebar + Form Layout**
+- Root: HORIZONTAL
+  - Sidebar (VERTICAL): Logo + Search + Nav items + Footer
+  - Main (VERTICAL, 32px itemSpacing, 32px H-padding)
+    - Tabs
+    - Form rows (each: HORIZONTAL, 32px spacing)
+      - Label column (~280px)
+      - Input/control column (fills remaining)
+    - Dividers between rows
+
+**Key Structural Lessons:**
+• Use **zero padding** on wrapper frames; apply padding only at container level
+• Use **itemSpacing for all rhythm**, not padding tricks
+• **Section → Container → Content** hierarchy pattern
+• Consistent H-padding: 16px (sidebar), 24px (cards), 32px (main content)
+• Consistent itemSpacing: 4 (tight), 8 (compact), 12 (comfortable), 16 (default), 24 (loose), 32 (sections)
+• Descriptive names: "Content", "Actions", "Text and supporting text", "Header section"
+• Tables: columnar VERTICAL frames, each with header + cells
+• Forms: HORIZONTAL rows with label (left) + input (right), dividers between
+• Navigation: HORIZONTAL for top nav, VERTICAL for sidebar
+• Buttons go in "Actions" frame
+
 ⚠️ CRITICAL FINAL RULES
 
 • ALWAYS Auto Layout
