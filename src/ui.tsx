@@ -24,11 +24,6 @@ const App = () => {
   const [isIterating, setIsIterating] = React.useState(false);
   const [mode, setMode] = React.useState<'ideation' | 'iterate'>('ideation');
 
-  // Ideation mode state
-  const [isGeneratingIdeas, setIsGeneratingIdeas] = React.useState(false);
-  const [concepts, setConcepts] = React.useState<any[]>([]);
-  const [selectedConcept, setSelectedConcept] = React.useState<any | null>(null);
-
   // Variations state
   const [numberOfVariations, setNumberOfVariations] = React.useState<1 | 2 | 3>(1);
   const [isGeneratingVariations, setIsGeneratingVariations] = React.useState(false);
@@ -109,85 +104,6 @@ const App = () => {
     };
   }, []);
 
-  // Render concept layout with intelligent positioning
-  const renderConceptLayout = (concept: any) => {
-    const items = concept.layout || [];
-
-    return items.map((item: any, idx: number) => {
-      const area = item.area || 'center';
-      const component = item.component || 'Container';
-
-      // Determine visual style based on area and component
-      let className = 'layout-item';
-      let style: React.CSSProperties = {};
-
-      // Map area to position
-      if (area === 'top') {
-        className += ' area-top';
-        style.width = item.width || '100%';
-        style.height = item.height || '16px';
-        style.order = -10;
-      } else if (area === 'left') {
-        className += ' area-left';
-        style.width = item.width || '30%';
-        style.height = 'calc(100% - 20px)';
-        style.order = 0;
-      } else if (area === 'right') {
-        className += ' area-right';
-        style.width = item.width || '25%';
-        style.height = 'calc(100% - 20px)';
-        style.order = 2;
-      } else if (area === 'bottom') {
-        className += ' area-bottom';
-        style.width = item.width || '100%';
-        style.height = item.height || '12px';
-        style.order = 10;
-      } else if (area === 'center' || area === 'main') {
-        className += ' area-center';
-        style.flex = '1';
-        style.order = 1;
-      }
-
-      // Add component type class for styling
-      const componentClass = component.toLowerCase().replace(/[\s/]+/g, '-');
-      className += ` component-${componentClass}`;
-
-      // Special handling for specific components
-      if (component.toLowerCase().includes('hero')) {
-        className += ' is-hero';
-        style.minHeight = '50px';
-      } else if (component.toLowerCase().includes('grid') || component.toLowerCase().includes('card')) {
-        className += ' is-grid';
-      } else if (component.toLowerCase().includes('nav')) {
-        className += ' is-nav';
-      } else if (component.toLowerCase().includes('sidebar')) {
-        className += ' is-sidebar';
-      } else if (component.toLowerCase().includes('form') || component.toLowerCase().includes('input')) {
-        className += ' is-form';
-      } else if (component.toLowerCase().includes('tabs') || component.toLowerCase().includes('tab')) {
-        className += ' is-tabs';
-      } else if (component.toLowerCase().includes('drawer')) {
-        className += ' is-drawer';
-        style.width = '35%';
-      } else if (component.toLowerCase().includes('column')) {
-        className += ' is-column';
-        if (component.toLowerCase().includes('three')) {
-          style.width = '33%';
-        } else if (component.toLowerCase().includes('two')) {
-          style.width = '50%';
-        }
-      }
-
-      return (
-        <div
-          key={idx}
-          className={className}
-          style={style}
-          title={component}
-        />
-      );
-    });
-  };
 
   // Handle scan design system button click
   const handleScanDesignSystem = () => {
@@ -200,50 +116,6 @@ const App = () => {
     }, '*');
   };
 
-  // Handle generate ideas button click
-  const handleGenerateIdeas = async () => {
-    if (!prompt.trim()) {
-      setPromptError('Provide a prompt to generate ideas.');
-      return;
-    }
-
-    if (!designSystem) {
-      setError('Design system not loaded. Please scan first.');
-      return;
-    }
-
-    setIsGeneratingIdeas(true);
-    setError('');
-    setResult('');
-    setPromptError('');
-    setConcepts([]);
-
-    try {
-      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-ideas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          designSystem,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate ideas');
-      }
-
-      const data = await response.json();
-      setConcepts(data.concepts || []);
-      setIsGeneratingIdeas(false);
-    } catch (err) {
-      setIsGeneratingIdeas(false);
-      setError(err instanceof Error ? err.message : 'Failed to generate ideas');
-      console.error('Ideation error:', err);
-    }
-  };
-
   // Generate variation prompts helper
   const generateVariationPrompts = (masterPrompt: string, n: number): string[] => {
     const variations = [
@@ -254,30 +126,29 @@ const App = () => {
     return variations.slice(0, n);
   };
 
-  // Handle concept selection - now generates variations in parallel
-  const handleSelectConcept = async (concept: any) => {
-    if (!designSystem) {
-      setError('Design system not loaded');
+  // Handle generate variations - directly generates designs without concept selection
+  const handleGenerateVariations = async () => {
+    if (!prompt.trim()) {
+      setPromptError('Provide a prompt to generate designs.');
       return;
     }
 
-    setSelectedConcept(concept);
+    if (!designSystem) {
+      setError('Design system not loaded. Please scan first.');
+      return;
+    }
+
     setIsGeneratingVariations(true);
     setIsLoading(true);
     setError('');
     setResult('');
+    setPromptError('');
 
     try {
-      // Build a more detailed prompt based on the concept
-      const detailedPrompt = `${prompt}
-
-Layout concept: ${concept.caption}
-Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area}`).join(', ')}`;
-
       const apiKey = 'USE_PROXY';
 
       // Generate variation prompts
-      const variationPrompts = generateVariationPrompts(detailedPrompt, numberOfVariations);
+      const variationPrompts = generateVariationPrompts(prompt, numberOfVariations);
 
       // Generate all variations in parallel
       const variationResults = await Promise.all(
@@ -298,10 +169,6 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
         '*'
       );
 
-      // Clear concepts after successful generation
-      setConcepts([]);
-      setSelectedConcept(null);
-
       // The plugin will send back generation-complete or generation-error
     } catch (err) {
       setIsGeneratingVariations(false);
@@ -315,8 +182,8 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
     if (e.key === 'Enter' && e.metaKey) {
       if (mode === 'iterate') {
         handleIterate();
-      } else if (concepts.length === 0) {
-        handleGenerateIdeas();
+      } else {
+        handleGenerateVariations();
       }
     }
   };
@@ -456,7 +323,7 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
                   onKeyDown={handleKeyPress}
                   placeholder="e.g., Create a banking dashboard with account overview and transactions"
                   rows={4}
-                  disabled={isGeneratingIdeas || isLoading}
+                  disabled={isGeneratingVariations || isLoading}
                 />
                 {promptError && <p className="error-text">{promptError}</p>}
               </div>
@@ -472,7 +339,7 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
                       key={num}
                       className={`variation-button ${numberOfVariations === num ? 'active' : ''}`}
                       onClick={() => setNumberOfVariations(num as 1 | 2 | 3)}
-                      disabled={isGeneratingIdeas || isLoading}
+                      disabled={isGeneratingVariations || isLoading}
                     >
                       {num}
                     </button>
@@ -486,54 +353,18 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
                 </p>
               </div>
 
-              {/* Generate Ideas Button - Only show if no concepts yet */}
-              {concepts.length === 0 && (
-                <button
-                  className="button button-generate"
-                  onClick={handleGenerateIdeas}
-                  disabled={isGeneratingIdeas || isLoading}
-                >
-                  {isGeneratingIdeas && <div className="spinner" />}
-                  {isGeneratingIdeas ? 'Generating 10 concepts...' : 'Generate Ideas'}
-                </button>
-              )}
-
-              {/* Concepts Grid */}
-              {concepts.length > 0 && (
-                <div className="concepts-section">
-                  <div className="concepts-header">
-                    <h3 className="concepts-title">Choose a concept</h3>
-                    <button
-                      className="button-link"
-                      onClick={() => {
-                        setConcepts([]);
-                        setSelectedConcept(null);
-                      }}
-                    >
-                      Start over
-                    </button>
-                  </div>
-                  <div id="concepts-grid">
-                    {concepts.map((concept) => (
-                      <div
-                        key={concept.id}
-                        className={`concept ${selectedConcept?.id === concept.id ? 'selected' : ''}`}
-                        onClick={() => !isLoading && handleSelectConcept(concept)}
-                      >
-                        <div className="layout">
-                          {renderConceptLayout(concept)}
-                        </div>
-                        <p className="concept-caption">{concept.caption}</p>
-                        {isLoading && selectedConcept?.id === concept.id && (
-                          <div className="concept-loading">
-                            <div className="spinner" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Generate Variations Button */}
+              <button
+                className="button button-generate"
+                onClick={handleGenerateVariations}
+                disabled={isGeneratingVariations || isLoading}
+              >
+                {isGeneratingVariations && <div className="spinner" />}
+                {isGeneratingVariations
+                  ? `Generating ${numberOfVariations} variation${numberOfVariations > 1 ? 's' : ''}...`
+                  : `Generate ${numberOfVariations} Variation${numberOfVariations > 1 ? 's' : ''}`
+                }
+              </button>
             </>
           )}
 
