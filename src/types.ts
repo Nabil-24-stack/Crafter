@@ -116,6 +116,10 @@ export interface LayoutNode {
   paddingBottom?: number;
   itemSpacing?: number;
 
+  // Child positioning within Auto Layout
+  layoutAlign?: 'INHERIT' | 'STRETCH' | 'MIN' | 'CENTER' | 'MAX';
+  layoutGrow?: number;
+
   // Additional styling properties
   cornerRadius?: number;
   strokeWeight?: number;

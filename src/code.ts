@@ -45,6 +45,71 @@ function sanitizeCounterAxisAlignItems(value: string): 'MIN' | 'MAX' | 'CENTER' 
   return 'CENTER';
 }
 
+/**
+ * Helper function to create Auto Layout frames with proper defaults
+ * Enforces Auto Layout best practices across all generated content
+ */
+interface AutoLayoutConfig {
+  name: string;
+  layoutMode: 'HORIZONTAL' | 'VERTICAL';
+  primaryAxisSizingMode?: 'AUTO' | 'FIXED';
+  counterAxisSizingMode?: 'AUTO' | 'FIXED';
+  primaryAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+  counterAxisAlignItems?: 'MIN' | 'MAX' | 'CENTER' | 'BASELINE';
+  itemSpacing?: number;
+  paddingLeft?: number;
+  paddingRight?: number;
+  paddingTop?: number;
+  paddingBottom?: number;
+  width?: number;  // Only used when counterAxisSizingMode is FIXED
+  height?: number; // Only used when primaryAxisSizingMode is FIXED
+}
+
+function createAutoLayoutFrame(config: AutoLayoutConfig): FrameNode {
+  const frame = figma.createFrame();
+  frame.name = config.name;
+
+  // ALWAYS set layoutMode - never leave as NONE
+  frame.layoutMode = config.layoutMode;
+
+  // Default to AUTO (hug) unless explicitly FIXED
+  frame.primaryAxisSizingMode = config.primaryAxisSizingMode || 'AUTO';
+  frame.counterAxisSizingMode = config.counterAxisSizingMode || 'AUTO';
+
+  // Set alignment with safe defaults
+  frame.primaryAxisAlignItems = config.primaryAxisAlignItems || 'MIN';
+  frame.counterAxisAlignItems = config.counterAxisAlignItems ?
+    sanitizeCounterAxisAlignItems(config.counterAxisAlignItems) : 'MIN';
+
+  // Set spacing
+  frame.itemSpacing = config.itemSpacing ?? 16;
+
+  // Set padding (default to 16 if not specified)
+  frame.paddingLeft = config.paddingLeft ?? 16;
+  frame.paddingRight = config.paddingRight ?? 16;
+  frame.paddingTop = config.paddingTop ?? 16;
+  frame.paddingBottom = config.paddingBottom ?? 16;
+
+  // Only resize if FIXED mode and dimensions provided
+  if (config.layoutMode === 'HORIZONTAL') {
+    if (config.primaryAxisSizingMode === 'FIXED' && config.width !== undefined) {
+      frame.resize(config.width, frame.height);
+    }
+    if (config.counterAxisSizingMode === 'FIXED' && config.height !== undefined) {
+      frame.resize(frame.width, config.height);
+    }
+  } else if (config.layoutMode === 'VERTICAL') {
+    if (config.counterAxisSizingMode === 'FIXED' && config.width !== undefined) {
+      frame.resize(config.width, frame.height);
+    }
+    if (config.primaryAxisSizingMode === 'FIXED' && config.height !== undefined) {
+      frame.resize(frame.width, config.height);
+    }
+  }
+
+  return frame;
+}
+
 // Handle messages from the UI
 figma.ui.onmessage = async (msg: Message) => {
   console.log('Received message:', msg.type);
@@ -261,71 +326,32 @@ async function createNodeFromLayout(layoutNode: LayoutNode): Promise<SceneNode |
 
   switch (layoutNode.type) {
     case 'FRAME': {
-      const frame = figma.createFrame();
-      frame.name = layoutNode.name;
+      // ENFORCE AUTO LAYOUT: All frames MUST use Auto Layout
+      // Default to VERTICAL if not specified
+      const layoutMode = (layoutNode.layoutMode && layoutNode.layoutMode !== 'NONE')
+        ? layoutNode.layoutMode
+        : 'VERTICAL';
 
-      // Set position (only for root/absolute positioned frames)
+      const frame = createAutoLayoutFrame({
+        name: layoutNode.name,
+        layoutMode: layoutMode,
+        primaryAxisSizingMode: layoutNode.primaryAxisSizingMode || 'AUTO',
+        counterAxisSizingMode: layoutNode.counterAxisSizingMode || 'AUTO',
+        primaryAxisAlignItems: layoutNode.primaryAxisAlignItems,
+        counterAxisAlignItems: layoutNode.counterAxisAlignItems,
+        itemSpacing: layoutNode.itemSpacing,
+        paddingLeft: layoutNode.paddingLeft,
+        paddingRight: layoutNode.paddingRight,
+        paddingTop: layoutNode.paddingTop,
+        paddingBottom: layoutNode.paddingBottom,
+        width: layoutNode.width,
+        height: layoutNode.height,
+      });
+
+      // Only set x/y position for root-level frames (those explicitly positioned)
+      // Children inside auto layout should NOT have x/y set
       if (layoutNode.x !== undefined) frame.x = layoutNode.x;
       if (layoutNode.y !== undefined) frame.y = layoutNode.y;
-
-      // Apply Auto Layout if specified
-      if (layoutNode.layoutMode && layoutNode.layoutMode !== 'NONE') {
-        frame.layoutMode = layoutNode.layoutMode;
-
-        // Set sizing modes
-        if (layoutNode.primaryAxisSizingMode) {
-          frame.primaryAxisSizingMode = layoutNode.primaryAxisSizingMode;
-        }
-        if (layoutNode.counterAxisSizingMode) {
-          frame.counterAxisSizingMode = layoutNode.counterAxisSizingMode;
-        }
-
-        // Set alignment
-        if (layoutNode.primaryAxisAlignItems) {
-          frame.primaryAxisAlignItems = layoutNode.primaryAxisAlignItems;
-        }
-        if (layoutNode.counterAxisAlignItems) {
-          frame.counterAxisAlignItems = sanitizeCounterAxisAlignItems(layoutNode.counterAxisAlignItems);
-        }
-
-        // Set spacing
-        if (layoutNode.itemSpacing !== undefined) {
-          frame.itemSpacing = layoutNode.itemSpacing;
-        }
-
-        // Set padding
-        if (layoutNode.paddingLeft !== undefined) frame.paddingLeft = layoutNode.paddingLeft;
-        if (layoutNode.paddingRight !== undefined) frame.paddingRight = layoutNode.paddingRight;
-        if (layoutNode.paddingTop !== undefined) frame.paddingTop = layoutNode.paddingTop;
-        if (layoutNode.paddingBottom !== undefined) frame.paddingBottom = layoutNode.paddingBottom;
-
-        // For auto layout, only set explicit size if FIXED mode
-        if (layoutNode.width !== undefined && layoutNode.primaryAxisSizingMode === 'FIXED') {
-          if (layoutNode.layoutMode === 'HORIZONTAL') {
-            frame.resize(layoutNode.width, frame.height);
-          }
-        }
-        if (layoutNode.height !== undefined && layoutNode.counterAxisSizingMode === 'FIXED') {
-          if (layoutNode.layoutMode === 'HORIZONTAL') {
-            frame.resize(frame.width, layoutNode.height);
-          }
-        }
-        if (layoutNode.width !== undefined && layoutNode.counterAxisSizingMode === 'FIXED') {
-          if (layoutNode.layoutMode === 'VERTICAL') {
-            frame.resize(layoutNode.width, frame.height);
-          }
-        }
-        if (layoutNode.height !== undefined && layoutNode.primaryAxisSizingMode === 'FIXED') {
-          if (layoutNode.layoutMode === 'VERTICAL') {
-            frame.resize(frame.width, layoutNode.height);
-          }
-        }
-      } else {
-        // No auto layout - use absolute positioning with explicit size
-        if (layoutNode.width !== undefined && layoutNode.height !== undefined) {
-          frame.resize(layoutNode.width, layoutNode.height);
-        }
-      }
 
       // Apply fills if specified
       if (layoutNode.fills) {
@@ -411,20 +437,19 @@ async function createNodeFromLayout(layoutNode: LayoutNode): Promise<SceneNode |
           if (instance) {
             instance.name = layoutNode.name;
 
-            // Only set position if specified (for absolute positioning)
-            // Auto layout children don't need x/y
-            if (layoutNode.x !== undefined) instance.x = layoutNode.x;
-            if (layoutNode.y !== undefined) instance.y = layoutNode.y;
+            // REMOVE x/y positioning - Auto Layout handles all positioning
+            // Components inside auto layout should use layoutAlign and layoutGrow instead
 
-            // Only resize if dimensions are explicitly specified
-            // Otherwise let the component use its natural size
-            if (layoutNode.width !== undefined && layoutNode.height !== undefined) {
-              try {
-                instance.resize(layoutNode.width, layoutNode.height);
-              } catch (error) {
-                // Some components can't be resized, that's ok
-                console.log('Could not resize component instance:', layoutNode.name);
-              }
+            // DO NOT resize component instances - let them use their natural size
+            // Components are designed at specific sizes and should maintain them
+            // Auto Layout will handle spacing and alignment
+
+            // Apply layoutAlign and layoutGrow for Auto Layout sizing
+            if (layoutNode.layoutAlign) {
+              instance.layoutAlign = layoutNode.layoutAlign as 'INHERIT' | 'STRETCH' | 'MIN' | 'CENTER' | 'MAX';
+            }
+            if (layoutNode.layoutGrow !== undefined) {
+              instance.layoutGrow = layoutNode.layoutGrow;
             }
 
             // Apply text override if specified
@@ -453,12 +478,23 @@ async function createNodeFromLayout(layoutNode: LayoutNode): Promise<SceneNode |
       const rect = figma.createRectangle();
       rect.name = layoutNode.name;
 
+      // AUTO LAYOUT: Set size based on context
+      // If we have explicit dimensions, use them
       const width = layoutNode.width ?? 100;
       const height = layoutNode.height ?? 100;
       rect.resize(width, height);
 
-      if (layoutNode.x !== undefined) rect.x = layoutNode.x;
-      if (layoutNode.y !== undefined) rect.y = layoutNode.y;
+      // AUTO LAYOUT: Only set x/y for root-level nodes
+      // Children inside auto layout should NOT have x/y set
+      // Instead, they'll use layoutAlign and layoutGrow
+
+      // Apply layoutAlign and layoutGrow for Auto Layout behavior
+      if (layoutNode.layoutAlign) {
+        rect.layoutAlign = layoutNode.layoutAlign as 'INHERIT' | 'STRETCH' | 'MIN' | 'CENTER' | 'MAX';
+      }
+      if (layoutNode.layoutGrow !== undefined) {
+        rect.layoutGrow = layoutNode.layoutGrow;
+      }
 
       if (layoutNode.fills) {
         rect.fills = layoutNode.fills.map((fill) => ({
@@ -480,11 +516,25 @@ async function createNodeFromLayout(layoutNode: LayoutNode): Promise<SceneNode |
       await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
       text.characters = layoutNode.text || layoutNode.name;
 
-      if (layoutNode.x !== undefined) text.x = layoutNode.x;
-      if (layoutNode.y !== undefined) text.y = layoutNode.y;
+      // AUTO LAYOUT: Text nodes should use textAutoResize to work with Auto Layout
+      // Set to "HEIGHT" so width can be controlled by parent, height hugs content
+      text.textAutoResize = 'HEIGHT';
 
-      if (layoutNode.width !== undefined && layoutNode.height !== undefined) {
-        text.resize(layoutNode.width, layoutNode.height);
+      // If explicit width is provided, set it
+      if (layoutNode.width !== undefined) {
+        text.resize(layoutNode.width, text.height);
+      }
+
+      // AUTO LAYOUT: Only set x/y for root-level nodes
+      // Children inside auto layout should NOT have x/y set
+      // Instead, they'll use layoutAlign and layoutGrow
+
+      // Apply layoutAlign and layoutGrow for Auto Layout behavior
+      if (layoutNode.layoutAlign) {
+        text.layoutAlign = layoutNode.layoutAlign as 'INHERIT' | 'STRETCH' | 'MIN' | 'CENTER' | 'MAX';
+      }
+      if (layoutNode.layoutGrow !== undefined) {
+        text.layoutGrow = layoutNode.layoutGrow;
       }
 
       node = text;
@@ -555,12 +605,22 @@ function createPlaceholderForComponent(layoutNode: LayoutNode): RectangleNode {
   const rect = figma.createRectangle();
   rect.name = `[Placeholder] ${layoutNode.componentName || layoutNode.name}`;
 
+  // AUTO LAYOUT: Set size based on context
   const width = layoutNode.width ?? 200;
   const height = layoutNode.height ?? 100;
   rect.resize(width, height);
 
-  if (layoutNode.x !== undefined) rect.x = layoutNode.x;
-  if (layoutNode.y !== undefined) rect.y = layoutNode.y;
+  // AUTO LAYOUT: Only set x/y for root-level nodes
+  // Children inside auto layout should NOT have x/y set
+  // Instead, they'll use layoutAlign and layoutGrow
+
+  // Apply layoutAlign and layoutGrow for Auto Layout behavior
+  if (layoutNode.layoutAlign) {
+    rect.layoutAlign = layoutNode.layoutAlign as 'INHERIT' | 'STRETCH' | 'MIN' | 'CENTER' | 'MAX';
+  }
+  if (layoutNode.layoutGrow !== undefined) {
+    rect.layoutGrow = layoutNode.layoutGrow;
+  }
 
   // Style as a placeholder
   rect.fills = [
@@ -746,8 +806,13 @@ async function applyIteration(frame: FrameNode, updatedLayout: any) {
   console.log('Updated layout from Claude:', JSON.stringify(updatedLayout, null, 2));
 
   // Apply top-level properties
+  // AUTO LAYOUT: Enforce Auto Layout - never allow NONE
   if (updatedLayout.layoutMode) {
-    frame.layoutMode = updatedLayout.layoutMode;
+    const layoutMode = updatedLayout.layoutMode !== 'NONE' ? updatedLayout.layoutMode : 'VERTICAL';
+    frame.layoutMode = layoutMode;
+  } else if (frame.layoutMode === 'NONE') {
+    // If frame currently has no layout mode, set it to VERTICAL
+    frame.layoutMode = 'VERTICAL';
   }
 
   if (updatedLayout.primaryAxisSizingMode) {
@@ -854,8 +919,13 @@ async function applyIterationToChild(parent: FrameNode, updatedChild: any, child
   if (child.type === 'FRAME' && 'layoutMode' in child) {
     const frameChild = child as FrameNode;
 
+    // AUTO LAYOUT: Enforce Auto Layout - never allow NONE
     if (updatedChild.layoutMode) {
-      frameChild.layoutMode = updatedChild.layoutMode;
+      const layoutMode = updatedChild.layoutMode !== 'NONE' ? updatedChild.layoutMode : 'VERTICAL';
+      frameChild.layoutMode = layoutMode;
+    } else if (frameChild.layoutMode === 'NONE') {
+      // If frame currently has no layout mode, set it to VERTICAL
+      frameChild.layoutMode = 'VERTICAL';
     }
 
     if (typeof updatedChild.itemSpacing === 'number') {
