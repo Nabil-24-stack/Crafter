@@ -29,6 +29,10 @@ const App = () => {
   const [concepts, setConcepts] = React.useState<any[]>([]);
   const [selectedConcept, setSelectedConcept] = React.useState<any | null>(null);
 
+  // Variations state
+  const [numberOfVariations, setNumberOfVariations] = React.useState<1 | 2 | 3>(1);
+  const [isGeneratingVariations, setIsGeneratingVariations] = React.useState(false);
+
   // Set up message listener on mount
   React.useEffect(() => {
     // Listen for messages from plugin
@@ -60,6 +64,7 @@ const App = () => {
 
         case 'generation-complete':
           setIsLoading(false);
+          setIsGeneratingVariations(false);
           setResult(
             msg.payload.reasoning
               ? `Success! ${msg.payload.reasoning}`
@@ -239,7 +244,17 @@ const App = () => {
     }
   };
 
-  // Handle concept selection
+  // Generate variation prompts helper
+  const generateVariationPrompts = (masterPrompt: string, n: number): string[] => {
+    const variations = [
+      `${masterPrompt} — Variation 1: Same concept, tighter layout, emphasize primary actions.`,
+      `${masterPrompt} — Variation 2: Balanced layout, alternate component arrangements.`,
+      `${masterPrompt} — Variation 3: More whitespace, simplified hierarchy.`
+    ];
+    return variations.slice(0, n);
+  };
+
+  // Handle concept selection - now generates variations in parallel
   const handleSelectConcept = async (concept: any) => {
     if (!designSystem) {
       setError('Design system not loaded');
@@ -247,6 +262,7 @@ const App = () => {
     }
 
     setSelectedConcept(concept);
+    setIsGeneratingVariations(true);
     setIsLoading(true);
     setError('');
     setResult('');
@@ -259,14 +275,24 @@ Layout concept: ${concept.caption}
 Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area}`).join(', ')}`;
 
       const apiKey = 'USE_PROXY';
-      const generationResult = await generateLayout(detailedPrompt, designSystem, apiKey);
 
-      // Send the generated layout to the plugin code for rendering
+      // Generate variation prompts
+      const variationPrompts = generateVariationPrompts(detailedPrompt, numberOfVariations);
+
+      // Generate all variations in parallel
+      const variationResults = await Promise.all(
+        variationPrompts.map(varPrompt => generateLayout(varPrompt, designSystem, apiKey))
+      );
+
+      // Send all variations to the plugin code for rendering
       parent.postMessage(
         {
           pluginMessage: {
-            type: 'generate-layout',
-            payload: generationResult,
+            type: 'generate-variations',
+            payload: {
+              variations: variationResults,
+              numberOfVariations,
+            },
           },
         },
         '*'
@@ -278,8 +304,9 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
 
       // The plugin will send back generation-complete or generation-error
     } catch (err) {
+      setIsGeneratingVariations(false);
       setIsLoading(false);
-      setError(err instanceof Error ? err.message : 'Failed to generate layout');
+      setError(err instanceof Error ? err.message : 'Failed to generate variations');
       console.error('Generation error:', err);
     }
   };
@@ -432,6 +459,31 @@ Structure: ${concept.layout.map((item: any) => `${item.component} in ${item.area
                   disabled={isGeneratingIdeas || isLoading}
                 />
                 {promptError && <p className="error-text">{promptError}</p>}
+              </div>
+
+              {/* Number of Variations Selector */}
+              <div className="input-group">
+                <label htmlFor="variations" className="label">
+                  Number of Variations
+                </label>
+                <div className="variations-selector">
+                  {[1, 2, 3].map((num) => (
+                    <button
+                      key={num}
+                      className={`variation-button ${numberOfVariations === num ? 'active' : ''}`}
+                      onClick={() => setNumberOfVariations(num as 1 | 2 | 3)}
+                      disabled={isGeneratingIdeas || isLoading}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+                <p className="hint-text">
+                  {numberOfVariations === 1
+                    ? 'Generate 1 design variation'
+                    : `Generate ${numberOfVariations} design variations side-by-side`
+                  }
+                </p>
               </div>
 
               {/* Generate Ideas Button - Only show if no concepts yet */}

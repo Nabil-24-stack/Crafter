@@ -132,6 +132,10 @@ figma.ui.onmessage = async (msg: Message) => {
         await handleGenerateLayout(msg.payload);
         break;
 
+      case 'generate-variations':
+        await handleGenerateVariations(msg.payload);
+        break;
+
       case 'iterate-design':
         await handleIterateDesign(msg.payload);
         break;
@@ -319,6 +323,95 @@ async function handleGenerateLayout(payload: { layout: LayoutNode; reasoning?: s
       payload: { error: error instanceof Error ? error.message : 'Failed to create layout' },
     });
     figma.notify('❌ Failed to generate layout', { error: true });
+  }
+}
+
+/**
+ * Generates and renders multiple design variations side-by-side on the Figma canvas
+ */
+async function handleGenerateVariations(payload: { variations: Array<{ layout: LayoutNode; reasoning?: string }>; numberOfVariations: number }) {
+  console.log(`Generating ${payload.numberOfVariations} design variations on canvas...`);
+
+  const { variations, numberOfVariations } = payload;
+
+  try {
+    const createdNodes: SceneNode[] = [];
+    const VARIATION_SPACING = 1200; // Horizontal spacing between variations
+
+    // Create all variations in parallel
+    for (let i = 0; i < numberOfVariations; i++) {
+      const variation = variations[i];
+      if (!variation) continue;
+
+      const { layout, reasoning } = variation;
+
+      // Create the layout node
+      const rootNode = await createNodeFromLayout(layout);
+
+      if (rootNode) {
+        // Add to current page
+        figma.currentPage.appendChild(rootNode);
+
+        // Update the name to include variation number
+        rootNode.name = `${layout.name} - Variation ${i + 1}`;
+
+        // Position variations side-by-side
+        if (i === 0) {
+          // First variation: position at viewport center or next to existing content
+          const nodes = figma.currentPage.children;
+          const existingContent = nodes.filter(n => n !== rootNode);
+
+          if (existingContent.length > 0) {
+            // Position to the right of existing content
+            const rightmostNode = existingContent.reduce((rightmost, node) => {
+              const nodeRight = node.x + node.width;
+              const rightmostRight = rightmost.x + rightmost.width;
+              return nodeRight > rightmostRight ? node : rightmost;
+            });
+            rootNode.x = rightmostNode.x + rightmostNode.width + 100;
+            rootNode.y = rightmostNode.y;
+          } else {
+            // Center in viewport
+            rootNode.x = figma.viewport.center.x - rootNode.width / 2;
+            rootNode.y = figma.viewport.center.y - rootNode.height / 2;
+          }
+        } else {
+          // Subsequent variations: place to the right with spacing
+          const previousNode = createdNodes[i - 1];
+          rootNode.x = previousNode.x + VARIATION_SPACING;
+          rootNode.y = previousNode.y;
+        }
+
+        createdNodes.push(rootNode);
+        console.log(`Variation ${i + 1} created successfully:`, rootNode.name);
+      }
+    }
+
+    if (createdNodes.length > 0) {
+      // Select all created variations
+      figma.currentPage.selection = createdNodes;
+      figma.viewport.scrollAndZoomIntoView(createdNodes);
+
+      const reasoningSummary = variations[0]?.reasoning || '';
+      figma.ui.postMessage({
+        type: 'generation-complete',
+        payload: {
+          success: true,
+          reasoning: `Generated ${createdNodes.length} design variation${createdNodes.length > 1 ? 's' : ''}. ${reasoningSummary}`
+        },
+      });
+
+      figma.notify(`✨ ${createdNodes.length} design variation${createdNodes.length > 1 ? 's' : ''} generated successfully!`);
+    } else {
+      throw new Error('Failed to create any variation nodes');
+    }
+  } catch (error) {
+    console.error('Error creating variations:', error);
+    figma.ui.postMessage({
+      type: 'generation-error',
+      payload: { error: error instanceof Error ? error.message : 'Failed to create variations' },
+    });
+    figma.notify('❌ Failed to generate variations', { error: true });
   }
 }
 

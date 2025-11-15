@@ -4,6 +4,7 @@
 export type MessageType =
   | 'generate-layout'
   | 'generate-with-claude'
+  | 'generate-variations'
   | 'iterate-design'
   | 'get-design-system'
   | 'get-selected-frame'

@@ -275,6 +275,47 @@ body {
   margin-top: -4px;
 }
 
+/* Variations selector */
+.variations-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.variation-button {
+  flex: 1;
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: white;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.variation-button:hover:not(:disabled) {
+  border-color: #b0b0b0;
+  background: #f8f8f8;
+}
+
+.variation-button.active {
+  border-color: #5B21B6;
+  background: #5B21B6;
+  color: white;
+}
+
+.variation-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hint-text {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+}
+
 /* Section spacing */
 .design-system-info {
   margin-top: 32px;
