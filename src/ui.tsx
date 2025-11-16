@@ -269,14 +269,22 @@ const App = () => {
             <h1 className="title">The AI Twin For Designers</h1>
             <p className="subtitle">Ideate with your design system</p>
           </div>
-          <button
-            className="button scan-button"
-            onClick={handleScanDesignSystem}
-            disabled={isScanning}
-          >
-            {isScanning && <div className="spinner" />}
-            {isScanning ? 'Scanning...' : 'Scan Design System'}
-          </button>
+          <div className="initial-buttons">
+            <button
+              className="button scan-button"
+              onClick={handleScanDesignSystem}
+              disabled={isScanning}
+            >
+              {isScanning && <div className="spinner" />}
+              {isScanning ? 'Scanning...' : 'Scan Design System'}
+            </button>
+            <button
+              className="button button-secondary"
+              onClick={handleExport}
+            >
+              Export Frame to JSON
+            </button>
+          </div>
         </div>
       )}
 
