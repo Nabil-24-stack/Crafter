@@ -607,7 +607,7 @@ async function callTogetherAI(systemPrompt, userPrompt) {
     },
     body: JSON.stringify({
       model: togetherModel,
-      max_tokens: 16384,
+      max_tokens: 4096, // Reduced from 16384 to fit within model's context limit
       temperature: 0.1, // Low temperature for consistent JSON output
       messages: [
         {
@@ -644,51 +644,28 @@ async function callTogetherAI(systemPrompt, userPrompt) {
 /**
  * Build simplified system prompt for fine-tuned Together AI model
  * The fine-tuned model was trained on 76 examples and already knows the patterns
+ * ULTRA-COMPACT version to reduce token usage
  */
 function buildSimplifiedSystemPrompt(designSystem) {
-  const MAX_DETAILED_COMPONENTS = 20;
-  const totalComponents = designSystem.components.length;
+  // Only use top 15 components to save tokens
+  const MAX_COMPONENTS = 15;
+  const topComponents = designSystem.components.slice(0, MAX_COMPONENTS);
 
-  let componentsInfo;
-
-  if (totalComponents <= MAX_DETAILED_COMPONENTS) {
-    componentsInfo = designSystem.components.map(comp => {
-      return `- ${comp.name} (${comp.category || 'component'})
-  Key: ${comp.key}
-  Size: ${comp.width}x${comp.height}px
-  ${comp.description ? `Description: ${comp.description}` : ''}`;
-    }).join('\n');
-  } else {
-    const topComponents = designSystem.components.slice(0, MAX_DETAILED_COMPONENTS);
-    const remainingComponents = designSystem.components.slice(MAX_DETAILED_COMPONENTS);
-
-    const detailedInfo = topComponents.map(comp => {
-      return `- ${comp.name} (${comp.category || 'component'})
-  Key: ${comp.key}
-  Size: ${comp.width}x${comp.height}px
-  ${comp.description ? `Description: ${comp.description}` : ''}`;
-    }).join('\n');
-
-    const summaryInfo = remainingComponents.map(comp =>
-      `- ${comp.name} (${comp.category}, ${comp.width}x${comp.height}px, key: ${comp.key})`
-    ).join('\n');
-
-    componentsInfo = `PRIORITY COMPONENTS:\n${detailedInfo}\n\nADDITIONAL COMPONENTS:\n${summaryInfo}`;
-  }
+  // Ultra-compact component list (one line per component)
+  const componentsInfo = topComponents.map(comp =>
+    `${comp.name}|${comp.key}|${comp.width}x${comp.height}`
+  ).join('\n');
 
   // Simplified prompt for fine-tuned model - it already knows the patterns
   return `You are Crafter, an assistant that generates Figma-style UI layout JSON. You always respond with a single JSON object describing the layout tree. Do not include explanations, markdown, or comments.
 
 AVAILABLE DESIGN SYSTEM
 
-COMPONENTS:
+COMPONENTS (name|key|size):
 ${componentsInfo}
 
-COLOR STYLES:
-${JSON.stringify(designSystem.colors)}
-
-TEXT STYLES:
-${JSON.stringify(designSystem.textStyles)}`;
+COLORS: ${JSON.stringify(designSystem.colors.slice(0, 10))}
+TEXT STYLES: ${JSON.stringify(designSystem.textStyles.slice(0, 5))}`;
 }
 
 /**
