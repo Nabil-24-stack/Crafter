@@ -11,6 +11,7 @@ import {
   SerializedFrame,
   SerializedNode,
 } from './types';
+import { expandSimplifiedLayout } from './schemaExpander';
 
 // Show the plugin UI
 figma.showUI(__html__, { width: 400, height: 600 });
@@ -24,6 +25,9 @@ let currentVariationsSession: {
   totalVariations: number;
   completedCount: number;
 } | null = null;
+
+// Global cache for design system (for schema expansion)
+let cachedDesignSystem: DesignSystemData | null = null;
 
 // Load all pages on startup (required for dynamic-page access)
 async function initPlugin() {
@@ -293,6 +297,9 @@ async function handleGetDesignSystem() {
     textStylesCount: textStyles.length,
   });
 
+  // Cache the design system for schema expansion
+  cachedDesignSystem = designSystem;
+
   // Send the design system back to UI
   figma.ui.postMessage({
     type: 'design-system-data',
@@ -454,8 +461,13 @@ async function handleGenerateSingleVariation(payload: {
   console.log(`Generating variation ${payload.variationIndex + 1} of ${payload.totalVariations} on canvas...`);
 
   const { variation, variationIndex, totalVariations } = payload;
-  const { layout, reasoning } = variation;
+  let { layout } = variation;
+  const { reasoning } = variation;
   const VARIATION_SPACING = 1200;
+
+  // Expand simplified schema to full Figma properties
+  console.log('Expanding simplified schema to full Figma properties...');
+  layout = expandSimplifiedLayout(layout, cachedDesignSystem || undefined);
 
   try {
     // Initialize session on first variation

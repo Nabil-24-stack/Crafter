@@ -259,84 +259,136 @@ DO NOT create:
 • Complex graphical shapes
 • Decorative patterns
 
-📐 REQUIRED JSON OUTPUT FORMAT
+📐 SIMPLIFIED JSON OUTPUT FORMAT
+
+Use this simplified schema for faster generation. The plugin will expand it to full Figma properties.
 
 {
   "reasoning": "Explain the design approach and key layout decisions.",
   "layout": {
-    "type": "FRAME",
+    "type": "frame",
     "name": "Root Frame Name",
-    "layoutMode": "VERTICAL" | "HORIZONTAL",
-    "primaryAxisSizingMode": "AUTO" | "FIXED",
-    "counterAxisSizingMode": "AUTO" | "FIXED",
-    "primaryAxisAlignItems": "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN",
-    "counterAxisAlignItems": "MIN" | "CENTER" | "MAX",
-    "itemSpacing": number,
-    "paddingLeft": number,
-    "paddingRight": number,
-    "paddingTop": number,
-    "paddingBottom": number,
-    "fills": [{"type": "SOLID", "color": {"r": 0-1, "g": 0-1, "b": 0-1}}],
-    "cornerRadius": number,
+    "layout": "vertical",        // "vertical" | "horizontal"
+    "spacing": 16,               // gap between children (default: 16)
+    "padding": 24,               // all sides OR {"x": 24, "y": 16}
+    "align": "start",            // "start" | "center" | "end" | "stretch" | "space-between"
+    "bg": "#ffffff",             // hex color OR "white" | "gray-50" | "transparent"
+    "radius": 8,                 // corner radius (optional)
     "children": [
       {
-        "type": "FRAME" | "COMPONENT_INSTANCE",
-        "name": "string",
-
-        // FRAME children
-        "layoutMode": "VERTICAL" | "HORIZONTAL",
-        "primaryAxisSizingMode": "AUTO" | "FIXED",
-        "counterAxisSizingMode": "AUTO" | "FIXED",
-        "primaryAxisAlignItems": "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN",
-        "counterAxisAlignItems": "MIN" | "CENTER" | "MAX",
-        "itemSpacing": number,
-        "paddingLeft": number,
-        "paddingRight": number,
-        "paddingTop": number,
-        "paddingBottom": number,
-        "fills": [{"type": "SOLID", "color": {"r": 0-1, "g": 0-1, "b": 0-1}}],
-        "cornerRadius": number,
-        "layoutAlign": "INHERIT" | "MIN" | "CENTER" | "MAX" | "STRETCH",
-        "layoutGrow": 0 | 1,
-        "children": [ ... ],
-
-        // COMPONENT_INSTANCE children
-        "componentKey": "string",
-        "componentName": "string",
-        "text": "optional string",
-        "layoutAlign": "INHERIT" | "MIN" | "CENTER" | "MAX" | "STRETCH",
-        "layoutGrow": 0 | 1
+        // Frame (container)
+        "type": "frame",
+        "name": "Container",
+        "layout": "horizontal",
+        "spacing": 12,
+        "padding": 16,
+        "children": [...]
+      },
+      {
+        // Component instance
+        "type": "component",
+        "component": "Primary Button",  // component name (fuzzy matched)
+        "text": "Click me",              // text override (optional)
+        "fill": true                     // makes it grow (layoutGrow: 1)
+      },
+      {
+        // Text node
+        "type": "text",
+        "text": "Hello World",
+        "style": "heading-1",  // text style name (optional)
+        "color": "#333333"     // text color (optional)
+      },
+      {
+        // Spacer (flexible gap)
+        "type": "spacer",
+        "size": 24  // fixed size OR "flex" for flexible
       }
     ]
   }
 }
 
-📌 GOLDEN DESIGN PATTERNS — LEARN FROM THESE
+IMPORTANT SIMPLIFICATIONS:
+• Use "frame" not "FRAME" (lowercase, simpler)
+• Use "layout" not "layoutMode" (shorter property name)
+• Use single "spacing" value (not itemSpacing + 4 padding values)
+• Use single "padding" value or {"x": 24, "y": 16} (not 4 separate values)
+• Use "component" with name string (not componentKey + componentName)
+• Use simple alignment: "start" | "center" | "end" (not complex Figma enums)
+• Use hex colors "#ffffff" or named "white" (not RGB objects)
+• Plugin will expand this to full Figma Auto Layout properties
 
-Study these high-quality layout patterns and apply similar structural thinking to your designs:
+📌 SIMPLIFIED PATTERN EXAMPLES
 
-**Pattern 1: Dashboard with Metrics**
-- Root: VERTICAL, 0 padding, itemSpacing: 0
-  - Header (VERTICAL, 0 padding, 0 spacing): Nav containers + dividers
-    - Container (HORIZONTAL, 32px H-padding): Logo + Nav items (left) | Actions + Avatar (right)
-  - Main (VERTICAL, 48px top, 96px bottom, 32px itemSpacing)
-    - Section → Container (32px H-padding) → Metric group (HORIZONTAL, 24px spacing)
-    - Section → Container → Filters + Table
+**Example 1: Dashboard Header**
+{
+  "type": "frame",
+  "name": "Header",
+  "layout": "horizontal",
+  "padding": {"x": 32, "y": 16},
+  "align": "space-between",
+  "bg": "white",
+  "children": [
+    {"type": "component", "component": "Logo"},
+    {
+      "type": "frame",
+      "layout": "horizontal",
+      "spacing": 12,
+      "children": [
+        {"type": "component", "component": "Notification Icon"},
+        {"type": "component", "component": "User Avatar"}
+      ]
+    }
+  ]
+}
 
-**Pattern 2: Sidebar + Form Layout**
-- Root: HORIZONTAL
-  - Sidebar (VERTICAL): Logo + Search + Nav items + Footer
-  - Main (VERTICAL, 32px itemSpacing, 32px H-padding)
-    - Tabs
-    - Form rows (each: HORIZONTAL, 32px spacing)
-      - Label column (~280px)
-      - Input/control column (fills remaining)
-    - Dividers between rows
+**Example 2: Card with Content**
+{
+  "type": "frame",
+  "name": "Card",
+  "layout": "vertical",
+  "spacing": 16,
+  "padding": 24,
+  "bg": "white",
+  "radius": 8,
+  "children": [
+    {"type": "text", "text": "Account Balance", "style": "heading-2"},
+    {"type": "text", "text": "$12,450.00", "style": "display"},
+    {"type": "component", "component": "View Details Button", "text": "View Details"}
+  ]
+}
 
-**Key Structural Lessons:**
-• Use **zero padding** on wrapper frames; apply padding only at container level
-• Use **itemSpacing for all rhythm**, not padding tricks
-• **Section → Container → Content** hierarchy pattern
+**Example 3: Two-Column Layout**
+{
+  "type": "frame",
+  "layout": "horizontal",
+  "spacing": 24,
+  "children": [
+    {
+      "type": "frame",
+      "name": "Left Column",
+      "layout": "vertical",
+      "spacing": 16,
+      "fill": true,
+      "children": [...]
+    },
+    {
+      "type": "frame",
+      "name": "Right Column",
+      "layout": "vertical",
+      "spacing": 16,
+      "fill": true,
+      "children": [...]
+    }
+  ]
+}
+
+**Key Simplified Patterns:**
+• Use **"spacing"** for gaps between items (not 4 separate padding values)
+• Use **"padding"** as single number or {"x": 32, "y": 16} for horizontal/vertical
+• Use **"align": "space-between"** for distributing items
+• Use **"fill": true** to make child fill available space
+• Use **"component"** with component name (plugin will fuzzy match)
+• Keep nesting simple and semantic
 • Consistent H-padding: 16px (sidebar), 24px (cards), 32px (main content)
 • Consistent itemSpacing: 4 (tight), 8 (compact), 12 (comfortable), 16 (default), 24 (loose), 32 (sections)
 • Descriptive names: "Content", "Actions", "Text and supporting text", "Header section"
