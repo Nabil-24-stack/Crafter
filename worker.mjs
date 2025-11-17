@@ -692,13 +692,52 @@ ${JSON.stringify(designSystem.textStyles)}`;
 }
 
 /**
+ * Sanitizes layout JSON to fix common AI errors
+ * Fixes invalid sizing mode values that cause Figma errors
+ */
+function sanitizeLayoutJSON(layoutObj) {
+  if (!layoutObj || typeof layoutObj !== 'object') {
+    return layoutObj;
+  }
+
+  // Fix sizing modes - Figma only accepts 'FIXED' or 'AUTO'
+  if (layoutObj.primaryAxisSizingMode &&
+      layoutObj.primaryAxisSizingMode !== 'FIXED' &&
+      layoutObj.primaryAxisSizingMode !== 'AUTO') {
+    console.warn(`⚠️ Invalid primaryAxisSizingMode "${layoutObj.primaryAxisSizingMode}", changing to "AUTO"`);
+    layoutObj.primaryAxisSizingMode = 'AUTO';
+  }
+
+  if (layoutObj.counterAxisSizingMode &&
+      layoutObj.counterAxisSizingMode !== 'FIXED' &&
+      layoutObj.counterAxisSizingMode !== 'AUTO') {
+    console.warn(`⚠️ Invalid counterAxisSizingMode "${layoutObj.counterAxisSizingMode}", changing to "AUTO"`);
+    layoutObj.counterAxisSizingMode = 'AUTO';
+  }
+
+  // Fix counterAxisAlignItems - Figma only accepts 'MIN' | 'MAX' | 'CENTER' | 'BASELINE'
+  const validCounterAxisAlign = ['MIN', 'MAX', 'CENTER', 'BASELINE'];
+  if (layoutObj.counterAxisAlignItems && !validCounterAxisAlign.includes(layoutObj.counterAxisAlignItems)) {
+    console.warn(`⚠️ Invalid counterAxisAlignItems "${layoutObj.counterAxisAlignItems}", changing to "CENTER"`);
+    layoutObj.counterAxisAlignItems = 'CENTER';
+  }
+
+  // Recursively sanitize children
+  if (Array.isArray(layoutObj.children)) {
+    layoutObj.children = layoutObj.children.map(child => sanitizeLayoutJSON(child));
+  }
+
+  return layoutObj;
+}
+
+/**
  * Extract JSON from Claude's response (handles comments, markdown, etc.)
  */
 function extractJSON(responseText) {
   let text = responseText.trim();
 
   // Log the raw response for debugging
-  console.log('Raw Claude response (first 500 chars):', text.substring(0, 500));
+  console.log('Raw AI response (first 500 chars):', text.substring(0, 500));
 
   // Remove markdown code blocks
   text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -788,18 +827,25 @@ Please generate a Figma layout that fulfills this request using the available de
 
   // Handle both formats: the fine-tuned model returns just the layout object
   // Claude returns { layout, reasoning }
+  let layout;
+  let reasoning;
+
   if (parsed.layout) {
-    return {
-      layout: parsed.layout,
-      reasoning: parsed.reasoning || 'Generated with fine-tuned model',
-    };
+    layout = parsed.layout;
+    reasoning = parsed.reasoning || 'Generated with fine-tuned model';
   } else {
     // Fine-tuned model returns the layout directly
-    return {
-      layout: parsed,
-      reasoning: 'Generated with fine-tuned model',
-    };
+    layout = parsed;
+    reasoning = 'Generated with fine-tuned model';
   }
+
+  // Sanitize the layout to fix common AI errors
+  layout = sanitizeLayoutJSON(layout);
+
+  return {
+    layout,
+    reasoning,
+  };
 }
 
 /**
@@ -840,8 +886,11 @@ Please modify the layout according to the user's request. Return the updated lay
     throw new Error(`Failed to parse Claude response: ${error.message}`);
   }
 
+  // Sanitize the updated layout to fix common AI errors
+  const sanitizedLayout = sanitizeLayoutJSON(parsed.updatedLayout);
+
   return {
-    updatedLayout: parsed.updatedLayout,
+    updatedLayout: sanitizedLayout,
     reasoning: parsed.reasoning,
   };
 }

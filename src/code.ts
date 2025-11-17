@@ -54,6 +54,20 @@ function sanitizeCounterAxisAlignItems(value: string): 'MIN' | 'MAX' | 'CENTER' 
 }
 
 /**
+ * Validates and sanitizes sizing mode values
+ * Figma only accepts: 'FIXED' | 'AUTO'
+ * AI sometimes returns invalid values like 'STRETCH'
+ */
+function sanitizeSizingMode(value: any, fieldName: string): 'FIXED' | 'AUTO' {
+  if (value === 'FIXED' || value === 'AUTO') {
+    return value;
+  }
+  // Default to AUTO if invalid value
+  console.warn(`Invalid ${fieldName} value "${value}", defaulting to "AUTO"`);
+  return 'AUTO';
+}
+
+/**
  * Helper function to create Auto Layout frames with proper defaults
  * Enforces Auto Layout best practices across all generated content
  */
@@ -80,9 +94,11 @@ function createAutoLayoutFrame(config: AutoLayoutConfig): FrameNode {
   // ALWAYS set layoutMode - never leave as NONE
   frame.layoutMode = config.layoutMode;
 
-  // Default to AUTO (hug) unless explicitly FIXED
-  frame.primaryAxisSizingMode = config.primaryAxisSizingMode || 'AUTO';
-  frame.counterAxisSizingMode = config.counterAxisSizingMode || 'AUTO';
+  // Sanitize and set sizing modes (default to AUTO if not specified or invalid)
+  frame.primaryAxisSizingMode = config.primaryAxisSizingMode ?
+    sanitizeSizingMode(config.primaryAxisSizingMode, 'primaryAxisSizingMode') : 'AUTO';
+  frame.counterAxisSizingMode = config.counterAxisSizingMode ?
+    sanitizeSizingMode(config.counterAxisSizingMode, 'counterAxisSizingMode') : 'AUTO';
 
   // Set alignment with safe defaults
   frame.primaryAxisAlignItems = config.primaryAxisAlignItems || 'MIN';
