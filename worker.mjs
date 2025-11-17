@@ -583,6 +583,115 @@ async function callClaude(systemPrompt, userPrompt) {
 }
 
 /**
+ * Call Together AI API (fine-tuned Llama model)
+ */
+async function callTogetherAI(systemPrompt, userPrompt) {
+  const togetherApiKey = process.env.TOGETHER_API_KEY;
+  const togetherModel = process.env.TOGETHER_MODEL_CRAFTER_FT;
+
+  if (!togetherApiKey) {
+    throw new Error('TOGETHER_API_KEY not configured');
+  }
+
+  if (!togetherModel) {
+    throw new Error('TOGETHER_MODEL_CRAFTER_FT not configured');
+  }
+
+  console.log(`🤖 Calling Together AI fine-tuned model: ${togetherModel}`);
+
+  const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${togetherApiKey}`,
+    },
+    body: JSON.stringify({
+      model: togetherModel,
+      max_tokens: 16384,
+      temperature: 0.1, // Low temperature for consistent JSON output
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Together AI error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Together AI response format is similar to OpenAI
+  return {
+    content: [
+      {
+        text: data.choices[0]?.message?.content || '{}',
+      },
+    ],
+    stop_reason: data.choices[0]?.finish_reason,
+    usage: data.usage,
+  };
+}
+
+/**
+ * Build simplified system prompt for fine-tuned Together AI model
+ * The fine-tuned model was trained on 76 examples and already knows the patterns
+ */
+function buildSimplifiedSystemPrompt(designSystem) {
+  const MAX_DETAILED_COMPONENTS = 20;
+  const totalComponents = designSystem.components.length;
+
+  let componentsInfo;
+
+  if (totalComponents <= MAX_DETAILED_COMPONENTS) {
+    componentsInfo = designSystem.components.map(comp => {
+      return `- ${comp.name} (${comp.category || 'component'})
+  Key: ${comp.key}
+  Size: ${comp.width}x${comp.height}px
+  ${comp.description ? `Description: ${comp.description}` : ''}`;
+    }).join('\n');
+  } else {
+    const topComponents = designSystem.components.slice(0, MAX_DETAILED_COMPONENTS);
+    const remainingComponents = designSystem.components.slice(MAX_DETAILED_COMPONENTS);
+
+    const detailedInfo = topComponents.map(comp => {
+      return `- ${comp.name} (${comp.category || 'component'})
+  Key: ${comp.key}
+  Size: ${comp.width}x${comp.height}px
+  ${comp.description ? `Description: ${comp.description}` : ''}`;
+    }).join('\n');
+
+    const summaryInfo = remainingComponents.map(comp =>
+      `- ${comp.name} (${comp.category}, ${comp.width}x${comp.height}px, key: ${comp.key})`
+    ).join('\n');
+
+    componentsInfo = `PRIORITY COMPONENTS:\n${detailedInfo}\n\nADDITIONAL COMPONENTS:\n${summaryInfo}`;
+  }
+
+  // Simplified prompt for fine-tuned model - it already knows the patterns
+  return `You are Crafter, an assistant that generates Figma-style UI layout JSON. You always respond with a single JSON object describing the layout tree. Do not include explanations, markdown, or comments.
+
+AVAILABLE DESIGN SYSTEM
+
+COMPONENTS:
+${componentsInfo}
+
+COLOR STYLES:
+${JSON.stringify(designSystem.colors)}
+
+TEXT STYLES:
+${JSON.stringify(designSystem.textStyles)}`;
+}
+
+/**
  * Extract JSON from Claude's response (handles comments, markdown, etc.)
  */
 function extractJSON(responseText) {
@@ -615,20 +724,52 @@ function extractJSON(responseText) {
  * Process a generate job
  */
 async function processGenerateJob(job) {
-  const { prompt, designSystem } = job.input;
+  const { prompt, designSystem, model } = job.input;
 
-  const systemPrompt = buildSystemPrompt(designSystem);
-  const userPrompt = `User Request: ${prompt}
+  // Determine which model to use
+  // Default to Together AI fine-tuned model if available, fallback to Claude
+  const useTogetherAI = model === 'together' ||
+    (!model && process.env.TOGETHER_API_KEY && process.env.TOGETHER_MODEL_CRAFTER_FT);
+
+  let aiResponse;
+  let responseText;
+
+  if (useTogetherAI) {
+    console.log('🤖 Using Together AI fine-tuned model for generation');
+
+    // Use simplified prompt for fine-tuned model
+    const systemPrompt = buildSimplifiedSystemPrompt(designSystem);
+    const userPrompt = `Design a ${prompt.includes('web') || prompt.includes('mobile') ? '' : 'web '}screen for ${prompt}. Use a clean, production-ready layout with good hierarchy, spacing, and realistic text. Return only the JSON layout object.`;
+
+    try {
+      aiResponse = await callTogetherAI(systemPrompt, userPrompt);
+      responseText = aiResponse.content[0]?.text || '{}';
+    } catch (error) {
+      console.warn('⚠️ Together AI failed, falling back to Claude:', error.message);
+      // Fallback to Claude
+      const claudeSystemPrompt = buildSystemPrompt(designSystem);
+      const claudeUserPrompt = `User Request: ${prompt}
+
+Please generate a Figma layout that fulfills this request using the available design system components. Return the layout as JSON following the schema provided.`;
+      aiResponse = await callClaude(claudeSystemPrompt, claudeUserPrompt);
+      responseText = aiResponse.content[0]?.text || '{}';
+    }
+  } else {
+    console.log('🧠 Using Claude Sonnet 4.5 for generation');
+
+    const systemPrompt = buildSystemPrompt(designSystem);
+    const userPrompt = `User Request: ${prompt}
 
 Please generate a Figma layout that fulfills this request using the available design system components. Return the layout as JSON following the schema provided.`;
 
-  const claudeResponse = await callClaude(systemPrompt, userPrompt);
-  const responseText = claudeResponse.content[0]?.text || '{}';
+    aiResponse = await callClaude(systemPrompt, userPrompt);
+    responseText = aiResponse.content[0]?.text || '{}';
+  }
 
   // Check if we hit the token limit
-  if (claudeResponse.stop_reason === 'max_tokens') {
-    console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
-    console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+  if (aiResponse.stop_reason === 'max_tokens' || aiResponse.stop_reason === 'length') {
+    console.warn('⚠️ Warning: Model hit max_tokens limit. Response may be truncated.');
+    console.warn('Usage:', JSON.stringify(aiResponse.usage));
   }
 
   // Extract and parse the layout JSON
@@ -642,13 +783,23 @@ Please generate a Figma layout that fulfills this request using the available de
     console.error('Failed JSON length:', jsonText.length, 'characters');
     console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
     console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
-    throw new Error(`Failed to parse Claude response: ${error.message}`);
+    throw new Error(`Failed to parse AI response: ${error.message}`);
   }
 
-  return {
-    layout: parsed.layout,
-    reasoning: parsed.reasoning,
-  };
+  // Handle both formats: the fine-tuned model returns just the layout object
+  // Claude returns { layout, reasoning }
+  if (parsed.layout) {
+    return {
+      layout: parsed.layout,
+      reasoning: parsed.reasoning || 'Generated with fine-tuned model',
+    };
+  } else {
+    // Fine-tuned model returns the layout directly
+    return {
+      layout: parsed,
+      reasoning: 'Generated with fine-tuned model',
+    };
+  }
 }
 
 /**
