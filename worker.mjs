@@ -677,6 +677,12 @@ function sanitizeLayoutJSON(layoutObj) {
     return layoutObj;
   }
 
+  // Fix "id" field - fine-tuned model uses "id" but Figma expects "name"
+  if (layoutObj.id && !layoutObj.name) {
+    layoutObj.name = layoutObj.id;
+    delete layoutObj.id;
+  }
+
   // Normalize type to uppercase (fine-tuned model returns lowercase)
   if (layoutObj.type) {
     const typeUpper = layoutObj.type.toUpperCase();
@@ -700,7 +706,6 @@ function sanitizeLayoutJSON(layoutObj) {
     const mappedType = typeMap[typeUpper] || 'FRAME'; // Default to FRAME
 
     if (mappedType !== layoutObj.type) {
-      console.warn(`⚠️ Normalizing type "${layoutObj.type}" → "${mappedType}"`);
       layoutObj.type = mappedType;
     }
   }
@@ -717,7 +722,6 @@ function sanitizeLayoutJSON(layoutObj) {
     } else {
       layoutObj.name = layoutObj.type || 'Node';
     }
-    console.warn(`⚠️ Missing name, set to "${layoutObj.name}"`);
   }
 
   // Fix sizing modes - Figma only accepts 'FIXED' or 'AUTO'
