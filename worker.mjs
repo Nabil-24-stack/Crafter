@@ -700,6 +700,21 @@ function sanitizeLayoutJSON(layoutObj) {
     return layoutObj;
   }
 
+  // Fix missing or undefined name (required by Figma)
+  if (!layoutObj.name || layoutObj.name === 'undefined') {
+    // Generate a default name based on type
+    if (layoutObj.type === 'COMPONENT_INSTANCE') {
+      layoutObj.name = layoutObj.componentName || 'Component';
+    } else if (layoutObj.type === 'FRAME') {
+      layoutObj.name = 'Container';
+    } else if (layoutObj.type === 'TEXT') {
+      layoutObj.name = 'Text';
+    } else {
+      layoutObj.name = layoutObj.type || 'Node';
+    }
+    console.warn(`⚠️ Missing name, set to "${layoutObj.name}"`);
+  }
+
   // Fix sizing modes - Figma only accepts 'FIXED' or 'AUTO'
   if (layoutObj.primaryAxisSizingMode &&
       layoutObj.primaryAxisSizingMode !== 'FIXED' &&
