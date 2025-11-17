@@ -15,7 +15,7 @@ const supabase = createClient(
 );
 
 /**
- * Get the next queued job
+ * Get the next queued job (legacy - keeping for compatibility)
  */
 async function getNextQueuedJob() {
   const { data, error } = await supabase
@@ -31,6 +31,25 @@ async function getNextQueuedJob() {
   }
 
   return data && data.length > 0 ? data[0] : null;
+}
+
+/**
+ * Get multiple queued jobs for parallel processing
+ */
+async function getQueuedJobs(limit = 3) {
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('status', 'queued')
+    .order('created_at', { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching queued jobs:', error);
+    throw error;
+  }
+
+  return data || [];
 }
 
 /**
@@ -973,53 +992,86 @@ Please modify the layout according to the user's request. Return the updated lay
 }
 
 /**
- * Main worker loop
+ * Process a single job (helper function for parallel processing)
+ */
+async function processSingleJob(job) {
+  try {
+    console.log(`\n📦 Processing job: ${job.id} (${job.mode})`);
+
+    // Mark as processing
+    await updateJob(job.id, 'processing');
+
+    // Process based on mode
+    let output;
+    if (job.mode === 'generate') {
+      output = await processGenerateJob(job);
+    } else if (job.mode === 'iterate') {
+      output = await processIterateJob(job);
+    } else {
+      throw new Error(`Unknown job mode: ${job.mode}`);
+    }
+
+    // Mark as done
+    await updateJob(job.id, 'done', output);
+
+    console.log(`✅ Job ${job.id} completed successfully`);
+  } catch (error) {
+    console.error(`❌ Error processing job ${job.id}:`, error.message);
+
+    // Mark job as error
+    try {
+      await updateJob(job.id, 'error', null, error.message);
+    } catch (updateError) {
+      console.error(`Failed to update job ${job.id} error status:`, updateError);
+    }
+
+    throw error; // Re-throw to be caught by Promise.allSettled
+  }
+}
+
+/**
+ * Main worker loop with parallel job processing
  */
 async function main() {
   console.log('🚀 Crafter Background Worker Started');
+  console.log('⚡ Parallel processing enabled (max 3 concurrent jobs)');
   console.log('Listening for jobs in Supabase queue...\n');
+
+  const MAX_CONCURRENT_JOBS = 3;
 
   while (true) {
     try {
-      // Get next job
-      const job = await getNextQueuedJob();
+      // Get multiple queued jobs
+      const jobs = await getQueuedJobs(MAX_CONCURRENT_JOBS);
 
-      if (!job) {
+      if (jobs.length === 0) {
         // No jobs, wait 3 seconds
         await new Promise(resolve => setTimeout(resolve, 3000));
         continue;
       }
 
-      console.log(`\n📦 Processing job: ${job.id} (${job.mode})`);
+      console.log(`\n🔄 Found ${jobs.length} queued job(s), processing in parallel...`);
 
-      // Mark as processing
-      await updateJob(job.id, 'processing');
+      // Process all jobs in parallel
+      const jobPromises = jobs.map(job => processSingleJob(job));
 
-      // Process based on mode
-      let output;
-      if (job.mode === 'generate') {
-        output = await processGenerateJob(job);
-      } else if (job.mode === 'iterate') {
-        output = await processIterateJob(job);
-      } else {
-        throw new Error(`Unknown job mode: ${job.mode}`);
+      // Wait for all jobs to complete (or fail)
+      // Using allSettled so one failure doesn't stop others
+      const results = await Promise.allSettled(jobPromises);
+
+      // Log summary
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+
+      if (successful > 0) {
+        console.log(`\n✨ Batch complete: ${successful} succeeded, ${failed} failed`);
       }
 
-      // Mark as done
-      await updateJob(job.id, 'done', output);
+      // Small delay before next batch
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      console.log(`✅ Job ${job.id} completed successfully`);
     } catch (error) {
-      console.error('❌ Error processing job:', error.message);
-
-      // Try to mark job as error
-      try {
-        if (error.jobId) {
-          await updateJob(error.jobId, 'error', null, error.message);
-        }
-      } catch (updateError) {
-        console.error('Failed to update job error status:', updateError);
-      }
+      console.error('❌ Error in main loop:', error.message);
 
       // Wait before retrying
       await new Promise(resolve => setTimeout(resolve, 5000));
