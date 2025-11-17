@@ -1,0 +1,370 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Header navigation",
+      "type": "INSTANCE",
+      "componentKey": "a7a7552c8b5e1b61f44d87caf558fef01df353b9",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 64,
+      "children": [
+        {
+          "name": "Page header",
+          "type": "INSTANCE",
+          "componentKey": "b26015b0c5fb2a974f7841ce519131756d74e1d5",
+          "componentName": "Style=Banner avatar, Breakpoint=Mobile",
+          "text": "Olivia Rhye"
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 32,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Form",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Input field",
+                          "type": "INSTANCE",
+                          "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                          "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                          "text": "First name"
+                        },
+                        {
+                          "name": "Input field",
+                          "type": "INSTANCE",
+                          "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                          "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                          "text": "Last name"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 32,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Input field",
+                          "type": "INSTANCE",
+                          "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                          "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                          "text": "Email address"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 32,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Avatar and file upload",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Avatar",
+                              "type": "INSTANCE",
+                              "componentKey": "04fd8b71120ea158b7643103940e2620a1a32542",
+                              "componentName": "Size=2xl, Placeholder=False, Text=False, Status icon=False"
+                            },
+                            {
+                              "name": "File upload",
+                              "type": "INSTANCE",
+                              "componentKey": "2387b1030e6b004ebf5e723e5e3990d82f2b2e29",
+                              "componentName": "Files queued=False, Type=Progress bar, Breakpoint=Desktop",
+                              "text": "Click to upload"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 32,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Input field",
+                          "type": "INSTANCE",
+                          "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                          "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                          "text": "Role"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 32,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Select",
+                          "type": "INSTANCE",
+                          "componentKey": "e60a2f9d9699d0a451482bc031d35044ef96ba60",
+                          "componentName": "Size=md, Type=Icon leading, State=Default",
+                          "text": "Country"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 32,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Select",
+                          "type": "INSTANCE",
+                          "componentKey": "e60a2f9d9699d0a451482bc031d35044ef96ba60",
+                          "componentName": "Size=md, Type=Icon leading, State=Default",
+                          "text": "Timezone"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Frame 1",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Your bio"
+                        },
+                        {
+                          "name": "Text editor",
+                          "type": "INSTANCE",
+                          "componentKey": "06fef13ab85504eb394c00b9187acb65c5e06af6",
+                          "componentName": "Type=Default, Size=sm",
+                          "text": "Team member"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Portfolio projects"
+                        },
+                        {
+                          "name": "Images",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Image",
+                              "type": "FRAME",
+                              "layoutMode": "NONE",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": []
+                            },
+                            {
+                              "name": "Image",
+                              "type": "FRAME",
+                              "layoutMode": "NONE",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": []
+                            },
+                            {
+                              "name": "Image",
+                              "type": "FRAME",
+                              "layoutMode": "NONE",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": []
+                            },
+                            {
+                              "name": "Image",
+                              "type": "FRAME",
+                              "layoutMode": "NONE",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "File upload",
+                          "type": "INSTANCE",
+                          "componentKey": "2387b1030e6b004ebf5e723e5e3990d82f2b2e29",
+                          "componentName": "Files queued=False, Type=Progress bar, Breakpoint=Desktop",
+                          "text": "Click to upload"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Section footer",
+                  "type": "INSTANCE",
+                  "componentKey": "fe9c4a65ea0154dc9338ab3debf37293f6b0dfee",
+                  "componentName": "Type=Section, Button group=False, Breakpoint=Mobile",
+                  "text": "Learn more"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

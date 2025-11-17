@@ -1,0 +1,353 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "47b14b39c2ad04ff19e1cabff1e24516abfd1827",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Buttons/Button",
+                  "type": "INSTANCE",
+                  "componentKey": "aaa35cdff84a693e7f25cdb5f6856b1eee177f1b",
+                  "componentName": "Size=md, Hierarchy=Link color, State=Default, Icon only=False",
+                  "text": "Back to dashboard"
+                },
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                },
+                {
+                  "name": "Horizontal tabs",
+                  "type": "INSTANCE",
+                  "componentKey": "468c38dc4f3ab2e85772096cc157bf5168cae1b5",
+                  "componentName": "Type=Underline, Size=sm, Full width=False, Breakpoint=Mobile",
+                  "text": "Team member"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Notification settings"
+                },
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Comments"
+                        },
+                        {
+                          "name": "Radio buttons",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "f96019f0c3f48e1a50c36289a2ff300367e25a55",
+                              "componentName": "Type=Slim, Pressed=True, Size=sm, Text=True, State=Default",
+                              "text": "Push"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "f96019f0c3f48e1a50c36289a2ff300367e25a55",
+                              "componentName": "Type=Slim, Pressed=True, Size=sm, Text=True, State=Default",
+                              "text": "Email"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "SMS"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Tags"
+                        },
+                        {
+                          "name": "Radio buttons",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "f96019f0c3f48e1a50c36289a2ff300367e25a55",
+                              "componentName": "Type=Slim, Pressed=True, Size=sm, Text=True, State=Default",
+                              "text": "Push"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "Email"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "SMS"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Reminders"
+                        },
+                        {
+                          "name": "Radio buttons",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "Push"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "Email"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "SMS"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "More activity about you"
+                        },
+                        {
+                          "name": "Radio buttons",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "Push"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "Email"
+                            },
+                            {
+                              "name": "Toggle",
+                              "type": "INSTANCE",
+                              "componentKey": "6f5dedcbdc2675489c6d2c90bebd2f3fd501250f",
+                              "componentName": "Type=Slim, Pressed=False, Size=sm, Text=True, State=Default",
+                              "text": "SMS"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

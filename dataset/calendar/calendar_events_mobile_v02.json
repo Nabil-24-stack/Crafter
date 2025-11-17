@@ -1,0 +1,102 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "a8af0c935088fa7b60cc26f87d209c38f5b9f349",
+      "componentName": "Open=False, Style=Slim, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                },
+                {
+                  "name": "Horizontal tabs",
+                  "type": "INSTANCE",
+                  "componentKey": "b61c1702f377e3a9542ab9030d201137b146c77a",
+                  "componentName": "Type=Button minimal, Size=sm, Full width=False, Breakpoint=Desktop",
+                  "text": "All events"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Calendar",
+              "type": "INSTANCE",
+              "componentKey": "73963ac7f3cac14068781ff25ed7361bf9e7fd07",
+              "componentName": "Type=Week view, Breakpoint=Mobile",
+              "text": "January 2025"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

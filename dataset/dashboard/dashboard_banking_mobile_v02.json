@@ -1,0 +1,556 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "47b14b39c2ad04ff19e1cabff1e24516abfd1827",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                },
+                {
+                  "name": "Tabs and filters",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Button group",
+                      "type": "INSTANCE",
+                      "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                      "componentName": "Icon=False",
+                      "text": "12m"
+                    },
+                    {
+                      "name": "Actions",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 12,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Date picker dropdown",
+                          "type": "INSTANCE",
+                          "componentKey": "c620fe3d24cd374b7700c5ea49d075eb53ab78de",
+                          "componentName": "Opened=False, Type=Dual dates, State=Placeholder, Breakpoint=Desktop",
+                          "text": "Select dates"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "bf0bb5f515f883f430b562d33f2f089b6b84c630",
+                          "componentName": "Size=md, Hierarchy=Secondary, State=Default, Icon only=False",
+                          "text": "Filters"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "_Account card mobile",
+                      "type": "COMPONENT"
+                    },
+                    {
+                      "name": "_Account card mobile",
+                      "type": "INSTANCE",
+                      "componentKey": "5bc8ba608006ece78d2c70e3d034a1d0ae03627d",
+                      "componentName": "_Account card mobile",
+                      "text": "Current balance"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Card",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 16,
+                      "paddingRight": 16,
+                      "paddingTop": 20,
+                      "paddingBottom": 20,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                          "text": "Balance over time"
+                        },
+                        {
+                          "name": "Line and bar chart",
+                          "type": "INSTANCE",
+                          "componentKey": "b43bdd89e589bad1c94b0987301d56a6f1499be7",
+                          "componentName": "Legend=False, Axis labels=False, Chart style=Bar, Breakpoint=Mobile",
+                          "text": "Jan"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Card",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 16,
+                      "paddingRight": 16,
+                      "paddingTop": 20,
+                      "paddingBottom": 20,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                          "text": "Your cards"
+                        },
+                        {
+                          "name": "Cards",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Cards",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 20,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Credit card mockup",
+                                  "type": "INSTANCE",
+                                  "componentKey": "6af4f2a0ad5ab975b84d3d43e6ea13455cfedf63",
+                                  "componentName": "Theme=Brand dark, Lines=False",
+                                  "text": "1234 1234 1234 1234"
+                                },
+                                {
+                                  "name": "Credit card mockup",
+                                  "type": "INSTANCE",
+                                  "componentKey": "62fc7e54c7518f6c8c7109b607042f5746b43173",
+                                  "componentName": "Theme=Gray dark, Lines=False",
+                                  "text": "1234 1234 1234 1234"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Pagination dot group",
+                              "type": "INSTANCE",
+                              "componentKey": "35a96dca9f91923dd3615cc1575ae4b6015eac91",
+                              "componentName": "Size=lg, Style=Dot, Framed=False"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Section footer",
+                      "type": "INSTANCE",
+                      "componentKey": "81bf10bb65239f4afde4c532eb708b9b46c6b0e3",
+                      "componentName": "Type=Card, Button group=False, Breakpoint=Mobile",
+                      "text": "Learn more"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Card",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 16,
+                      "paddingRight": 16,
+                      "paddingTop": 20,
+                      "paddingBottom": 20,
+                      "children": [
+                        {
+                          "name": "Text",
+                          "type": "TEXT",
+                          "text": "Recent deposits"
+                        },
+                        {
+                          "name": "Table",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Content",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Column",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Ending in 1234"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Ending in 1234"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Stripe deposit"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Ending in 1234"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "PayPal deposit"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Apple Pay"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Ending in 1234"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "0e191a0c8af494f39159f68251b7aa26accb3967",
+                                      "componentName": "Type=Payment method, Size=md, State=Default",
+                                      "text": "Stripe deposit"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Column",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    },
+                                    {
+                                      "name": "Table cell",
+                                      "type": "INSTANCE",
+                                      "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                      "componentName": "Type=Text, Size=md, State=Default",
+                                      "text": "Olivia Rhye"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Section footer",
+                              "type": "INSTANCE",
+                              "componentKey": "fe9c4a65ea0154dc9338ab3debf37293f6b0dfee",
+                              "componentName": "Type=Section, Button group=False, Breakpoint=Mobile",
+                              "text": "Learn more"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

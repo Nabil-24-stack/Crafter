@@ -1,0 +1,735 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "bca730060a41a69a66e7e6bd36c52cee13a19040",
+      "componentName": "Open=False, Style=Sections dividers, Breakpoint=Desktop",
+      "text": "Search"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Buttons/Button",
+                  "type": "INSTANCE",
+                  "componentKey": "aaa35cdff84a693e7f25cdb5f6856b1eee177f1b",
+                  "componentName": "Size=md, Hierarchy=Link color, State=Default, Icon only=False",
+                  "text": "Back to settings"
+                },
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "a6824f25327d0afaa3bcb424e3340e99b3516543",
+                  "componentName": "Style=Simple, Breakpoint=Desktop",
+                  "text": "Settings"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Pricing tier card",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 24,
+                      "paddingLeft": 24,
+                      "paddingRight": 24,
+                      "paddingTop": 24,
+                      "paddingBottom": 24,
+                      "children": [
+                        {
+                          "name": "Heading and price",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Heading and supporting text",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 4,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 4,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Heading and badge",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 8,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Heading",
+                                      "type": "TEXT",
+                                      "text": "Basic plan"
+                                    },
+                                    {
+                                      "name": "Badge",
+                                      "type": "INSTANCE",
+                                      "componentKey": "67894a188a8bef38b1ddbac0f54e80109694f87a",
+                                      "componentName": "Size=md, Type=Badge modern, Icon=False, Color=Gray",
+                                      "text": "Monthly"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Text",
+                                  "type": "TEXT",
+                                  "text": "Our most popular plan for small teams."
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Price",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 2,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "$ wrap",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 10,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 10,
+                                  "children": [
+                                    {
+                                      "name": "$",
+                                      "type": "TEXT",
+                                      "text": "$"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Price",
+                                  "type": "TEXT",
+                                  "text": "10"
+                                },
+                                {
+                                  "name": "Period wrap",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 7,
+                                  "children": [
+                                    {
+                                      "name": "Period",
+                                      "type": "TEXT",
+                                      "text": "per month"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Text and progress bar",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "14 of 20 users"
+                            },
+                            {
+                              "name": "Progress bar",
+                              "type": "INSTANCE",
+                              "componentKey": "b158a89c59af75d6169df2c1b133cca44b2ee65c",
+                              "componentName": "Progress=70%, Label=False"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Section footer",
+                      "type": "INSTANCE",
+                      "componentKey": "c88de417fde1894c8f7ea3d3258bd0b01c7b3bb8",
+                      "componentName": "Type=Card, Button group=False, Breakpoint=Desktop",
+                      "text": "Learn more"
+                    }
+                  ]
+                },
+                {
+                  "name": "Inline CTA",
+                  "type": "INSTANCE",
+                  "componentKey": "732c6016be5bcc6bb25e0bea19d3c68419434da1",
+                  "componentName": "Type=Payment method, Breakpoint=Desktop",
+                  "text": "Payment method"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                  "text": "Billing and invoicing"
+                },
+                {
+                  "name": "Table",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "98e025f4f2a11747d805a53f0a30e03739cefec9",
+                              "componentName": "Size=md, Text=True, Checkbox=True",
+                              "text": "Invoice"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #007 – Dec 2025"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #006 – Nov 2025"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #005 – Oct 2025"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #004– Sep 2025"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #003 – Aug 2025"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #002 – Jul 2025"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "78864928702eef4b86bc34e5b91284498de95c9a",
+                              "componentName": "Type=File type icon, Size=md, State=Default",
+                              "text": "Invoice #001 – Jun 2025"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "7b8a26d498c25b2418d132d9981c6e7e6b0a1f66",
+                              "componentName": "Size=md, Text=True, Checkbox=False",
+                              "text": "Billing date"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "7b8a26d498c25b2418d132d9981c6e7e6b0a1f66",
+                              "componentName": "Size=md, Text=True, Checkbox=False",
+                              "text": "Status"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a75927f3506009014c7eb249292b6da0777094ba",
+                              "componentName": "Type=Badge, Size=md, State=Default",
+                              "text": "Paid"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "7b8a26d498c25b2418d132d9981c6e7e6b0a1f66",
+                              "componentName": "Size=md, Text=True, Checkbox=False",
+                              "text": "Amount"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "7b8a26d498c25b2418d132d9981c6e7e6b0a1f66",
+                              "componentName": "Size=md, Text=True, Checkbox=False",
+                              "text": "Plan"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                              "componentName": "Type=Text, Size=md, State=Default",
+                              "text": "Olivia Rhye"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "acec65a7b42eb89ca60964c93e43baa0ee80a24e",
+                              "componentName": "Size=md, Text=False, Checkbox=False"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "3f1243cd4324947f077e38ba32580dba425089a5",
+                              "componentName": "Type=Action buttons, Size=md, State=Default",
+                              "text": "Delete"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

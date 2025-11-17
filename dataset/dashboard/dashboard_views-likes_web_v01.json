@@ -1,0 +1,842 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "627278a85c432cb1eb9a1eb6d212129ee6c44918",
+      "componentName": "Open=False, Style=Slim, Breakpoint=Desktop"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "a6824f25327d0afaa3bcb424e3340e99b3516543",
+                  "componentName": "Style=Simple, Breakpoint=Desktop",
+                  "text": "Settings"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "58c09a9f7f6b1a77da9eb63bc9c5329f3166ec4f",
+                  "componentName": "Tabs=False, Type=Button group, Breakpoint=Desktop",
+                  "text": "Profile views"
+                },
+                {
+                  "name": "Line and bar chart",
+                  "type": "INSTANCE",
+                  "componentKey": "45f820c32df6d2c046a10566edc3d0109fa6d7e9",
+                  "componentName": "Legend=False, Axis labels=True, Chart style=Line, Breakpoint=Desktop",
+                  "text": "Profile views"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 32,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 8,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section header",
+                      "type": "INSTANCE",
+                      "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                      "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                      "text": "Biggest fans"
+                    },
+                    {
+                      "name": "Table",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Column",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Phoenix Baker"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Lana Steiner"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Demi Wilkinson"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Candice Wu"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Natali Craig"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Drew Cano"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Orlando Diggs"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Column",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Column",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Section footer",
+                          "type": "INSTANCE",
+                          "componentKey": "aa6a62626ba554524e2ba9d2b4b3b5ff0ed2658c",
+                          "componentName": "Type=Section, Button group=False, Breakpoint=Desktop",
+                          "text": "View all"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 8,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section header",
+                      "type": "INSTANCE",
+                      "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                      "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                      "text": "Favorite designers"
+                    },
+                    {
+                      "name": "Table",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Column",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Andi Lane"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Kate Morrison"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Koray Okumus"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Ava Wright"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Eve Leroy"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Zahir Mays"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                                  "componentName": "Type=Avatar, Size=md, State=Default",
+                                  "text": "Joshua WIlson"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Column",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "eb5ab7ea348baa0c614e5efe0395328cd0c8fc7e",
+                                  "componentName": "Type=Text, Size=md, State=Default",
+                                  "text": "Olivia Rhye"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Column",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                },
+                                {
+                                  "name": "Table cell",
+                                  "type": "INSTANCE",
+                                  "componentKey": "1c66083e3ad9b59379621049ad47cdf42ae94cc1",
+                                  "componentName": "Type=Action icons, Size=md, State=Default"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Section footer",
+                          "type": "INSTANCE",
+                          "componentKey": "aa6a62626ba554524e2ba9d2b4b3b5ff0ed2658c",
+                          "componentName": "Type=Section, Button group=False, Breakpoint=Desktop",
+                          "text": "View all"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Side panel",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 0,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "children": [
+        {
+          "name": "Container",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 32,
+          "paddingLeft": 24,
+          "paddingRight": 24,
+          "paddingTop": 0,
+          "paddingBottom": 24,
+          "children": [
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 16,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                      "componentName": "Type=Message, Sent=False, Actions panel=False",
+                      "text": "Anita Cruz"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "ac629f17e57a8b6fefa20ab71bc8cfe0993cd410",
+                      "componentName": "Type=Message, Sent=True, Actions panel=False",
+                      "text": "You"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                      "componentName": "Type=Message, Sent=False, Actions panel=False",
+                      "text": "Anita Cruz"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "f959e5d759c46ad9effb73910fb9a7b733245094",
+                      "componentName": "Type=File, Sent=False, Actions panel=False",
+                      "text": "Anita Cruz"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 32,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "ac629f17e57a8b6fefa20ab71bc8cfe0993cd410",
+                      "componentName": "Type=Message, Sent=True, Actions panel=False",
+                      "text": "You"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "e87e41a7333836d96e5b8e550bb2e32abe7f8a94",
+                      "componentName": "Type=Link preview, Sent=False, Actions panel=False",
+                      "text": "Anita Cruz"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Content divider",
+              "type": "INSTANCE",
+              "componentKey": "6a8a336578cbf1f0ffe42461b47cb8ddddfc9987",
+              "componentName": "Type=Text, Style=Single line",
+              "text": "Today"
+            },
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 16,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 32,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "765c70a4fd6242bf30cd64b3de9bd76976de2551",
+                      "componentName": "Type=Message, Sent=True, Actions panel=True",
+                      "text": "You"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                      "componentName": "Type=Message, Sent=False, Actions panel=False",
+                      "text": "Anita Cruz"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "9707c37f764f5ce91032e2c1d7f758b7c5a46297",
+                      "componentName": "Type=Writing, Sent=False, Actions panel=False",
+                      "text": "Anita Cruz"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Message input",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 20,
+          "paddingRight": 20,
+          "paddingTop": 0,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "name": "Message action",
+              "type": "INSTANCE",
+              "componentKey": "cd604d6f6777bc510dd646028eca98cd3ebb2b33",
+              "componentName": "Type=Advanced",
+              "text": "Description"
+            }
+          ]
+        },
+        {
+          "name": "Card header",
+          "type": "INSTANCE",
+          "componentKey": "6887ecac4b3874c383d3264e925f59f0f5be294d",
+          "componentName": "Avatar=False, Breakpoint=Desktop",
+          "text": "Anita Cruz"
+        }
+      ]
+    }
+  ]
+}

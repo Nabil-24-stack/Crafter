@@ -1,0 +1,115 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "2a91b35696ee069321297a619f32e4cfae2b26e6",
+      "componentName": "Open=False, Style=Sections subheadings, Breakpoint=Desktop",
+      "text": "GENERAL"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "a6824f25327d0afaa3bcb424e3340e99b3516543",
+                  "componentName": "Style=Simple, Breakpoint=Desktop",
+                  "text": "Untitled UI"
+                },
+                {
+                  "name": "Horizontal tabs",
+                  "type": "INSTANCE",
+                  "componentKey": "b61c1702f377e3a9542ab9030d201137b146c77a",
+                  "componentName": "Type=Button minimal, Size=sm, Full width=False, Breakpoint=Desktop",
+                  "text": "All events"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Calendar",
+                  "type": "INSTANCE",
+                  "componentKey": "f0a56672517bd4fa399307118a6dba9466594c71",
+                  "componentName": "Type=Week view, Breakpoint=Desktop",
+                  "text": "JAN"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

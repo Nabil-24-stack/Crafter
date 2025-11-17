@@ -1,0 +1,1088 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Header navigation",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 0,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "children": [
+        {
+          "name": "Container",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 738,
+          "paddingLeft": 32,
+          "paddingRight": 32,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Content",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 16,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Logo",
+                  "type": "INSTANCE",
+                  "componentKey": "45c667b822001e1da75616bd625fc14077627163",
+                  "componentName": "Dark mode=True"
+                },
+                {
+                  "name": "Navigation",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 4,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "_Nav item base",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 105,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Home"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_Nav item base",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 105,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Customers"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_Nav item base",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 105,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Projects"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_Nav item base",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 105,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Tasks"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_Nav item base",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 105,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Reporting"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_Nav item base",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 105,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Users"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Content",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 16,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Actions",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 4,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "_Nav item button",
+                      "type": "INSTANCE",
+                      "componentKey": "90e79be70ea41b7839670847e254594f411b6f24",
+                      "componentName": "Current=False, Size=md, Color=Primary, Theme=Dark, State=Default"
+                    },
+                    {
+                      "name": "_Nav item button",
+                      "type": "INSTANCE",
+                      "componentKey": "90e79be70ea41b7839670847e254594f411b6f24",
+                      "componentName": "Current=False, Size=md, Color=Primary, Theme=Dark, State=Default"
+                    },
+                    {
+                      "name": "_Nav item button",
+                      "type": "INSTANCE",
+                      "componentKey": "90e79be70ea41b7839670847e254594f411b6f24",
+                      "componentName": "Current=False, Size=md, Color=Primary, Theme=Dark, State=Default"
+                    }
+                  ]
+                },
+                {
+                  "name": "Dropdown",
+                  "type": "INSTANCE",
+                  "componentKey": "12f6394d562a6a91516412d0b5bf687459221b13",
+                  "componentName": "Type=Avatar, Open=False"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Divider",
+          "type": "VECTOR"
+        }
+      ]
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 48,
+      "paddingBottom": 96,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 10,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Text",
+                          "type": "TEXT",
+                          "text": "Customers"
+                        },
+                        {
+                          "name": "Actions",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Button 04",
+                              "type": "INSTANCE",
+                              "componentKey": "a6f3b03008896da53d422722ead9a26edb4a6784",
+                              "componentName": "Size=md, Hierarchy=Tertiary gray, Icon=False, Destructive=False, State=Default",
+                              "text": "Tertiary"
+                            },
+                            {
+                              "name": "Button 03",
+                              "type": "INSTANCE",
+                              "componentKey": "37956f7860358db19edbdc623c27c6f21804012c",
+                              "componentName": "Size=md, Hierarchy=Secondary color, Icon=False, Destructive=False, State=Default",
+                              "text": "Secondary"
+                            },
+                            {
+                              "name": "Button 02",
+                              "type": "INSTANCE",
+                              "componentKey": "f72a2a208c37ce1dea062f3c0e93b8b84466ff4c",
+                              "componentName": "Size=md, Hierarchy=Secondary gray, Icon=Leading, Destructive=False, State=Default",
+                              "text": "Import"
+                            },
+                            {
+                              "name": "Button 01",
+                              "type": "INSTANCE",
+                              "componentKey": "211fe82a3349f8ea3d040a92c6377262702034aa",
+                              "componentName": "Size=md, Hierarchy=Primary, Icon=Leading, Destructive=False, State=Default",
+                              "text": "Add customer"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 64,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 24,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section header",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 1,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Active now"
+                            },
+                            {
+                              "name": "Actions",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Dropdown",
+                                  "type": "INSTANCE",
+                                  "componentKey": "122d5384fb72d1504c5d2ee008db2c4ff9f28937",
+                                  "componentName": "Type=Icon, Open=False"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Activity gauge",
+                      "type": "INSTANCE",
+                      "componentKey": "b8fc05fb35169eda792bece130356245683bde43",
+                      "componentName": "Size=md, Legend=False, Label=False",
+                      "text": "316"
+                    }
+                  ]
+                },
+                {
+                  "name": "Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 24,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section header",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 1,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Total customers"
+                            },
+                            {
+                              "name": "Actions",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Dropdown",
+                                  "type": "INSTANCE",
+                                  "componentKey": "122d5384fb72d1504c5d2ee008db2c4ff9f28937",
+                                  "componentName": "Type=Icon, Open=False"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Line and bar chart",
+                      "type": "INSTANCE",
+                      "componentKey": "515e98291ab1004cfc22e0b81a2e769d4b18c1fc",
+                      "componentName": "Legend=Top, Axis labels=False, Chart style=Line, Breakpoint=Desktop",
+                      "text": "2021"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Filters bar",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Dropdowns",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Button",
+                              "type": "INSTANCE",
+                              "componentKey": "c58c50787a816ba24bcaac601b39fa1f28e078cc",
+                              "componentName": "Size=md, Hierarchy=Secondary color, Icon=Trailing, Destructive=False, State=Default",
+                              "text": "All time"
+                            },
+                            {
+                              "name": "Button",
+                              "type": "INSTANCE",
+                              "componentKey": "c58c50787a816ba24bcaac601b39fa1f28e078cc",
+                              "componentName": "Size=md, Hierarchy=Secondary color, Icon=Trailing, Destructive=False, State=Default",
+                              "text": "US, AU, +4"
+                            },
+                            {
+                              "name": "Button",
+                              "type": "INSTANCE",
+                              "componentKey": "f72a2a208c37ce1dea062f3c0e93b8b84466ff4c",
+                              "componentName": "Size=md, Hierarchy=Secondary gray, Icon=Leading, Destructive=False, State=Default",
+                              "text": "More filters"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Select",
+                          "type": "INSTANCE",
+                          "componentKey": "055f9a0e8f8f8f650f426e91f330353f21233f5b",
+                          "componentName": "State=Placeholder, Type=Search, Supporting text=False, Label=False",
+                          "text": "Search"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Table",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a22a92482704406884f9088ee8d4636ba14deb9b",
+                              "componentName": "Text=True, Checkbox=True, Color=Gray",
+                              "text": "Company"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Catalog"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Circooles"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Command+R"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Hourglass"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Layers"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Quotient"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "41a05b3cd21b72b3c6e5f524207502aae9e1b83b",
+                              "componentName": "Style=Lead avatar checkbox, Supporting text=True, State=Default",
+                              "text": "Sisyphus"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "9338c23a217b0fe7a1402762b7d4564a50896c36",
+                              "componentName": "Text=True, Checkbox=False, Color=Gray",
+                              "text": "Status"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Customer"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Churned"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Customer"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Customer"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Churned"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Customer"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "a71ac6808bfcb4dde66e8f66099899f59e1e2a88",
+                              "componentName": "Style=Badge, Supporting text=False, State=Default",
+                              "text": "Customer"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "9338c23a217b0fe7a1402762b7d4564a50896c36",
+                              "componentName": "Text=True, Checkbox=False, Color=Gray",
+                              "text": "About"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Content curating app"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Design software"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Data prediction"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Productivity app"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Web app integrations"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Sales CRM"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "60ae06c5177bb335d4731a1c556228b84fa861f5",
+                              "componentName": "Style=Text, Supporting text=True, State=Default",
+                              "text": "Automation and workflow"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "9338c23a217b0fe7a1402762b7d4564a50896c36",
+                              "componentName": "Text=True, Checkbox=False, Color=Gray",
+                              "text": "Users"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+5"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+8"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+2"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+5"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+1"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+6"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b7815058f20917bde78766531daaaf3b215c5d12",
+                              "componentName": "Style=Avatar group, Supporting text=False, State=Default",
+                              "text": "+4"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "9338c23a217b0fe7a1402762b7d4564a50896c36",
+                              "componentName": "Text=True, Checkbox=False, Color=Gray",
+                              "text": "License use"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "6c511974bf212bbfead55ef6cde08536611f901b",
+                              "componentName": "Style=Progress bar, Supporting text=True, State=Default"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Column",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 0,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Table header cell",
+                              "type": "INSTANCE",
+                              "componentKey": "b4fff2c73775a1b721ba676d8aa360116bd64e75",
+                              "componentName": "Text=False, Checkbox=False, Color=Gray"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            },
+                            {
+                              "name": "Table cell",
+                              "type": "INSTANCE",
+                              "componentKey": "783274b6fd46517acd05fbe0bcaea3cde4829ed5",
+                              "componentName": "Style=Action icons, Supporting text=False, State=Default"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Pagination",
+                      "type": "INSTANCE",
+                      "componentKey": "5261cc6539a28cc1887ef6c0018843e612963aa7",
+                      "componentName": "Type=Card minimal center aligned, Shape=Square, Breakpoint=Desktop",
+                      "text": "Previous"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

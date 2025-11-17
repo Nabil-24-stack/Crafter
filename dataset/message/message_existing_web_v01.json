@@ -1,0 +1,377 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "e68a49f0be3549182334c9c7fbbb395acda646c8",
+      "componentName": "Open=False, Style=Simple, Breakpoint=Desktop",
+      "text": "Search"
+    },
+    {
+      "name": "Side panel",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 0,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "children": [
+        {
+          "name": "Card header",
+          "type": "INSTANCE",
+          "componentKey": "6887ecac4b3874c383d3264e925f59f0f5be294d",
+          "componentName": "Avatar=False, Breakpoint=Desktop",
+          "text": "Messages"
+        },
+        {
+          "name": "Search wrap",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 0,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 0,
+          "paddingBottom": 12,
+          "children": [
+            {
+              "name": "Select",
+              "type": "INSTANCE",
+              "componentKey": "ba1ed6a20b9be1a77b4a7a733f86c52bdd95e9f6",
+              "componentName": "Size=sm, Type=Search, State=Placeholder",
+              "text": "Search"
+            }
+          ]
+        },
+        {
+          "name": "_Message",
+          "type": "COMPONENT"
+        },
+        {
+          "name": "_Message",
+          "type": "INSTANCE",
+          "componentKey": "0255f2f06d53e5a07cfe7d6e1182b186ca9b75ce",
+          "componentName": "_Message",
+          "text": "Katherine Moss"
+        },
+        {
+          "name": "_Message",
+          "type": "INSTANCE",
+          "componentKey": "0255f2f06d53e5a07cfe7d6e1182b186ca9b75ce",
+          "componentName": "_Message",
+          "text": "Mollie Hall"
+        },
+        {
+          "name": "_Message",
+          "type": "INSTANCE",
+          "componentKey": "0255f2f06d53e5a07cfe7d6e1182b186ca9b75ce",
+          "componentName": "_Message",
+          "text": "Rosalee Melvin"
+        },
+        {
+          "name": "_Message",
+          "type": "INSTANCE",
+          "componentKey": "0255f2f06d53e5a07cfe7d6e1182b186ca9b75ce",
+          "componentName": "_Message",
+          "text": "Anaiah Whitten"
+        },
+        {
+          "name": "_Message",
+          "type": "INSTANCE",
+          "componentKey": "0255f2f06d53e5a07cfe7d6e1182b186ca9b75ce",
+          "componentName": "_Message",
+          "text": "Koray Okumus"
+        },
+        {
+          "name": "_Message",
+          "type": "INSTANCE",
+          "componentKey": "0255f2f06d53e5a07cfe7d6e1182b186ca9b75ce",
+          "componentName": "_Message",
+          "text": "Eva Bond"
+        }
+      ]
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 0,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "children": [
+        {
+          "name": "Card header",
+          "type": "INSTANCE",
+          "componentKey": "f0f159290671e05f5f664ad6b14bc141f59ca960",
+          "componentName": "Avatar=True, Breakpoint=Desktop",
+          "text": "Katherine Moss"
+        },
+        {
+          "name": "Container",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 24,
+          "paddingRight": 24,
+          "paddingTop": 0,
+          "paddingBottom": 24,
+          "children": [
+            {
+              "name": "Content divider",
+              "type": "INSTANCE",
+              "componentKey": "6a8a336578cbf1f0ffe42461b47cb8ddddfc9987",
+              "componentName": "Type=Text, Style=Single line",
+              "text": "Thursday"
+            },
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 16,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                      "componentName": "Type=Message, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                      "componentName": "Type=Message, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "e87e41a7333836d96e5b8e550bb2e32abe7f8a94",
+                      "componentName": "Type=Link preview, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "f959e5d759c46ad9effb73910fb9a7b733245094",
+                      "componentName": "Type=File, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 32,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "765c70a4fd6242bf30cd64b3de9bd76976de2551",
+                      "componentName": "Type=Message, Sent=True, Actions panel=True",
+                      "text": "You"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                      "componentName": "Type=Message, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Content divider",
+              "type": "INSTANCE",
+              "componentKey": "6a8a336578cbf1f0ffe42461b47cb8ddddfc9987",
+              "componentName": "Type=Text, Style=Single line",
+              "text": "Today"
+            },
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 16,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "7ee973b0709ea4a5459a4b07482ebb31019ab62a",
+                      "componentName": "Type=Audio, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 32,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "ac629f17e57a8b6fefa20ab71bc8cfe0993cd410",
+                      "componentName": "Type=Message, Sent=True, Actions panel=False",
+                      "text": "You"
+                    }
+                  ]
+                },
+                {
+                  "name": "Row",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Message",
+                      "type": "INSTANCE",
+                      "componentKey": "9707c37f764f5ce91032e2c1d7f758b7c5a46297",
+                      "componentName": "Type=Writing, Sent=False, Actions panel=False",
+                      "text": "Katherine Moss"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Message input",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 0,
+          "paddingLeft": 24,
+          "paddingRight": 24,
+          "paddingTop": 0,
+          "paddingBottom": 20,
+          "children": [
+            {
+              "name": "Message action",
+              "type": "INSTANCE",
+              "componentKey": "4deb7a6de1c6bd62e08212bf494a71930554cc5d",
+              "componentName": "Type=Textarea input",
+              "text": "Description"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,467 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "2d50862d50cda5f7d656c3fc9c394b65f8dddc74",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Desktop",
+      "text": "Search"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 24,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "a6824f25327d0afaa3bcb424e3340e99b3516543",
+                  "componentName": "Style=Simple, Breakpoint=Desktop",
+                  "text": "Settings"
+                },
+                {
+                  "name": "Tabs and filters",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Button group",
+                      "type": "INSTANCE",
+                      "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                      "componentName": "Icon=False",
+                      "text": "12 months"
+                    },
+                    {
+                      "name": "Actions",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 12,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Date picker dropdown",
+                          "type": "INSTANCE",
+                          "componentKey": "c620fe3d24cd374b7700c5ea49d075eb53ab78de",
+                          "componentName": "Opened=False, Type=Dual dates, State=Placeholder, Breakpoint=Desktop",
+                          "text": "Select dates"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "bf0bb5f515f883f430b562d33f2f089b6b84c630",
+                          "componentName": "Size=md, Hierarchy=Secondary, State=Default, Icon only=False",
+                          "text": "Filters"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Metric group",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 24,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Metric item",
+                      "type": "INSTANCE",
+                      "componentKey": "801a01810d4eaaa8c5b7a03155cf004236c40a52",
+                      "componentName": "Actions=False, Type=Chart 01, Breakpoint=Desktop",
+                      "text": "Users"
+                    },
+                    {
+                      "name": "Metric item",
+                      "type": "INSTANCE",
+                      "componentKey": "801a01810d4eaaa8c5b7a03155cf004236c40a52",
+                      "componentName": "Actions=False, Type=Chart 01, Breakpoint=Desktop",
+                      "text": "Sessions"
+                    },
+                    {
+                      "name": "Metric item",
+                      "type": "INSTANCE",
+                      "componentKey": "801a01810d4eaaa8c5b7a03155cf004236c40a52",
+                      "componentName": "Actions=False, Type=Chart 01, Breakpoint=Desktop",
+                      "text": "Session duration"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Card",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 24,
+                      "paddingRight": 24,
+                      "paddingTop": 24,
+                      "paddingBottom": 24,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                          "text": "Active users right now"
+                        },
+                        {
+                          "name": "Map and data",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 64,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Map wrap",
+                              "type": "FRAME",
+                              "layoutMode": "NONE",
+                              "itemSpacing": 0,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "_Vector map",
+                                  "type": "INSTANCE",
+                                  "componentKey": "ffaaa2d832f4bdaf0d1b1760430a5e535d94e2db",
+                                  "componentName": "_Vector map"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "f76e20481f504ea48f35d5a663a86799ab21b3a0",
+                                  "componentName": "State=Hover",
+                                  "text": "Melbourne, AUS"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                },
+                                {
+                                  "name": "_Map location marker",
+                                  "type": "INSTANCE",
+                                  "componentKey": "cbe226a7e6f91156579f94d2d5810522c72bb73b",
+                                  "componentName": "State=Default"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Sidebar",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 20,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Number",
+                                  "type": "TEXT",
+                                  "text": "10.8k"
+                                },
+                                {
+                                  "name": "Countries",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 12,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "_Country",
+                                      "type": "COMPONENT"
+                                    },
+                                    {
+                                      "name": "_Country",
+                                      "type": "INSTANCE",
+                                      "componentKey": "befcd998c53ca035c0ade872ca171d0fd2b2161e",
+                                      "componentName": "_Country",
+                                      "text": "India"
+                                    },
+                                    {
+                                      "name": "_Country",
+                                      "type": "INSTANCE",
+                                      "componentKey": "befcd998c53ca035c0ade872ca171d0fd2b2161e",
+                                      "componentName": "_Country",
+                                      "text": "United Kingdom"
+                                    },
+                                    {
+                                      "name": "_Country",
+                                      "type": "INSTANCE",
+                                      "componentKey": "befcd998c53ca035c0ade872ca171d0fd2b2161e",
+                                      "componentName": "_Country",
+                                      "text": "Australia"
+                                    },
+                                    {
+                                      "name": "_Country",
+                                      "type": "INSTANCE",
+                                      "componentKey": "befcd998c53ca035c0ade872ca171d0fd2b2161e",
+                                      "componentName": "_Country",
+                                      "text": "Canada"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Card",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 24,
+                      "paddingRight": 24,
+                      "paddingTop": 24,
+                      "paddingBottom": 24,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                          "text": "How do you acquire users?"
+                        },
+                        {
+                          "name": "Charts",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Line and bar chart",
+                              "type": "INSTANCE",
+                              "componentKey": "8942389388dc2b28e417d23e37ef4c61741d9ed5",
+                              "componentName": "Legend=False, Axis labels=False, Chart style=Bar, Breakpoint=Desktop",
+                              "text": "Jan"
+                            },
+                            {
+                              "name": "Pie chart",
+                              "type": "INSTANCE",
+                              "componentKey": "d28079dafe9ec52180f5a13ebbf6b465dea85594",
+                              "componentName": "Size=sm, Legend=True",
+                              "text": "Organic"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2107 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "f7cbb00f3475713d6bf2ab3a41d757fa0940a4bb",
+      "componentName": "Open=False, Style=Simple, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                },
+                {
+                  "name": "Horizontal tabs",
+                  "type": "INSTANCE",
+                  "componentKey": "096df379c3c3b313de3bb276bacc5594d3635bbb",
+                  "componentName": "Type=Button border, Size=sm, Full width=False, Breakpoint=Mobile",
+                  "text": "Team member"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Appearance"
+                },
+                {
+                  "name": "Form",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Company logo"
+                        },
+                        {
+                          "name": "Avatar and actions",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Avatar",
+                              "type": "INSTANCE",
+                              "componentKey": "04fd8b71120ea158b7643103940e2620a1a32542",
+                              "componentName": "Size=2xl, Placeholder=False, Text=False, Status icon=False"
+                            },
+                            {
+                              "name": "Actions",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 16,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Buttons/Button",
+                                  "type": "INSTANCE",
+                                  "componentKey": "08a8aa51a09c788d0375b95b9ecb17c4dc299918",
+                                  "componentName": "Size=sm, Hierarchy=Secondary, State=Default, Icon only=False",
+                                  "text": "Replace logo"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Brand color"
+                        },
+                        {
+                          "name": "Color picker",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Options",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 8,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Custom option",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Text",
+                                  "type": "TEXT",
+                                  "text": "Custom"
+                                },
+                                {
+                                  "name": "Color",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Input field",
+                                  "type": "INSTANCE",
+                                  "componentKey": "388f128f0c410eb25011b4cb77f82cb653d7708b",
+                                  "componentName": "Size=sm, Type=Default, Destructive=False, State=Filled",
+                                  "text": "Email"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Brand color"
+                        },
+                        {
+                          "name": "Cards",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Card and text",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Card",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Card inner light mode",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Background",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Lines",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Screen",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Nav",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Controls",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "HORIZONTAL",
+                                                  "itemSpacing": 2.5,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Close",
+                                                      "type": "ELLIPSE"
+                                                    },
+                                                    {
+                                                      "name": "Maximise",
+                                                      "type": "ELLIPSE"
+                                                    },
+                                                    {
+                                                      "name": "Minimise",
+                                                      "type": "ELLIPSE"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Section",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Chart",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Background",
+                                                      "type": "GROUP"
+                                                    },
+                                                    {
+                                                      "name": "Line",
+                                                      "type": "VECTOR"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Section",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Supporting text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Heading",
+                                              "type": "TEXT",
+                                              "text": "Your dashboard"
+                                            },
+                                            {
+                                              "name": "Actions",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 3.125,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                },
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Sidebar",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Supporting text",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                },
+                                                {
+                                                  "name": "Actions",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "VERTICAL",
+                                                  "itemSpacing": 3.75,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "Card inner dark mode",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Background",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Lines",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Screen",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Nav",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Controls",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "HORIZONTAL",
+                                                  "itemSpacing": 2.5,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Close",
+                                                      "type": "ELLIPSE"
+                                                    },
+                                                    {
+                                                      "name": "Maximise",
+                                                      "type": "ELLIPSE"
+                                                    },
+                                                    {
+                                                      "name": "Minimise",
+                                                      "type": "ELLIPSE"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Section",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Chart",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Background",
+                                                      "type": "GROUP"
+                                                    },
+                                                    {
+                                                      "name": "Line",
+                                                      "type": "VECTOR"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Section",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Supporting text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Heading",
+                                              "type": "TEXT",
+                                              "text": "Your dashboard"
+                                            },
+                                            {
+                                              "name": "Actions",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 3.125,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                },
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Sidebar",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Supporting text",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                },
+                                                {
+                                                  "name": "Actions",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "VERTICAL",
+                                                  "itemSpacing": 3.75,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "Checkbox",
+                                      "type": "INSTANCE",
+                                      "componentKey": "163386f3e4b550b31f3d9bda1ad468184edf5900",
+                                      "componentName": "Checked=True, Indeterminate=False, Size=md, Type=Radio, Text=False, State=Default"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Text",
+                                  "type": "TEXT",
+                                  "text": "System preference"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Card and text",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Card",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Card inner light mode",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Background",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Lines",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Line",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Screen",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Nav",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Controls",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "HORIZONTAL",
+                                                  "itemSpacing": 2.5,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Close",
+                                                      "type": "ELLIPSE"
+                                                    },
+                                                    {
+                                                      "name": "Maximise",
+                                                      "type": "ELLIPSE"
+                                                    },
+                                                    {
+                                                      "name": "Minimise",
+                                                      "type": "ELLIPSE"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Section",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Chart",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Background",
+                                                      "type": "GROUP"
+                                                    },
+                                                    {
+                                                      "name": "Line",
+                                                      "type": "VECTOR"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Section",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Supporting text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Heading",
+                                              "type": "TEXT",
+                                              "text": "Your dashboard"
+                                            },
+                                            {
+                                              "name": "Actions",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 3.125,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                },
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Sidebar",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Supporting text",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "NONE",
+                                                  "itemSpacing": 0,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": []
+                                                },
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                },
+                                                {
+                                                  "name": "Actions",
+                                                  "type": "FRAME",
+                                                  "layoutMode": "VERTICAL",
+                                                  "itemSpacing": 3.75,
+                                                  "paddingLeft": 0,
+                                                  "paddingRight": 0,
+                                                  "paddingTop": 0,
+                                                  "paddingBottom": 0,
+                                                  "children": [
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    },
+                                                    {
+                                                      "name": "Action",
+                                                      "type": "RECTANGLE"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Text",
+                                  "type": "TEXT",
+                                  "text": "Light mode"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Transparent sidebar"
+                        },
+                        {
+                          "name": "Toggle",
+                          "type": "INSTANCE",
+                          "componentKey": "27e0b79e5477f6ac423f175fb35cf67e712c5923",
+                          "componentName": "Type=Default, Pressed=True, Size=md, Text=False, State=Default"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Language"
+                        },
+                        {
+                          "name": "Select",
+                          "type": "INSTANCE",
+                          "componentKey": "2c843ff23f1c394efb7e6d45907a35519ed52ea0",
+                          "componentName": "Size=sm, Type=Icon leading, State=Default",
+                          "text": "Team member"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Divider",
+                      "type": "RECTANGLE"
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section label",
+                          "type": "INSTANCE",
+                          "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                          "componentName": "Size=sm, Actions=False",
+                          "text": "Banner appearance"
+                        },
+                        {
+                          "name": "Cards",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Card and text",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Card",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Background",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Lines",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Fill",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "Screen",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Nav",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Controls",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 2.5,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Close",
+                                                  "type": "ELLIPSE"
+                                                },
+                                                {
+                                                  "name": "Maximise",
+                                                  "type": "ELLIPSE"
+                                                },
+                                                {
+                                                  "name": "Minimise",
+                                                  "type": "ELLIPSE"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Section",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Mockup",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Actions",
+                                          "type": "FRAME",
+                                          "layoutMode": "HORIZONTAL",
+                                          "itemSpacing": 3.125,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            },
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Supporting text",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Heading",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Banner",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Supporting text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            },
+                                            {
+                                              "name": "Actions",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 2.5,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "X close",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Icon",
+                                                  "type": "VECTOR"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "iPhone",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "iPhone mockup",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Background",
+                                              "type": "VECTOR"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Logo",
+                                          "type": "RECTANGLE"
+                                        },
+                                        {
+                                          "name": "Banner",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            },
+                                            {
+                                              "name": "Text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "X close",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Icon",
+                                                  "type": "VECTOR"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Icon",
+                                              "type": "RECTANGLE"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Text and supporting text",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Text",
+                                      "type": "TEXT",
+                                      "text": "Default"
+                                    },
+                                    {
+                                      "name": "Supporting text",
+                                      "type": "TEXT",
+                                      "text": "Default solid brand color."
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Card and text",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Card",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Background",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Lines",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Fill",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Line",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "Screen",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "Nav",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Controls",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 2.5,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Close",
+                                                  "type": "ELLIPSE"
+                                                },
+                                                {
+                                                  "name": "Maximise",
+                                                  "type": "ELLIPSE"
+                                                },
+                                                {
+                                                  "name": "Minimise",
+                                                  "type": "ELLIPSE"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Section",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Mockup",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Actions",
+                                          "type": "FRAME",
+                                          "layoutMode": "HORIZONTAL",
+                                          "itemSpacing": 3.125,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            },
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Supporting text",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Heading",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "Banner",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Supporting text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            },
+                                            {
+                                              "name": "Actions",
+                                              "type": "FRAME",
+                                              "layoutMode": "HORIZONTAL",
+                                              "itemSpacing": 2.5,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Action",
+                                                  "type": "RECTANGLE"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "X close",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Icon",
+                                                  "type": "VECTOR"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "iPhone",
+                                      "type": "FRAME",
+                                      "layoutMode": "NONE",
+                                      "itemSpacing": 0,
+                                      "paddingLeft": 0,
+                                      "paddingRight": 0,
+                                      "paddingTop": 0,
+                                      "paddingBottom": 0,
+                                      "children": [
+                                        {
+                                          "name": "iPhone mockup",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Background",
+                                              "type": "VECTOR"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "Logo",
+                                          "type": "RECTANGLE"
+                                        },
+                                        {
+                                          "name": "Banner",
+                                          "type": "FRAME",
+                                          "layoutMode": "NONE",
+                                          "itemSpacing": 0,
+                                          "paddingLeft": 0,
+                                          "paddingRight": 0,
+                                          "paddingTop": 0,
+                                          "paddingBottom": 0,
+                                          "children": [
+                                            {
+                                              "name": "Action",
+                                              "type": "RECTANGLE"
+                                            },
+                                            {
+                                              "name": "Text",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": []
+                                            },
+                                            {
+                                              "name": "X close",
+                                              "type": "FRAME",
+                                              "layoutMode": "NONE",
+                                              "itemSpacing": 0,
+                                              "paddingLeft": 0,
+                                              "paddingRight": 0,
+                                              "paddingTop": 0,
+                                              "paddingBottom": 0,
+                                              "children": [
+                                                {
+                                                  "name": "Icon",
+                                                  "type": "VECTOR"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "Icon",
+                                              "type": "RECTANGLE"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "Checkbox",
+                                      "type": "INSTANCE",
+                                      "componentKey": "163386f3e4b550b31f3d9bda1ad468184edf5900",
+                                      "componentName": "Checked=True, Indeterminate=False, Size=md, Type=Radio, Text=False, State=Default"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Text and supporting text",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Text",
+                                      "type": "TEXT",
+                                      "text": "Simplified"
+                                    },
+                                    {
+                                      "name": "Supporting text",
+                                      "type": "TEXT",
+                                      "text": "Minimal and simplified."
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Section footer",
+                      "type": "INSTANCE",
+                      "componentKey": "fe9c4a65ea0154dc9338ab3debf37293f6b0dfee",
+                      "componentName": "Type=Section, Button group=False, Breakpoint=Mobile",
+                      "text": "Reset"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

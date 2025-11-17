@@ -1,0 +1,661 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "2d50862d50cda5f7d656c3fc9c394b65f8dddc74",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Desktop",
+      "text": "Search"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "a6824f25327d0afaa3bcb424e3340e99b3516543",
+                  "componentName": "Style=Simple, Breakpoint=Desktop",
+                  "text": "Settings"
+                },
+                {
+                  "name": "Tabs and filters",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Button group",
+                      "type": "INSTANCE",
+                      "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                      "componentName": "Icon=False",
+                      "text": "12 months"
+                    },
+                    {
+                      "name": "Actions",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 12,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Date picker dropdown",
+                          "type": "INSTANCE",
+                          "componentKey": "c620fe3d24cd374b7700c5ea49d075eb53ab78de",
+                          "componentName": "Opened=False, Type=Dual dates, State=Placeholder, Breakpoint=Desktop",
+                          "text": "Select dates"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "bf0bb5f515f883f430b562d33f2f089b6b84c630",
+                          "componentName": "Size=md, Hierarchy=Secondary, State=Default, Icon only=False",
+                          "text": "Filters"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 32,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Heading and chart",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 32,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Heading and number",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Heading",
+                          "type": "TEXT",
+                          "text": "MRR"
+                        },
+                        {
+                          "name": "Number and badge",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Number and $",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 2,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "$ wrap",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 2,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "$",
+                                      "type": "TEXT",
+                                      "text": "$"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Number",
+                                  "type": "TEXT",
+                                  "text": "18,880"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "_Change",
+                              "type": "INSTANCE",
+                              "componentKey": "c3e7dc9c7754874bf8095639c41d1593ee02f179",
+                              "componentName": "Type=02, Trend=Positive",
+                              "text": "7.4%"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Line and bar chart",
+                      "type": "INSTANCE",
+                      "componentKey": "b21643bff73a9006bae73491822ce6502b582500",
+                      "componentName": "Legend=False, Axis labels=False, Chart style=Line, Breakpoint=Desktop",
+                      "text": "Jan"
+                    }
+                  ]
+                },
+                {
+                  "name": "Metrics",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Heading and number",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Heading",
+                          "type": "TEXT",
+                          "text": "Total members"
+                        },
+                        {
+                          "name": "Number and badge",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Number",
+                              "type": "TEXT",
+                              "text": "4,862"
+                            },
+                            {
+                              "name": "_Change",
+                              "type": "INSTANCE",
+                              "componentKey": "c3e7dc9c7754874bf8095639c41d1593ee02f179",
+                              "componentName": "Type=02, Trend=Positive",
+                              "text": "9.2%"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Heading and number",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Heading",
+                          "type": "TEXT",
+                          "text": "Paid members"
+                        },
+                        {
+                          "name": "Number and badge",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Number",
+                              "type": "TEXT",
+                              "text": "2,671"
+                            },
+                            {
+                              "name": "_Change",
+                              "type": "INSTANCE",
+                              "componentKey": "c3e7dc9c7754874bf8095639c41d1593ee02f179",
+                              "componentName": "Type=02, Trend=Positive",
+                              "text": "6.6%"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Heading and number",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Heading",
+                          "type": "TEXT",
+                          "text": "Email open rate"
+                        },
+                        {
+                          "name": "Number and badge",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Number",
+                              "type": "TEXT",
+                              "text": "82%"
+                            },
+                            {
+                              "name": "_Change",
+                              "type": "INSTANCE",
+                              "componentKey": "c3e7dc9c7754874bf8095639c41d1593ee02f179",
+                              "componentName": "Type=02, Trend=Positive",
+                              "text": "8.1%"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                  "text": "Start creating content"
+                },
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 32,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 32,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "CTAs",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 24,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "CTA",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 20,
+                              "paddingRight": 20,
+                              "paddingTop": 20,
+                              "paddingBottom": 20,
+                              "children": [
+                                {
+                                  "name": "Featured icon",
+                                  "type": "INSTANCE",
+                                  "componentKey": "f1a4ceb4521cb5155cff20a328e1803fc1b0bcd0",
+                                  "componentName": "Size=lg, Color=Gray, Type=Modern"
+                                },
+                                {
+                                  "name": "Text and supporting text",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 2,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Text",
+                                      "type": "TEXT",
+                                      "text": "Create your first member"
+                                    },
+                                    {
+                                      "name": "Supporting text",
+                                      "type": "TEXT",
+                                      "text": "Add yourself or import from CSV"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "CTA",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 20,
+                              "paddingRight": 20,
+                              "paddingTop": 20,
+                              "paddingBottom": 20,
+                              "children": [
+                                {
+                                  "name": "Featured icon",
+                                  "type": "INSTANCE",
+                                  "componentKey": "f1a4ceb4521cb5155cff20a328e1803fc1b0bcd0",
+                                  "componentName": "Size=lg, Color=Gray, Type=Modern"
+                                },
+                                {
+                                  "name": "Text and supporting text",
+                                  "type": "FRAME",
+                                  "layoutMode": "VERTICAL",
+                                  "itemSpacing": 2,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Text",
+                                      "type": "TEXT",
+                                      "text": "Create a new post"
+                                    },
+                                    {
+                                      "name": "Supporting text",
+                                      "type": "TEXT",
+                                      "text": "Dive into the editor and start creating"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Posts",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 24,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Section header",
+                              "type": "INSTANCE",
+                              "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                              "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                              "text": "Recent posts"
+                            },
+                            {
+                              "name": "Content",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 24,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Blog post card",
+                                  "type": "INSTANCE",
+                                  "componentKey": "f8c3e4bff5488032e5a82a5f8a63872a8eeb9046",
+                                  "componentName": "Type=Simple 03, Orientation=Vertical, Breakpoint=Desktop",
+                                  "text": "Olivia Rhye • 20 Jan 2025"
+                                },
+                                {
+                                  "name": "Blog post card",
+                                  "type": "INSTANCE",
+                                  "componentKey": "f8c3e4bff5488032e5a82a5f8a63872a8eeb9046",
+                                  "componentName": "Type=Simple 03, Orientation=Vertical, Breakpoint=Desktop",
+                                  "text": "Phoenix Baker • 19 Jan 2025"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 24,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Heading",
+                          "type": "TEXT",
+                          "text": "Top members"
+                        },
+                        {
+                          "name": "Activity feed",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Phoenix Baker"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Lana Steiner"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Demi Wikinson"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Candice Wu"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Natali Craig"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Orlando Diggs"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Drew Cano"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Kate Morrison"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Koray Okumus"
+                            },
+                            {
+                              "name": "_Feed item base",
+                              "type": "INSTANCE",
+                              "componentKey": "482713b0f43b91ce6d6a5515c73e7acbd070d1e5",
+                              "componentName": "Size=sm, Supporting item=False, Connector=False",
+                              "text": "Ava Wright"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

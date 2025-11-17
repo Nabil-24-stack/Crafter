@@ -1,0 +1,357 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "47b14b39c2ad04ff19e1cabff1e24516abfd1827",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Text and tabs",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Text and percentage",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Text",
+                          "type": "TEXT",
+                          "text": "Site traffic"
+                        },
+                        {
+                          "name": "Percentage",
+                          "type": "TEXT",
+                          "text": "+104%"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Tabs and button",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 12,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Horizontal tabs",
+                          "type": "INSTANCE",
+                          "componentKey": "b61c1702f377e3a9542ab9030d201137b146c77a",
+                          "componentName": "Type=Button minimal, Size=sm, Full width=False, Breakpoint=Desktop",
+                          "text": "12m"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "08a8aa51a09c788d0375b95b9ecb17c4dc299918",
+                          "componentName": "Size=sm, Hierarchy=Secondary, State=Default, Icon only=False",
+                          "text": "Filters"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Line and bar chart",
+                  "type": "INSTANCE",
+                  "componentKey": "b43bdd89e589bad1c94b0987301d56a6f1499be7",
+                  "componentName": "Legend=False, Axis labels=False, Chart style=Bar, Breakpoint=Mobile",
+                  "text": "Jan"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "eb32cbd7b4f7b089587a1b04cd8644127741e32c",
+                  "componentName": "Tabs=False, Type=Search, Breakpoint=Mobile",
+                  "text": "Recently active"
+                }
+              ]
+            },
+            {
+              "name": "Table",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 0,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Column",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Table header cell",
+                          "type": "INSTANCE",
+                          "componentKey": "98e025f4f2a11747d805a53f0a30e03739cefec9",
+                          "componentName": "Size=md, Text=True, Checkbox=True",
+                          "text": "3 selected"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                          "componentName": "Type=Avatar, Size=md, State=Default",
+                          "text": "Lily-Rose Chedjou"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "820ae760c4e45699fa6e65a2bf294bc566cf323a",
+                          "componentName": "Type=Avatar, Size=md, State=Hover/selected",
+                          "text": "Caitlyn King"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "820ae760c4e45699fa6e65a2bf294bc566cf323a",
+                          "componentName": "Type=Avatar, Size=md, State=Hover/selected",
+                          "text": "Fleur Cook"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                          "componentName": "Type=Avatar, Size=md, State=Default",
+                          "text": "Marco Kelly"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "820ae760c4e45699fa6e65a2bf294bc566cf323a",
+                          "componentName": "Type=Avatar, Size=md, State=Hover/selected",
+                          "text": "Lulu Meyers"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                          "componentName": "Type=Avatar, Size=md, State=Default",
+                          "text": "Mikey Lawrence"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "2414274bd714f32f212293ea451b08fe4751bcce",
+                          "componentName": "Type=Avatar, Size=md, State=Default",
+                          "text": "Freya Browning"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Column",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Table header cell",
+                          "type": "INSTANCE",
+                          "componentKey": "acec65a7b42eb89ca60964c93e43baa0ee80a24e",
+                          "componentName": "Size=md, Text=False, Checkbox=False"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "5536bac3e2cd53a528b1d2b85ea984b9aca4e147",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Default"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "189b93ece894c4901890630746eab505b1c1af08",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Hover/selected"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "189b93ece894c4901890630746eab505b1c1af08",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Hover/selected"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "5536bac3e2cd53a528b1d2b85ea984b9aca4e147",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Default"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "189b93ece894c4901890630746eab505b1c1af08",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Hover/selected"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "5536bac3e2cd53a528b1d2b85ea984b9aca4e147",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Default"
+                        },
+                        {
+                          "name": "Table cell",
+                          "type": "INSTANCE",
+                          "componentKey": "5536bac3e2cd53a528b1d2b85ea984b9aca4e147",
+                          "componentName": "Type=Action dropdown icon, Size=md, State=Default"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Pagination",
+                  "type": "INSTANCE",
+                  "componentKey": "e7343c9928b1e32cf8e5c85bf713f68b62d141a0",
+                  "componentName": "Type=Card default, Shape=Square, Breakpoint=Mobile",
+                  "text": "Page 1 of 10"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

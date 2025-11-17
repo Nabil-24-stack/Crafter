@@ -1,0 +1,338 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "HORIZONTAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "627278a85c432cb1eb9a1eb6d212129ee6c44918",
+      "componentName": "Open=False, Style=Slim, Breakpoint=Desktop"
+    },
+    {
+      "name": "Main wrap",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 0,
+      "paddingLeft": 4,
+      "paddingRight": 0,
+      "paddingTop": 8,
+      "paddingBottom": 0,
+      "children": [
+        {
+          "name": "Main",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 32,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 32,
+          "paddingBottom": 48,
+          "children": [
+            {
+              "name": "Header section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Container",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 32,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Page header",
+                      "type": "INSTANCE",
+                      "componentKey": "a6824f25327d0afaa3bcb424e3340e99b3516543",
+                      "componentName": "Style=Simple, Breakpoint=Desktop",
+                      "text": "Settings"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Container",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 48,
+                  "paddingLeft": 32,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                          "text": "Overview"
+                        },
+                        {
+                          "name": "Large tabs",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 16,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "_Large tab",
+                              "type": "COMPONENT"
+                            },
+                            {
+                              "name": "_Large tab",
+                              "type": "INSTANCE",
+                              "componentKey": "1233f2e3f3c28307decfb475aa8d9df859a6be7b",
+                              "componentName": "_Large tab",
+                              "text": "Sessions"
+                            },
+                            {
+                              "name": "_Large tab",
+                              "type": "INSTANCE",
+                              "componentKey": "1233f2e3f3c28307decfb475aa8d9df859a6be7b",
+                              "componentName": "_Large tab",
+                              "text": "Bounce rate"
+                            },
+                            {
+                              "name": "_Large tab",
+                              "type": "INSTANCE",
+                              "componentKey": "1233f2e3f3c28307decfb475aa8d9df859a6be7b",
+                              "componentName": "_Large tab",
+                              "text": "Session duration"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Line and bar chart",
+                              "type": "INSTANCE",
+                              "componentKey": "b21643bff73a9006bae73491822ce6502b582500",
+                              "componentName": "Legend=False, Axis labels=False, Chart style=Line, Breakpoint=Desktop",
+                              "text": "Jan"
+                            },
+                            {
+                              "name": "Section footer",
+                              "type": "INSTANCE",
+                              "componentKey": "897a6c811faaee0865b1bfc6156b902cedb0dc3e",
+                              "componentName": "Type=Section, Button group=True, Breakpoint=Desktop",
+                              "text": "12 months"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                          "text": "Traffic sources"
+                        },
+                        {
+                          "name": "Radar chart",
+                          "type": "INSTANCE",
+                          "componentKey": "e13834181a7d9448902e12ad5cedb7fee456afb2",
+                          "componentName": "Legend=False",
+                          "text": "1,000"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 0,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Divider",
+                  "type": "RECTANGLE"
+                }
+              ]
+            },
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Container",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 48,
+                  "paddingLeft": 32,
+                  "paddingRight": 32,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                          "text": "How do you acquire users?"
+                        },
+                        {
+                          "name": "Horizontal tabs",
+                          "type": "INSTANCE",
+                          "componentKey": "f1678ff992c7430776c863f47e927890d39668cf",
+                          "componentName": "Type=Button border, Size=sm, Full width=False, Breakpoint=Desktop",
+                          "text": "Traffic channel"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Line and bar chart",
+                              "type": "INSTANCE",
+                              "componentKey": "0d02d399b2bf5a84c01e780faa61ff08091943c0",
+                              "componentName": "Legend=Top, Axis labels=False, Chart style=Bar, Breakpoint=Desktop",
+                              "text": "Direct"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Section footer",
+                          "type": "INSTANCE",
+                          "componentKey": "897a6c811faaee0865b1bfc6156b902cedb0dc3e",
+                          "componentName": "Type=Section, Button group=True, Breakpoint=Desktop",
+                          "text": "12 months"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Section header",
+                          "type": "INSTANCE",
+                          "componentKey": "0638df4db6a3859ac7a1450b1368104f4bfbb3e3",
+                          "componentName": "Tabs=False, Type=Buttons, Breakpoint=Desktop",
+                          "text": "Sessions by country"
+                        },
+                        {
+                          "name": "Pie chart",
+                          "type": "INSTANCE",
+                          "componentKey": "83330def17888d392a5ac5915d56fab8ad3bcd9f",
+                          "componentName": "Size=lg, Legend=True",
+                          "text": "USA"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

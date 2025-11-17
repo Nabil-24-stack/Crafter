@@ -1,0 +1,385 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "f7cbb00f3475713d6bf2ab3a41d757fa0940a4bb",
+      "componentName": "Open=False, Style=Simple, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Page header",
+          "type": "INSTANCE",
+          "componentKey": "b26015b0c5fb2a974f7841ce519131756d74e1d5",
+          "componentName": "Style=Banner avatar, Breakpoint=Mobile",
+          "text": "Amélie Laurent"
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Header and about",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 24,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section header",
+                      "type": "INSTANCE",
+                      "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                      "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                      "text": "Experience"
+                    },
+                    {
+                      "name": "About",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Text and paragraph",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "About me"
+                            },
+                            {
+                              "name": "Paragraph",
+                              "type": "TEXT",
+                              "text": "I'm a Product Designer based in Melbourne, Australia. I enjoy working on product design, design systems, and Webflow projects, but I don't take myself too seriously.\nI’ve worked with some of the world’s most exciting companies, including Coinbase, Stripe, and Linear. I'm passionate about helping startups grow, improve their UX and customer experience, and to raise venture capital through good design.\nMy work has been featured on Typewolf, Mindsparkle Magazine, Webflow, Fonts In Use, CSS Winner, httpster, Siteinspire, and Best Website Gallery."
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "aaa35cdff84a693e7f25cdb5f6856b1eee177f1b",
+                          "componentName": "Size=md, Hierarchy=Link color, State=Default, Icon only=False",
+                          "text": "Read more"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Divider",
+                  "type": "RECTANGLE"
+                },
+                {
+                  "name": "Details",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 24,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Label and text",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Label",
+                          "type": "TEXT",
+                          "text": "Location"
+                        },
+                        {
+                          "name": "Text and icon",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "AU",
+                              "type": "INSTANCE",
+                              "componentKey": "0445265b2bf38fe3aef122b3ca482fa43da0edf2",
+                              "componentName": "AU"
+                            },
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Melbourne, Australia"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Label and text",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Label",
+                          "type": "TEXT",
+                          "text": "Website"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "39b45b34234f11df36b582691312269938f8993d",
+                          "componentName": "Size=lg, Hierarchy=Link color, State=Default, Icon only=False",
+                          "text": "amelielaurent.com"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Label and text",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Label",
+                          "type": "TEXT",
+                          "text": "Portfolio"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "39b45b34234f11df36b582691312269938f8993d",
+                          "componentName": "Size=lg, Hierarchy=Link color, State=Default, Icon only=False",
+                          "text": "@amelielaurent"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Label and text",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 8,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Label",
+                          "type": "TEXT",
+                          "text": "Email"
+                        },
+                        {
+                          "name": "Buttons/Button",
+                          "type": "INSTANCE",
+                          "componentKey": "39b45b34234f11df36b582691312269938f8993d",
+                          "componentName": "Size=lg, Hierarchy=Link color, State=Default, Icon only=False",
+                          "text": "hello@amelie.com"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Divider",
+                  "type": "RECTANGLE"
+                },
+                {
+                  "name": "Experience",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "_Job card mobile",
+                      "type": "COMPONENT"
+                    },
+                    {
+                      "name": "_Job card mobile",
+                      "type": "INSTANCE",
+                      "componentKey": "94a664dfc04a32077ca406315de19e4847a53170",
+                      "componentName": "_Job card mobile",
+                      "text": "Product Designer"
+                    },
+                    {
+                      "name": "_Job card mobile",
+                      "type": "INSTANCE",
+                      "componentKey": "94a664dfc04a32077ca406315de19e4847a53170",
+                      "componentName": "_Job card mobile",
+                      "text": "UX Designer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Container",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 32,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "2d088a570841b4f917662b3b0c02ac7613b1a53b",
+                  "componentName": "Tabs=True, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Projects"
+                },
+                {
+                  "name": "Projects",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Image",
+                      "type": "FRAME",
+                      "layoutMode": "NONE",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": []
+                    },
+                    {
+                      "name": "Image",
+                      "type": "FRAME",
+                      "layoutMode": "NONE",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": []
+                    },
+                    {
+                      "name": "Image",
+                      "type": "FRAME",
+                      "layoutMode": "NONE",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": []
+                    },
+                    {
+                      "name": "Image",
+                      "type": "FRAME",
+                      "layoutMode": "NONE",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

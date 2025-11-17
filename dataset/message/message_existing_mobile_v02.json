@@ -1,0 +1,462 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 0.9901961088180542,
+        "g": 0.9901961088180542,
+        "b": 0.9901961088180542
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "f7cbb00f3475713d6bf2ab3a41d757fa0940a4bb",
+      "componentName": "Open=False, Style=Simple, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "children": [
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 0,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Header",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": -32,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "paddingBottom": 20,
+              "children": [
+                {
+                  "name": "Image wrap",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 0,
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Image",
+                      "type": "FRAME",
+                      "layoutMode": "NONE",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Container",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 16,
+                  "paddingRight": 16,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Content",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Avatar and actions",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 24,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Avatar profile photo",
+                              "type": "INSTANCE",
+                              "componentKey": "5913cec7af88d6ef02ae5b47cb82e64d7b59c85a",
+                              "componentName": "Placeholder=False, Text=False, Size=md"
+                            },
+                            {
+                              "name": "Actions",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 12,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Buttons/Button",
+                                  "type": "INSTANCE",
+                                  "componentKey": "dd226144355907abaf202df2ce389927f372b89a",
+                                  "componentName": "Size=sm, Hierarchy=Secondary, State=Default, Icon only=True"
+                                },
+                                {
+                                  "name": "Buttons/Button",
+                                  "type": "INSTANCE",
+                                  "componentKey": "dd226144355907abaf202df2ce389927f372b89a",
+                                  "componentName": "Size=sm, Hierarchy=Secondary, State=Default, Icon only=True"
+                                },
+                                {
+                                  "name": "Buttons/Button",
+                                  "type": "INSTANCE",
+                                  "componentKey": "dd226144355907abaf202df2ce389927f372b89a",
+                                  "componentName": "Size=sm, Hierarchy=Secondary, State=Default, Icon only=True"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Text and more options",
+                          "type": "FRAME",
+                          "layoutMode": "HORIZONTAL",
+                          "itemSpacing": 8,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text and supporting text",
+                              "type": "FRAME",
+                              "layoutMode": "VERTICAL",
+                              "itemSpacing": 2,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Text and online indicator",
+                                  "type": "FRAME",
+                                  "layoutMode": "HORIZONTAL",
+                                  "itemSpacing": 8,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": [
+                                    {
+                                      "name": "Text",
+                                      "type": "TEXT",
+                                      "text": "Mollie Hall"
+                                    },
+                                    {
+                                      "name": "_Avatar online indicator",
+                                      "type": "INSTANCE",
+                                      "componentKey": "02e93fa7bac6b503e01225e6a0789bb5158c1d94",
+                                      "componentName": "Size=md, Online=True"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Supporting text",
+                                  "type": "TEXT",
+                                  "text": "mollie@untitledui.com"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Dropdown",
+                              "type": "INSTANCE",
+                              "componentKey": "fe3a98a64b59cb122977e925f386cef1c6ec9976",
+                              "componentName": "Type=Icon, Open=False"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 32,
+              "children": [
+                {
+                  "name": "Content divider",
+                  "type": "INSTANCE",
+                  "componentKey": "6a8a336578cbf1f0ffe42461b47cb8ddddfc9987",
+                  "componentName": "Type=Text, Style=Single line",
+                  "text": "Thursday"
+                },
+                {
+                  "name": "Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                          "componentName": "Type=Message, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                          "componentName": "Type=Message, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "f959e5d759c46ad9effb73910fb9a7b733245094",
+                          "componentName": "Type=File, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 32,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "ac629f17e57a8b6fefa20ab71bc8cfe0993cd410",
+                          "componentName": "Type=Message, Sent=True, Actions panel=False",
+                          "text": "You"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                          "componentName": "Type=Message, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Content divider",
+                  "type": "INSTANCE",
+                  "componentKey": "6a8a336578cbf1f0ffe42461b47cb8ddddfc9987",
+                  "componentName": "Type=Text, Style=Single line",
+                  "text": "Today"
+                },
+                {
+                  "name": "Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "d0d4e4a5668b62159c322bbc9a5132a6b9853f53",
+                          "componentName": "Type=Image, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "aa31db95878e0f1a865c5be21b48d403d973fb9c",
+                          "componentName": "Type=Message, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 32,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "765c70a4fd6242bf30cd64b3de9bd76976de2551",
+                          "componentName": "Type=Message, Sent=True, Actions panel=True",
+                          "text": "You"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 0,
+                      "paddingLeft": 0,
+                      "paddingRight": 32,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Message",
+                          "type": "INSTANCE",
+                          "componentKey": "9707c37f764f5ce91032e2c1d7f758b7c5a46297",
+                          "componentName": "Type=Writing, Sent=False, Actions panel=False",
+                          "text": "Mollie Hall"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Message input",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 12,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 16,
+              "paddingBottom": 16,
+              "children": [
+                {
+                  "name": "Message action",
+                  "type": "INSTANCE",
+                  "componentKey": "cb7b24dc10c8da5072ed1aa33c8f320541094783",
+                  "componentName": "Type=Minimal",
+                  "text": "Email"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

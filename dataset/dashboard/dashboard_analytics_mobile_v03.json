@@ -1,0 +1,306 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "a8af0c935088fa7b60cc26f87d209c38f5b9f349",
+      "componentName": "Open=False, Style=Slim, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Overview"
+                },
+                {
+                  "name": "Large tabs",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 16,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "_Large tab",
+                      "type": "INSTANCE",
+                      "componentKey": "1233f2e3f3c28307decfb475aa8d9df859a6be7b",
+                      "componentName": "_Large tab",
+                      "text": "Users"
+                    },
+                    {
+                      "name": "_Large tab",
+                      "type": "INSTANCE",
+                      "componentKey": "1233f2e3f3c28307decfb475aa8d9df859a6be7b",
+                      "componentName": "_Large tab",
+                      "text": "Sessions"
+                    },
+                    {
+                      "name": "_Large tab",
+                      "type": "INSTANCE",
+                      "componentKey": "1233f2e3f3c28307decfb475aa8d9df859a6be7b",
+                      "componentName": "_Large tab",
+                      "text": "Bounce rate"
+                    }
+                  ]
+                },
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Line and bar chart",
+                      "type": "INSTANCE",
+                      "componentKey": "73550153501ddfc70cfc3f2cd1a086de250e6823",
+                      "componentName": "Legend=False, Axis labels=False, Chart style=Line, Breakpoint=Mobile",
+                      "text": "Jan"
+                    },
+                    {
+                      "name": "Section footer",
+                      "type": "INSTANCE",
+                      "componentKey": "45c59f0751d05ad60b5d11998f437347e9e1e761",
+                      "componentName": "Type=Section, Button group=True, Breakpoint=Mobile",
+                      "text": "12m"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Traffic sources"
+                },
+                {
+                  "name": "Radar chart",
+                  "type": "INSTANCE",
+                  "componentKey": "e13834181a7d9448902e12ad5cedb7fee456afb2",
+                  "componentName": "Legend=False",
+                  "text": "1,000"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Sessions by country"
+                },
+                {
+                  "name": "Horizontal tabs",
+                  "type": "INSTANCE",
+                  "componentKey": "f1678ff992c7430776c863f47e927890d39668cf",
+                  "componentName": "Type=Button border, Size=sm, Full width=False, Breakpoint=Desktop",
+                  "text": "Traffic channel"
+                },
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Line and bar chart",
+                      "type": "INSTANCE",
+                      "componentKey": "b24e36c24db0aee70b2ceb96998acf53f18415bb",
+                      "componentName": "Legend=Top, Axis labels=False, Chart style=Bar, Breakpoint=Mobile",
+                      "text": "Direct"
+                    },
+                    {
+                      "name": "Section footer",
+                      "type": "INSTANCE",
+                      "componentKey": "45c59f0751d05ad60b5d11998f437347e9e1e761",
+                      "componentName": "Type=Section, Button group=True, Breakpoint=Mobile",
+                      "text": "12m"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section header",
+                  "type": "INSTANCE",
+                  "componentKey": "f2c7f52b3186935633c1bef9349cf6545c8c1d1e",
+                  "componentName": "Tabs=False, Type=Buttons, Breakpoint=Mobile",
+                  "text": "Sessions by country"
+                },
+                {
+                  "name": "Pie chart",
+                  "type": "INSTANCE",
+                  "componentKey": "233d3a6830fc0b869e1c1220df9fae4abfe942af",
+                  "componentName": "Size=md, Legend=True",
+                  "text": "USA"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

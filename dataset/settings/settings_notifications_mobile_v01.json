@@ -1,0 +1,410 @@
+{
+  "name": "Mobile",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Sidebar navigation",
+      "type": "INSTANCE",
+      "componentKey": "47b14b39c2ad04ff19e1cabff1e24516abfd1827",
+      "componentName": "Open=False, Style=Dual-tier, Breakpoint=Mobile"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 32,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 32,
+      "paddingBottom": 48,
+      "children": [
+        {
+          "name": "Header section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 20,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Page header",
+                  "type": "INSTANCE",
+                  "componentKey": "812c1be2fbe8fa3a2385eaf8c318d5a18ddd414c",
+                  "componentName": "Style=Simple, Breakpoint=Mobile",
+                  "text": "Back"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 16,
+              "paddingRight": 16,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section label",
+                      "type": "INSTANCE",
+                      "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                      "componentName": "Size=sm, Actions=False",
+                      "text": "General notifications"
+                    },
+                    {
+                      "name": "Rows",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 16,
+                      "children": [
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "I’m mentioned in a message"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Someone replies to any message"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "I’m assigned a task"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "A task is overdue"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "A task status is updated"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Divider",
+                  "type": "RECTANGLE"
+                },
+                {
+                  "name": "Content",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Section label",
+                      "type": "INSTANCE",
+                      "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                      "componentName": "Size=sm, Actions=False",
+                      "text": "Summary notifications"
+                    },
+                    {
+                      "name": "Rows",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 16,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 16,
+                      "children": [
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Daily summary"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Weekly summary"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Monthly summary"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Row",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 12,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Text",
+                              "type": "TEXT",
+                              "text": "Quarterly summary"
+                            },
+                            {
+                              "name": "Button group",
+                              "type": "INSTANCE",
+                              "componentKey": "be1ea46d40eafc2c2079c0fcd32395a81b60b965",
+                              "componentName": "Icon=False",
+                              "text": "None"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+{
+  "name": "Desktop",
+  "type": "FRAME",
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingLeft": 0,
+  "paddingRight": 0,
+  "paddingTop": 0,
+  "paddingBottom": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "cornerRadius": 0,
+  "children": [
+    {
+      "name": "Header navigation",
+      "type": "INSTANCE",
+      "componentKey": "d84f8f7ddcfcba813067e0eb90957f539080ec1f",
+      "componentName": "Open=True, Style=Dual-tier, Breakpoint=Desktop",
+      "text": "Home"
+    },
+    {
+      "name": "Main",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 48,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 96,
+      "children": [
+        {
+          "name": "Page header",
+          "type": "INSTANCE",
+          "componentKey": "9da2f123f349af1ad4b41b99b9fc234f8a7fc95f",
+          "componentName": "Style=Banner avatar, Breakpoint=Desktop",
+          "text": "Settings"
+        },
+        {
+          "name": "Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 32,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "children": [
+            {
+              "name": "Container",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 24,
+              "paddingLeft": 32,
+              "paddingRight": 32,
+              "paddingTop": 0,
+              "paddingBottom": 0,
+              "children": [
+                {
+                  "name": "Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 24,
+                  "paddingLeft": 0,
+                  "paddingRight": 0,
+                  "paddingTop": 0,
+                  "paddingBottom": 0,
+                  "children": [
+                    {
+                      "name": "Form",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 20,
+                      "paddingLeft": 0,
+                      "paddingRight": 0,
+                      "paddingTop": 0,
+                      "paddingBottom": 0,
+                      "children": [
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Input fields",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 24,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Input field",
+                                  "type": "INSTANCE",
+                                  "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                                  "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                                  "text": "First name"
+                                },
+                                {
+                                  "name": "Input field",
+                                  "type": "INSTANCE",
+                                  "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                                  "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                                  "text": "Last name"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Input field",
+                              "type": "INSTANCE",
+                              "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                              "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                              "text": "Email address"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Avatar and file upload",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 20,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Avatar",
+                                  "type": "INSTANCE",
+                                  "componentKey": "04fd8b71120ea158b7643103940e2620a1a32542",
+                                  "componentName": "Size=2xl, Placeholder=False, Text=False, Status icon=False"
+                                },
+                                {
+                                  "name": "File upload",
+                                  "type": "INSTANCE",
+                                  "componentKey": "2387b1030e6b004ebf5e723e5e3990d82f2b2e29",
+                                  "componentName": "Files queued=False, Type=Progress bar, Breakpoint=Desktop",
+                                  "text": "Click to upload"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Input field",
+                              "type": "INSTANCE",
+                              "componentKey": "4a99a47b5722ccc4a77ddecfe69c0fbaab0fa9f2",
+                              "componentName": "Size=md, Type=Default, Destructive=False, State=Filled",
+                              "text": "Role"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Select",
+                              "type": "INSTANCE",
+                              "componentKey": "e60a2f9d9699d0a451482bc031d35044ef96ba60",
+                              "componentName": "Size=md, Type=Icon leading, State=Default",
+                              "text": "Country"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 32,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Select",
+                              "type": "INSTANCE",
+                              "componentKey": "e60a2f9d9699d0a451482bc031d35044ef96ba60",
+                              "componentName": "Size=md, Type=Icon leading, State=Default",
+                              "text": "Timezone"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Frame 1",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Section label",
+                              "type": "INSTANCE",
+                              "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                              "componentName": "Size=sm, Actions=False",
+                              "text": "Your bio"
+                            },
+                            {
+                              "name": "Text editor",
+                              "type": "INSTANCE",
+                              "componentKey": "4b080d934d65649e24f3a0efbd698b0c1d8bc775",
+                              "componentName": "Type=Default, Size=md",
+                              "text": "Team member"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Divider",
+                          "type": "RECTANGLE"
+                        },
+                        {
+                          "name": "Content",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 20,
+                          "paddingLeft": 0,
+                          "paddingRight": 0,
+                          "paddingTop": 0,
+                          "paddingBottom": 0,
+                          "children": [
+                            {
+                              "name": "Section label",
+                              "type": "INSTANCE",
+                              "componentKey": "f80da2a5251af953b36b7332f5f54a1f98c5e207",
+                              "componentName": "Size=sm, Actions=False",
+                              "text": "Portfolio projects"
+                            },
+                            {
+                              "name": "Images",
+                              "type": "FRAME",
+                              "layoutMode": "HORIZONTAL",
+                              "itemSpacing": 20,
+                              "paddingLeft": 0,
+                              "paddingRight": 0,
+                              "paddingTop": 0,
+                              "paddingBottom": 0,
+                              "children": [
+                                {
+                                  "name": "Image",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Image",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Image",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                },
+                                {
+                                  "name": "Image",
+                                  "type": "FRAME",
+                                  "layoutMode": "NONE",
+                                  "itemSpacing": 0,
+                                  "paddingLeft": 0,
+                                  "paddingRight": 0,
+                                  "paddingTop": 0,
+                                  "paddingBottom": 0,
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "name": "File upload",
+                              "type": "INSTANCE",
+                              "componentKey": "2387b1030e6b004ebf5e723e5e3990d82f2b2e29",
+                              "componentName": "Files queued=False, Type=Progress bar, Breakpoint=Desktop",
+                              "text": "Click to upload"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Section footer",
+                      "type": "INSTANCE",
+                      "componentKey": "aa6a62626ba554524e2ba9d2b4b3b5ff0ed2658c",
+                      "componentName": "Type=Section, Button group=False, Breakpoint=Desktop",
+                      "text": "Learn more"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
