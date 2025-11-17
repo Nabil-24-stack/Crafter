@@ -677,6 +677,34 @@ function sanitizeLayoutJSON(layoutObj) {
     return layoutObj;
   }
 
+  // Normalize type to uppercase (fine-tuned model returns lowercase)
+  if (layoutObj.type) {
+    const typeUpper = layoutObj.type.toUpperCase();
+
+    // Map common types to Figma types
+    const typeMap = {
+      'FRAME': 'FRAME',
+      'TEXT': 'TEXT',
+      'RECTANGLE': 'RECTANGLE',
+      'COMPONENT_INSTANCE': 'COMPONENT_INSTANCE',
+      'INSTANCE': 'COMPONENT_INSTANCE',
+      'COMPONENT': 'COMPONENT_INSTANCE',
+      'IMAGE': 'RECTANGLE', // Images become rectangles (placeholders)
+      'LIST': 'FRAME', // Lists become frames
+      'CHART': 'FRAME', // Charts become frames
+      'BUTTON': 'COMPONENT_INSTANCE', // Buttons should be components
+      'INPUT': 'COMPONENT_INSTANCE', // Inputs should be components
+      'CARD': 'FRAME', // Cards become frames
+    };
+
+    const mappedType = typeMap[typeUpper] || 'FRAME'; // Default to FRAME
+
+    if (mappedType !== layoutObj.type) {
+      console.warn(`⚠️ Normalizing type "${layoutObj.type}" → "${mappedType}"`);
+      layoutObj.type = mappedType;
+    }
+  }
+
   // Fix missing or undefined name (required by Figma)
   if (!layoutObj.name || layoutObj.name === 'undefined') {
     // Generate a default name based on type
