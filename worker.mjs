@@ -784,40 +784,104 @@ function extractJSON(responseText) {
 }
 
 /**
- * Process a generate job
+ * Process a generate job with two-stage pipeline
  */
 async function processGenerateJob(job) {
   const { prompt, designSystem, model } = job.input;
 
-  // Determine which model to use
-  // Default to Together AI fine-tuned model if available, fallback to Claude
-  const useTogetherAI = model === 'together' ||
+  // Determine which approach to use
+  const useTwoStage = model === 'together' ||
     (!model && process.env.TOGETHER_API_KEY && process.env.TOGETHER_MODEL_CRAFTER_FT);
 
-  let aiResponse;
-  let responseText;
+  let layout;
+  let reasoning;
 
-  if (useTogetherAI) {
-    console.log('🤖 Using Together AI fine-tuned model for generation');
+  if (useTwoStage) {
+    console.log('🚀 Using two-stage pipeline: Together AI → Claude refinement');
 
-    // Use simplified prompt for fine-tuned model
-    const systemPrompt = buildSimplifiedSystemPrompt(designSystem);
-    const userPrompt = `Design a ${prompt.includes('web') || prompt.includes('mobile') ? '' : 'web '}screen for ${prompt}. Use a clean, production-ready layout with good hierarchy, spacing, and realistic text. Return only the JSON layout object.`;
+    // STAGE 1: Together AI generates rough layout structure
+    console.log('📝 Stage 1: Together AI generating rough layout...');
+    const togetherSystemPrompt = buildSimplifiedSystemPrompt(designSystem);
+    const togetherUserPrompt = `Design a ${prompt.includes('web') || prompt.includes('mobile') ? '' : 'web '}screen for ${prompt}. Focus on overall structure and hierarchy. Return only the JSON layout object.`;
 
+    let roughLayout;
     try {
-      aiResponse = await callTogetherAI(systemPrompt, userPrompt);
-      responseText = aiResponse.content[0]?.text || '{}';
+      const togetherResponse = await callTogetherAI(togetherSystemPrompt, togetherUserPrompt);
+      const togetherText = togetherResponse.content[0]?.text || '{}';
+
+      // Try to extract and parse Together AI's response
+      try {
+        const togetherJSON = extractJSON(togetherText);
+        roughLayout = JSON.parse(togetherJSON);
+        console.log('✅ Stage 1 complete: Together AI generated rough layout');
+      } catch (parseError) {
+        console.warn('⚠️ Together AI returned invalid JSON, using prompt only for Claude');
+        roughLayout = null;
+      }
     } catch (error) {
-      console.warn('⚠️ Together AI failed, falling back to Claude:', error.message);
-      // Fallback to Claude
-      const claudeSystemPrompt = buildSystemPrompt(designSystem);
-      const claudeUserPrompt = `User Request: ${prompt}
+      console.warn('⚠️ Together AI failed:', error.message);
+      roughLayout = null;
+    }
+
+    // STAGE 2: Claude refines the layout
+    console.log('🎨 Stage 2: Claude refining layout with design system...');
+    const claudeSystemPrompt = buildSystemPrompt(designSystem);
+
+    let claudeUserPrompt;
+    if (roughLayout) {
+      // Claude refines the rough layout from Together AI
+      claudeUserPrompt = `User Request: ${prompt}
+
+A rough layout structure was generated, but it needs refinement:
+${JSON.stringify(roughLayout, null, 2)}
+
+Please refine this layout as a senior designer:
+1. Fix any structural issues or invalid properties
+2. Apply the design system components properly (use correct componentKey values)
+3. Ensure strict Auto Layout rules are followed
+4. Use proper Figma property names (e.g., "name" not "id", "componentKey" not "component")
+5. Add proper spacing, padding, and visual hierarchy
+6. Use realistic, production-ready text content
+7. Ensure the layout matches the user's original request
+
+Return the refined layout as high-quality JSON following the schema provided.`;
+    } else {
+      // Together AI failed, Claude generates from scratch
+      claudeUserPrompt = `User Request: ${prompt}
 
 Please generate a Figma layout that fulfills this request using the available design system components. Return the layout as JSON following the schema provided.`;
-      aiResponse = await callClaude(claudeSystemPrompt, claudeUserPrompt);
-      responseText = aiResponse.content[0]?.text || '{}';
     }
+
+    const claudeResponse = await callClaude(claudeSystemPrompt, claudeUserPrompt);
+    const claudeText = claudeResponse.content[0]?.text || '{}';
+
+    // Check if we hit the token limit
+    if (claudeResponse.stop_reason === 'max_tokens' || claudeResponse.stop_reason === 'length') {
+      console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
+      console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+    }
+
+    // Extract and parse Claude's refined layout
+    const jsonText = extractJSON(claudeText);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonText);
+    } catch (error) {
+      console.error('❌ JSON parse error:', error.message);
+      console.error('Failed JSON length:', jsonText.length, 'characters');
+      console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
+      console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
+      throw new Error(`Failed to parse AI response: ${error.message}`);
+    }
+
+    layout = parsed.layout || parsed;
+    reasoning = parsed.reasoning || 'Generated with two-stage pipeline (Together AI + Claude)';
+
+    console.log('✅ Stage 2 complete: Claude refined the layout');
+
   } else {
+    // Single-stage: Claude only
     console.log('🧠 Using Claude Sonnet 4.5 for generation');
 
     const systemPrompt = buildSystemPrompt(designSystem);
@@ -825,45 +889,34 @@ Please generate a Figma layout that fulfills this request using the available de
 
 Please generate a Figma layout that fulfills this request using the available design system components. Return the layout as JSON following the schema provided.`;
 
-    aiResponse = await callClaude(systemPrompt, userPrompt);
-    responseText = aiResponse.content[0]?.text || '{}';
+    const aiResponse = await callClaude(systemPrompt, userPrompt);
+    const responseText = aiResponse.content[0]?.text || '{}';
+
+    // Check if we hit the token limit
+    if (aiResponse.stop_reason === 'max_tokens' || aiResponse.stop_reason === 'length') {
+      console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
+      console.warn('Usage:', JSON.stringify(aiResponse.usage));
+    }
+
+    // Extract and parse the layout JSON
+    const jsonText = extractJSON(responseText);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonText);
+    } catch (error) {
+      console.error('❌ JSON parse error:', error.message);
+      console.error('Failed JSON length:', jsonText.length, 'characters');
+      console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
+      console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
+      throw new Error(`Failed to parse AI response: ${error.message}`);
+    }
+
+    layout = parsed.layout || parsed;
+    reasoning = parsed.reasoning || 'Generated with Claude';
   }
 
-  // Check if we hit the token limit
-  if (aiResponse.stop_reason === 'max_tokens' || aiResponse.stop_reason === 'length') {
-    console.warn('⚠️ Warning: Model hit max_tokens limit. Response may be truncated.');
-    console.warn('Usage:', JSON.stringify(aiResponse.usage));
-  }
-
-  // Extract and parse the layout JSON
-  const jsonText = extractJSON(responseText);
-
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch (error) {
-    console.error('❌ JSON parse error:', error.message);
-    console.error('Failed JSON length:', jsonText.length, 'characters');
-    console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
-    console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
-    throw new Error(`Failed to parse AI response: ${error.message}`);
-  }
-
-  // Handle both formats: the fine-tuned model returns just the layout object
-  // Claude returns { layout, reasoning }
-  let layout;
-  let reasoning;
-
-  if (parsed.layout) {
-    layout = parsed.layout;
-    reasoning = parsed.reasoning || 'Generated with fine-tuned model';
-  } else {
-    // Fine-tuned model returns the layout directly
-    layout = parsed;
-    reasoning = 'Generated with fine-tuned model';
-  }
-
-  // Sanitize the layout to fix common AI errors
+  // Sanitize the layout to fix any remaining AI errors
   layout = sanitizeLayoutJSON(layout);
 
   return {
