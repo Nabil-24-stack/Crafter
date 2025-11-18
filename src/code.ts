@@ -1017,16 +1017,17 @@ function createPlaceholderForComponent(layoutNode: LayoutNode): RectangleNode {
 
 /**
  * Handles getting the currently selected frame for iteration
+ * Exports the frame as SVG for AI modification
  */
 async function handleGetSelectedFrame() {
-  console.log('Getting selected frame...');
+  console.log('Getting selected frame for SVG iteration...');
 
   const selection = figma.currentPage.selection;
 
   if (selection.length === 0) {
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { frame: null, message: 'No frame selected' },
+      payload: { svgContent: null, message: 'No frame selected' },
     });
     return;
   }
@@ -1037,18 +1038,34 @@ async function handleGetSelectedFrame() {
   if (selectedNode.type !== 'FRAME') {
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { frame: null, message: 'Selected node is not a frame' },
+      payload: { svgContent: null, message: 'Selected node is not a frame' },
     });
     return;
   }
 
-  // Serialize the frame
-  const serializedFrame = await serializeFrame(selectedNode as FrameNode);
+  // Export frame as SVG
+  try {
+    const svgData = await selectedNode.exportAsync({
+      format: 'SVG',
+      svgIdAttribute: true,
+    });
 
-  figma.ui.postMessage({
-    type: 'selected-frame-data',
-    payload: { frame: serializedFrame, frameId: selectedNode.id },
-  });
+    // Convert Uint8Array to string
+    const svgString = new TextDecoder().decode(svgData);
+
+    figma.ui.postMessage({
+      type: 'selected-frame-data',
+      payload: { svgContent: svgString, frameId: selectedNode.id },
+    });
+
+    console.log('SVG exported successfully for iteration');
+  } catch (error) {
+    console.error('Error exporting SVG:', error);
+    figma.ui.postMessage({
+      type: 'selected-frame-data',
+      payload: { svgContent: null, message: 'Failed to export frame as SVG' },
+    });
+  }
 }
 
 /**
@@ -1171,14 +1188,22 @@ async function serializeNode(node: SceneNode): Promise<any> {
  * Handles iteration request - applies changes to selected frame
  */
 async function handleIterateDesign(payload: any) {
-  console.log('Handling iteration request...');
+  console.log('Handling SVG iteration request...');
 
-  const { updatedLayout, frameId } = payload;
+  const { svg, frameId } = payload;
 
   if (!frameId) {
     figma.ui.postMessage({
       type: 'iteration-error',
       payload: { error: 'No frame ID provided' },
+    });
+    return;
+  }
+
+  if (!svg) {
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: { error: 'No SVG content provided' },
     });
     return;
   }
@@ -1195,20 +1220,39 @@ async function handleIterateDesign(payload: any) {
   }
 
   try {
-    // Apply the iteration changes
-    await applyIteration(frame as FrameNode, updatedLayout);
+    // Replace frame contents with updated SVG
+    const frameNode = frame as FrameNode;
+
+    // Store frame position and name
+    const { x, y, name } = frameNode;
+    const parent = frameNode.parent;
+
+    // Remove all children from frame
+    frameNode.children.forEach(child => child.remove());
+
+    // Import the updated SVG into the frame
+    const svgNode = figma.createNodeFromSvg(svg);
+    frameNode.appendChild(svgNode);
+
+    // Restore frame properties
+    frameNode.name = name;
+    frameNode.x = x;
+    frameNode.y = y;
+
+    // Resize frame to fit SVG content
+    frameNode.resize(svgNode.width, svgNode.height);
 
     figma.ui.postMessage({
       type: 'iteration-complete',
       payload: { message: 'Design iteration applied successfully' },
     });
 
-    console.log('Iteration applied successfully');
+    console.log('SVG iteration applied successfully');
   } catch (error) {
-    console.error('Error applying iteration:', error);
+    console.error('Error applying SVG iteration:', error);
     figma.ui.postMessage({
       type: 'iteration-error',
-      payload: { error: error instanceof Error ? error.message : 'Failed to apply iteration' },
+      payload: { error: error instanceof Error ? error.message : 'Failed to apply SVG iteration' },
     });
   }
 }

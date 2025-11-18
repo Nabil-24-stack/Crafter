@@ -208,6 +208,6 @@ export interface IterationRequest {
 }
 
 export interface IterationResult {
-  updatedLayout: LayoutNode;
+  svg: string; // Updated SVG markup
   reasoning?: string;
 }
