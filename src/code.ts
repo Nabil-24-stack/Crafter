@@ -233,6 +233,16 @@ async function handleGetDesignSystem() {
 
   console.log(`Found ${allNodes.length} component nodes in file`);
 
+  /**
+   * Safely convert value to string or number
+   */
+  function safeValue(value: any, defaultValue: any = ''): any {
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      return value;
+    }
+    return defaultValue;
+  }
+
   let analyzedCount = 0;
   const allComponents: ComponentData[] = allNodes.map((node) => {
     // Both ComponentNode and ComponentSetNode have these properties
@@ -249,18 +259,23 @@ async function handleGetDesignSystem() {
       console.warn(`Failed to analyze visuals for ${node.name}:`, error);
     }
 
+    // Safely extract all properties to avoid Symbol issues
+    const id = safeValue(node.id, `component-${Math.random()}`);
+    const name = safeValue(node.name, 'Unnamed Component');
+    const key = safeValue((node as any).key, id);
+    const description = safeValue((node as any).description, '');
+    const width = typeof component.width === 'number' ? Math.round(component.width) : 0;
+    const height = typeof component.height === 'number' ? Math.round(component.height) : 0;
+
     return {
-      id: node.id,
-      name: node.name,
-      key: (node as any).key || node.id, // Use key if available, fallback to id
-      description: (node as any).description || '',
+      id,
+      name,
+      key,
+      description,
       type: node.type as 'COMPONENT' | 'COMPONENT_SET',
-      // Add size information
-      width: Math.round(component.width),
-      height: Math.round(component.height),
-      // Infer category from component name
-      category: inferComponentCategory(component.name),
-      // Add visual properties
+      width,
+      height,
+      category: inferComponentCategory(name),
       visuals,
     };
   });
@@ -288,9 +303,13 @@ async function handleGetDesignSystem() {
           const bHex = b.toString(16).padStart(2, '0');
           const hex = `#${rHex}${gHex}${bHex}`;
 
+          // Safely extract properties to avoid Symbol issues
+          const styleId = safeValue(style.id, `color-${Math.random()}`);
+          const styleName = safeValue(style.name, 'Unnamed Color');
+
           return {
-            id: style.id,
-            name: style.name,
+            id: styleId,
+            name: styleName,
             hex, // Add hex for easier use
             color: {
               r: solidPaint.color.r,
@@ -309,13 +328,23 @@ async function handleGetDesignSystem() {
 
   // Get local text styles using async version
   const localTextStyles = await figma.getLocalTextStylesAsync();
-  const textStyles: TextStyle[] = localTextStyles.map((style) => ({
-    id: style.id,
-    name: style.name,
-    fontSize: style.fontSize as number,
-    fontFamily: style.fontName.family,
-    fontWeight: style.fontName.style === 'Bold' ? 700 : 400,
-  }));
+  const textStyles: TextStyle[] = localTextStyles.map((style) => {
+    // Safely extract properties to avoid Symbol issues
+    const styleId = safeValue(style.id, `text-${Math.random()}`);
+    const styleName = safeValue(style.name, 'Unnamed Text Style');
+    const fontSize = typeof style.fontSize === 'number' ? style.fontSize : 14;
+    const fontFamily = safeValue(style.fontName?.family, 'Inter');
+    const fontStyle = safeValue(style.fontName?.style, 'Regular');
+    const fontWeight = fontStyle === 'Bold' ? 700 : 400;
+
+    return {
+      id: styleId,
+      name: styleName,
+      fontSize,
+      fontFamily,
+      fontWeight,
+    };
+  });
 
   // Generate visual language description for AI
   const visualLanguage = generateVisualLanguageDescription(
