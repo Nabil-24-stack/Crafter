@@ -486,22 +486,18 @@ async function handleGenerateVariations(payload: { variations: Array<{ layout: L
 
 /**
  * Handles a single variation as soon as it's ready (streaming approach)
+ * SVG MODE: Accepts SVG string instead of layout
  */
 async function handleGenerateSingleVariation(payload: {
-  variation: { layout: LayoutNode; reasoning?: string };
+  variation: { svg: string; reasoning?: string };
   variationIndex: number;
   totalVariations: number;
 }) {
   console.log(`Generating variation ${payload.variationIndex + 1} of ${payload.totalVariations} on canvas...`);
 
   const { variation, variationIndex, totalVariations } = payload;
-  let { layout } = variation;
-  const { reasoning } = variation;
+  const { svg, reasoning } = variation;
   const VARIATION_SPACING = 1200;
-
-  // Expand simplified schema to full Figma properties
-  console.log('Expanding simplified schema to full Figma properties...');
-  layout = expandSimplifiedLayout(layout, cachedDesignSystem || undefined);
 
   try {
     // Initialize session on first variation
@@ -534,15 +530,14 @@ async function handleGenerateSingleVariation(payload: {
       };
     }
 
-    // Create the layout node
-    const rootNode = await createNodeFromLayout(layout);
+    // Import SVG as Figma node
+    const rootNode = await importSVGToFigma(svg, `SVG Mockup - Variation ${variationIndex + 1}`);
 
     if (rootNode) {
       // Add to current page
       figma.currentPage.appendChild(rootNode);
 
-      // Update the name to include variation number
-      rootNode.name = `${layout.name} - Variation ${variationIndex + 1}`;
+      // Name is already set in importSVGToFigma()
 
       // Position based on variation index
       rootNode.x = currentVariationsSession.basePosition.x + (variationIndex * VARIATION_SPACING);
@@ -588,6 +583,41 @@ async function handleGenerateSingleVariation(payload: {
       payload: { error: error instanceof Error ? error.message : `Failed to create variation ${variationIndex + 1}` },
     });
     figma.notify(`❌ Failed to generate variation ${variationIndex + 1}`, { error: true });
+  }
+}
+
+/**
+ * Import SVG markup into Figma as a node
+ */
+async function importSVGToFigma(svgString: string, name: string = 'SVG Mockup'): Promise<FrameNode | null> {
+  try {
+    console.log('Importing SVG to Figma:', name);
+    console.log('SVG length:', svgString.length, 'characters');
+
+    // Use Figma's built-in SVG import
+    const svgNode = figma.createNodeFromSvg(svgString);
+
+    if (!svgNode) {
+      throw new Error('figma.createNodeFromSvg() returned null');
+    }
+
+    // Wrap SVG in a frame for better organization
+    const frame = figma.createFrame();
+    frame.name = name;
+    frame.resize(svgNode.width, svgNode.height);
+    frame.appendChild(svgNode);
+
+    // Position SVG node at 0,0 within frame
+    svgNode.x = 0;
+    svgNode.y = 0;
+
+    console.log('✅ SVG imported successfully as', name);
+
+    return frame;
+  } catch (error) {
+    console.error('❌ Failed to import SVG:', error);
+    figma.notify(`Failed to import SVG: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return null;
   }
 }
 

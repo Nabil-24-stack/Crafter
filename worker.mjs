@@ -855,9 +855,113 @@ function extractJSON(responseText) {
 }
 
 /**
- * Process a generate job with two-stage pipeline
+ * Build SVG system prompt using visual language
+ */
+function buildSVGSystemPrompt(designSystem) {
+  const visualLanguage = designSystem.visualLanguage || 'No visual language available';
+
+  return `You are a UI design assistant that generates SVG mockups.
+
+Use the design system's visual language to style your SVG elements.
+
+${visualLanguage}
+
+OUTPUT FORMAT: Pure SVG markup (no markdown, no JSON wrapper, no explanations)
+
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Use design system colors, border-radius (via rx/ry), shadows (via filter), typography -->
+  <rect x="0" y="0" width="1920" height="80" fill="#ffffff" />
+  <text x="40" y="50" font-family="Inter" font-size="18" font-weight="600" fill="#1f2937">Dashboard</text>
+  ...
+</svg>
+
+RULES:
+• Use exact colors from PRIMARY COLORS
+• Match border-radius values using rx/ry attributes on <rect>
+• Apply shadows using <filter> and <feDropShadow> or approximate with opacity
+• Use specified fonts with correct sizes and weights
+• Create clean, production-ready layouts with proper spacing
+• Use <g> tags for semantic grouping (header, main, sidebar, etc.)
+• Add id attributes for major sections
+• Use realistic text content (no lorem ipsum)
+• Create a complete, full-screen layout (1920x1080 or 1440x900 for web)
+• Represent components using their visual characteristics (colors, radius, shadows)
+
+IMPORTANT:
+• Return ONLY the SVG markup
+• No markdown code blocks
+• No JSON wrapper
+• No explanations before or after
+• Start with <svg and end with </svg>`;
+}
+
+/**
+ * Extract SVG from Claude response (remove markdown)
+ */
+function extractSVG(responseText) {
+  let text = responseText.trim();
+
+  console.log('Raw SVG response (first 300 chars):', text.substring(0, 300));
+
+  // Remove markdown code blocks
+  text = text.replace(/```svg\n?/g, '').replace(/```xml\n?/g, '').replace(/```\n?/g, '');
+
+  // Find SVG tags
+  const svgStart = text.indexOf('<svg');
+  const svgEnd = text.lastIndexOf('</svg>');
+
+  if (svgStart !== -1 && svgEnd > svgStart) {
+    text = text.substring(svgStart, svgEnd + 6);
+  }
+
+  console.log('Extracted SVG (first 300 chars):', text.substring(0, 300));
+  console.log('Extracted SVG length:', text.length, 'characters');
+
+  return text.trim();
+}
+
+/**
+ * Process a generate job - SVG MODE
  */
 async function processGenerateJob(job) {
+  const { prompt, designSystem } = job.input;
+
+  // SVG MODE: Use Claude only (no Together AI until retrained on SVG)
+  console.log('🎨 SVG Mode: Using Claude 4.5 for SVG generation');
+
+  const systemPrompt = buildSVGSystemPrompt(designSystem);
+  const userPrompt = `User Request: ${prompt}
+
+Generate an SVG mockup that fulfills this request. Use the design system's visual language (colors, border-radius, shadows, typography). Return ONLY the SVG markup, no markdown or explanations.`;
+
+  const claudeResponse = await callClaude(systemPrompt, userPrompt);
+  const responseText = claudeResponse.content[0]?.text || '';
+
+  // Check if we hit the token limit
+  if (claudeResponse.stop_reason === 'max_tokens' || claudeResponse.stop_reason === 'length') {
+    console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
+    console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+  }
+
+  // Extract SVG from response
+  const svg = extractSVG(responseText);
+
+  if (!svg || !svg.includes('<svg')) {
+    throw new Error('Failed to extract valid SVG from Claude response');
+  }
+
+  console.log('✅ SVG generated successfully');
+
+  return {
+    svg,
+    reasoning: 'SVG mockup generated with Claude 4.5'
+  };
+}
+
+/**
+ * DEPRECATED: Two-stage pipeline for Figma JSON (keeping for reference)
+ */
+async function processGenerateJob_OLD_FIGMA_MODE(job) {
   const { prompt, designSystem, model } = job.input;
 
   // Determine which approach to use

@@ -221,13 +221,13 @@ function expandPadding(padding: SimplifiedNode['padding']): {
  */
 function expandAlignment(align: string): {
   primary: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
-  counter: 'MIN' | 'CENTER' | 'MAX' | 'STRETCH';
+  counter: 'MIN' | 'CENTER' | 'MAX';
 } {
   const alignMap: Record<string, { primary: any; counter: any }> = {
     'start': { primary: 'MIN', counter: 'MIN' },
     'center': { primary: 'CENTER', counter: 'CENTER' },
     'end': { primary: 'MAX', counter: 'MAX' },
-    'stretch': { primary: 'MIN', counter: 'STRETCH' },
+    'stretch': { primary: 'MIN', counter: 'CENTER' }, // Changed STRETCH to CENTER
     'space-between': { primary: 'SPACE_BETWEEN', counter: 'MIN' },
   };
 

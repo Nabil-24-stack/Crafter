@@ -91,134 +91,30 @@ export async function generateLayout(
 }
 
 /**
- * Generates a mock layout for testing without API key
+ * Generates a mock SVG for testing without API key
  */
 function generateMockLayout(prompt: string, designSystem: DesignSystemData): GenerationResult {
-  console.log('Using mock layout generation for prompt:', prompt);
+  console.log('Using mock SVG generation for prompt:', prompt);
 
-  // Create a simple mock layout based on available components
-  const mockLayout: LayoutNode = {
-    type: 'FRAME',
-    name: 'Generated Layout',
-    x: 0,
-    y: 0,
-    width: 1200,
-    height: 800,
-    fills: [
-      {
-        type: 'SOLID',
-        color: { r: 0.95, g: 0.95, b: 0.95 },
-      },
-    ],
-    children: [],
-  };
+  // Get primary color from design system or use default
+  const primaryColor = designSystem.colors[0]?.hex || '#0066cc';
+  const backgroundColor = '#ffffff';
 
-  // Add a header frame
-  const headerFrame: LayoutNode = {
-    type: 'FRAME',
-    name: 'Header',
-    x: 0,
-    y: 0,
-    width: 1200,
-    height: 80,
-    fills: [
-      {
-        type: 'SOLID',
-        color: { r: 1, g: 1, b: 1 },
-      },
-    ],
-    children: [],
-  };
-
-  // Add components if available
-  if (designSystem.components.length > 0) {
-    // Add first component as a button in header
-    const firstComponent = designSystem.components[0];
-    headerFrame.children?.push({
-      type: 'COMPONENT_INSTANCE',
-      name: firstComponent.name,
-      componentKey: firstComponent.key,
-      componentName: firstComponent.name,
-      x: 40,
-      y: 20,
-      width: 120,
-      height: 40,
-    });
-  } else {
-    // Add a placeholder rectangle if no components
-    headerFrame.children?.push({
-      type: 'RECTANGLE',
-      name: 'Placeholder Button',
-      x: 40,
-      y: 20,
-      width: 120,
-      height: 40,
-      fills: [
-        {
-          type: 'SOLID',
-          color: { r: 0.2, g: 0.6, b: 1 },
-        },
-      ],
-    });
-  }
-
-  // Add a content frame
-  const contentFrame: LayoutNode = {
-    type: 'FRAME',
-    name: 'Content',
-    x: 40,
-    y: 120,
-    width: 1120,
-    height: 640,
-    fills: [
-      {
-        type: 'SOLID',
-        color: { r: 1, g: 1, b: 1 },
-      },
-    ],
-    children: [],
-  };
-
-  // Add more component instances if available
-  if (designSystem.components.length > 1) {
-    for (let i = 1; i < Math.min(4, designSystem.components.length); i++) {
-      const component = designSystem.components[i];
-      contentFrame.children?.push({
-        type: 'COMPONENT_INSTANCE',
-        name: component.name,
-        componentKey: component.key,
-        componentName: component.name,
-        x: 40,
-        y: 40 + i * 100,
-        width: 300,
-        height: 80,
-      });
-    }
-  } else {
-    // Add placeholder cards
-    for (let i = 0; i < 3; i++) {
-      contentFrame.children?.push({
-        type: 'RECTANGLE',
-        name: `Card ${i + 1}`,
-        x: 40 + i * 360,
-        y: 40,
-        width: 320,
-        height: 200,
-        fills: [
-          {
-            type: 'SOLID',
-            color: { r: 0.9, g: 0.9, b: 0.95 },
-          },
-        ],
-      });
-    }
-  }
-
-  mockLayout.children?.push(headerFrame, contentFrame);
+  // Create a simple mock SVG
+  const mockSVG = `<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="1920" height="1080" fill="${backgroundColor}"/>
+  <rect x="0" y="0" width="1920" height="80" fill="${primaryColor}"/>
+  <text x="40" y="50" font-family="Inter" font-size="24" font-weight="600" fill="#ffffff">Mock SVG - ${prompt}</text>
+  <g id="content">
+    <rect x="40" y="120" width="400" height="200" fill="${backgroundColor}" stroke="${primaryColor}" stroke-width="2" rx="8"/>
+    <text x="60" y="160" font-family="Inter" font-size="18" font-weight="500" fill="#1f2937">This is a mock SVG</text>
+    <text x="60" y="200" font-family="Inter" font-size="14" fill="#6b7280">Generated for testing without API key</text>
+  </g>
+</svg>`;
 
   return {
-    layout: mockLayout,
-    reasoning: `Mock layout generated for: "${prompt}". This is a demonstration layout using ${designSystem.components.length} available components.`,
+    svg: mockSVG,
+    reasoning: `Mock SVG generated for: "${prompt}". This is a demonstration using the design system's visual language.`,
   };
 }
 

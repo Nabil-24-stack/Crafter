@@ -159,7 +159,7 @@ export interface LayoutNode {
 }
 
 export interface GenerationResult {
-  layout: LayoutNode;
+  svg: string; // SVG markup string
   reasoning?: string;
 }
 

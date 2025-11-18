@@ -189,7 +189,7 @@ function rgbToHex(color: RGB): string {
  * Generate visual language description for AI prompts
  */
 export function generateVisualLanguageDescription(
-  components: Array<{ name: string; category: string; visuals?: ComponentVisuals }>,
+  components: Array<{ name: string; category?: string; visuals?: ComponentVisuals }>,
   colors: Array<{ name: string; hex: string }>,
   textStyles: Array<{ name: string; fontFamily: string; fontSize: number; fontWeight: number }>
 ): string {
