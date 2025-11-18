@@ -1067,8 +1067,11 @@ async function handleGetSelectedFrame() {
       svgIdAttribute: true,
     });
 
-    // Convert Uint8Array to string
-    const svgString = new TextDecoder().decode(svgData);
+    // Convert Uint8Array to string (TextDecoder not available in Figma)
+    let svgString = '';
+    for (let i = 0; i < svgData.length; i++) {
+      svgString += String.fromCharCode(svgData[i]);
+    }
 
     figma.ui.postMessage({
       type: 'selected-frame-data',
