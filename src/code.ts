@@ -12,6 +12,7 @@ import {
   SerializedNode,
 } from './types';
 import { expandSimplifiedLayout } from './schemaExpander';
+import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
 
 // Show the plugin UI
 figma.showUI(__html__, { width: 400, height: 600 });
@@ -236,6 +237,17 @@ async function handleGetDesignSystem() {
     // Both ComponentNode and ComponentSetNode have these properties
     const component = node as ComponentNode | ComponentSetNode;
 
+    // Analyze visual properties for SVG generation
+    let visuals;
+    try {
+      if (node.type === 'COMPONENT') {
+        visuals = analyzeComponentVisuals(node as ComponentNode);
+        console.log(`Analyzed visuals for ${node.name}:`, visuals);
+      }
+    } catch (error) {
+      console.warn(`Failed to analyze visuals for ${node.name}:`, error);
+    }
+
     return {
       id: node.id,
       name: node.name,
@@ -247,6 +259,8 @@ async function handleGetDesignSystem() {
       height: Math.round(component.height),
       // Infer category from component name
       category: inferComponentCategory(component.name),
+      // Add visual properties
+      visuals,
     };
   });
 
@@ -260,9 +274,17 @@ async function handleGetDesignSystem() {
       const paints = style.paints;
       if (paints.length > 0 && paints[0].type === 'SOLID') {
         const solidPaint = paints[0] as SolidPaint;
+
+        // Convert to hex
+        const r = Math.round(solidPaint.color.r * 255).toString(16).padStart(2, '0');
+        const g = Math.round(solidPaint.color.g * 255).toString(16).padStart(2, '0');
+        const b = Math.round(solidPaint.color.b * 255).toString(16).padStart(2, '0');
+        const hex = `#${r}${g}${b}`;
+
         return {
           id: style.id,
           name: style.name,
+          hex, // Add hex for easier use
           color: {
             r: solidPaint.color.r,
             g: solidPaint.color.g,
@@ -285,10 +307,20 @@ async function handleGetDesignSystem() {
     fontWeight: style.fontName.style === 'Bold' ? 700 : 400,
   }));
 
+  // Generate visual language description for AI
+  const visualLanguage = generateVisualLanguageDescription(
+    allComponents,
+    colorStyles,
+    textStyles
+  );
+
+  console.log('Generated visual language description:\n', visualLanguage);
+
   const designSystem: DesignSystemData = {
     components: allComponents,
     colors: colorStyles,
     textStyles: textStyles,
+    visualLanguage, // Add visual language for SVG generation
   };
 
   console.log('Design system extracted:', {

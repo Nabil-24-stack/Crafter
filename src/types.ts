@@ -25,6 +25,26 @@ export interface Message {
 }
 
 // Design system data structures
+export interface ComponentVisuals {
+  colors: string[];              // Dominant colors (2-3 main colors)
+  borderRadius?: number;         // Corner radius in px
+  shadow?: string;               // CSS box-shadow format
+  stroke?: {
+    color: string;
+    width: number;
+  };
+  typography?: {
+    fontSize: number;
+    fontWeight: number;
+    fontFamily: string;
+    color: string;
+  };
+  spacing?: {
+    padding?: number;
+    gap?: number;
+  };
+}
+
 export interface ComponentData {
   id: string;
   name: string;
@@ -35,11 +55,14 @@ export interface ComponentData {
   width?: number;
   height?: number;
   category?: string; // e.g., "button", "input", "card", "icon"
+  // Visual properties for SVG generation
+  visuals?: ComponentVisuals;
 }
 
 export interface ColorStyle {
   id: string;
   name: string;
+  hex: string; // Added hex for easier use
   color: {
     r: number;
     g: number;
@@ -60,6 +83,7 @@ export interface DesignSystemData {
   components: ComponentData[];
   colors: ColorStyle[];
   textStyles: TextStyle[];
+  visualLanguage?: string; // Formatted visual language description for AI
 }
 
 // Claude API structures
