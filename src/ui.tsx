@@ -224,9 +224,12 @@ const App = () => {
     setResult('');
 
     try {
+      console.log('Starting iteration request...');
       const iterationResult = await iterateLayout(selectedFrame, iterationPrompt, designSystem);
+      console.log('Iteration result received from worker:', iterationResult);
 
       // Send the iteration result to the plugin code for applying
+      console.log('Sending SVG to plugin code for applying...');
       parent.postMessage(
         {
           pluginMessage: {

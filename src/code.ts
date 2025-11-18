@@ -1208,11 +1208,15 @@ async function serializeNode(node: SceneNode): Promise<any> {
  * Handles iteration request - applies changes to selected frame
  */
 async function handleIterateDesign(payload: any) {
-  console.log('Handling SVG iteration request...');
+  console.log('Handling SVG iteration request...', payload);
 
   const { svg, frameId } = payload;
 
+  console.log('Frame ID:', frameId);
+  console.log('SVG length:', svg ? svg.length : 0);
+
   if (!frameId) {
+    console.log('ERROR: No frame ID provided');
     figma.ui.postMessage({
       type: 'iteration-error',
       payload: { error: 'No frame ID provided' },
@@ -1221,6 +1225,7 @@ async function handleIterateDesign(payload: any) {
   }
 
   if (!svg) {
+    console.log('ERROR: No SVG content provided');
     figma.ui.postMessage({
       type: 'iteration-error',
       payload: { error: 'No SVG content provided' },
@@ -1232,6 +1237,7 @@ async function handleIterateDesign(payload: any) {
   const frame = await figma.getNodeByIdAsync(frameId);
 
   if (!frame || frame.type !== 'FRAME') {
+    console.log('ERROR: Frame not found or invalid');
     figma.ui.postMessage({
       type: 'iteration-error',
       payload: { error: 'Frame not found or invalid' },
@@ -1240,6 +1246,7 @@ async function handleIterateDesign(payload: any) {
   }
 
   try {
+    console.log('Applying SVG to frame...');
     // Replace frame contents with updated SVG
     const frameNode = frame as FrameNode;
 
@@ -1247,9 +1254,11 @@ async function handleIterateDesign(payload: any) {
     const { x, y, name } = frameNode;
     const parent = frameNode.parent;
 
+    console.log('Removing old children...');
     // Remove all children from frame
     frameNode.children.forEach(child => child.remove());
 
+    console.log('Importing new SVG...');
     // Import the updated SVG into the frame
     const svgNode = figma.createNodeFromSvg(svg);
     frameNode.appendChild(svgNode);
@@ -1262,6 +1271,7 @@ async function handleIterateDesign(payload: any) {
     // Resize frame to fit SVG content
     frameNode.resize(svgNode.width, svgNode.height);
 
+    console.log('Sending iteration-complete message...');
     figma.ui.postMessage({
       type: 'iteration-complete',
       payload: { message: 'Design iteration applied successfully' },
