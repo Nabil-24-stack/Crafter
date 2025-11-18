@@ -43,6 +43,23 @@ async function initPlugin() {
 // Initialize
 initPlugin();
 
+// Listen for selection changes to detect frame selection for iteration
+figma.on('selectionchange', () => {
+  const selection = figma.currentPage.selection;
+
+  // If exactly one frame is selected, automatically trigger iteration mode
+  if (selection.length === 1 && selection[0].type === 'FRAME') {
+    console.log('Frame selected, triggering iteration mode...');
+    handleGetSelectedFrame();
+  } else if (selection.length === 0 || selection[0].type !== 'FRAME') {
+    // No frame selected or not a frame - return to ideation mode
+    figma.ui.postMessage({
+      type: 'selected-frame-data',
+      payload: { svgContent: null, message: 'No frame selected' },
+    });
+  }
+});
+
 /**
  * Validates and sanitizes counterAxisAlignItems values
  * Figma only accepts: 'MIN' | 'MAX' | 'CENTER' | 'BASELINE'
