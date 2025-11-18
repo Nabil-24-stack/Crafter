@@ -219,6 +219,16 @@ function rgbToHex(color: RGB): string {
 }
 
 /**
+ * Safely convert value to string
+ */
+function safeString(value: any): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'boolean') return String(value);
+  return ''; // Skip symbols and other types
+}
+
+/**
  * Generate visual language description for AI prompts
  */
 export function generateVisualLanguageDescription(
@@ -226,66 +236,112 @@ export function generateVisualLanguageDescription(
   colors: Array<{ name: string; hex: string }>,
   textStyles: Array<{ name: string; fontFamily: string; fontSize: number; fontWeight: number }>
 ): string {
-  const lines: string[] = [];
+  try {
+    const lines: string[] = [];
 
-  // Primary colors
-  const primaryColors = colors.slice(0, 8).map(c => c.hex).join(', ');
-  lines.push(`PRIMARY COLORS: ${primaryColors}`);
-  lines.push('');
+    // Primary colors - safely extract hex values
+    const primaryColors = colors
+      .slice(0, 8)
+      .map(c => safeString(c.hex))
+      .filter(hex => hex.length > 0)
+      .join(', ');
 
-  // Component visual characteristics grouped by category
-  lines.push('COMPONENT VISUAL CHARACTERISTICS:');
-
-  const categorized = new Map<string, Array<{ name: string; visuals?: ComponentVisuals }>>();
-  components.forEach(comp => {
-    const category = comp.category || 'other';
-    if (!categorized.has(category)) {
-      categorized.set(category, []);
-    }
-    categorized.get(category)!.push(comp);
-  });
-
-  // Describe visual characteristics for each category
-  categorized.forEach((comps, category) => {
-    const comp = comps[0]; // Use first component as representative
-    if (!comp.visuals) return;
-
-    const v = comp.visuals;
-    const parts: string[] = [];
-
-    if (v.colors.length > 0) {
-      parts.push(`colors: ${v.colors.join(', ')}`);
-    }
-    if (v.borderRadius) {
-      parts.push(`border-radius: ${v.borderRadius}px`);
-    }
-    if (v.shadow) {
-      parts.push(`shadow: ${v.shadow}`);
-    }
-    if (v.stroke) {
-      parts.push(`border: ${v.stroke.width}px solid ${v.stroke.color}`);
-    }
-    if (v.typography) {
-      const t = v.typography;
-      parts.push(`font: ${t.fontFamily} ${t.fontSize}px/${t.fontWeight}`);
-    }
-    if (v.spacing) {
-      if (v.spacing.padding) parts.push(`padding: ${v.spacing.padding}px`);
-      if (v.spacing.gap) parts.push(`gap: ${v.spacing.gap}px`);
+    if (primaryColors) {
+      lines.push(`PRIMARY COLORS: ${primaryColors}`);
+      lines.push('');
     }
 
-    if (parts.length > 0) {
-      lines.push(`- ${category}: ${parts.join(', ')}`);
-    }
-  });
+    // Component visual characteristics grouped by category
+    lines.push('COMPONENT VISUAL CHARACTERISTICS:');
 
-  lines.push('');
+    const categorized = new Map<string, Array<{ name: string; visuals?: ComponentVisuals }>>();
+    components.forEach(comp => {
+      try {
+        const category = safeString(comp.category) || 'other';
+        if (!categorized.has(category)) {
+          categorized.set(category, []);
+        }
+        categorized.get(category)!.push(comp);
+      } catch (err) {
+        // Skip this component if there's an error
+      }
+    });
 
-  // Typography styles
-  lines.push('TYPOGRAPHY:');
-  textStyles.slice(0, 6).forEach(style => {
-    lines.push(`- ${style.name}: ${style.fontFamily} ${style.fontSize}px/${style.fontWeight}`);
-  });
+    // Describe visual characteristics for each category
+    categorized.forEach((comps, category) => {
+      try {
+        const comp = comps[0]; // Use first component as representative
+        if (!comp.visuals) return;
 
-  return lines.join('\n');
+        const v = comp.visuals;
+        const parts: string[] = [];
+
+        if (v.colors && Array.isArray(v.colors) && v.colors.length > 0) {
+          const colorStrs = v.colors.map(c => safeString(c)).filter(c => c.length > 0);
+          if (colorStrs.length > 0) {
+            parts.push(`colors: ${colorStrs.join(', ')}`);
+          }
+        }
+        if (v.borderRadius && typeof v.borderRadius === 'number') {
+          parts.push(`border-radius: ${v.borderRadius}px`);
+        }
+        if (v.shadow && typeof v.shadow === 'string') {
+          parts.push(`shadow: ${safeString(v.shadow)}`);
+        }
+        if (v.stroke && typeof v.stroke.width === 'number') {
+          parts.push(`border: ${v.stroke.width}px solid ${safeString(v.stroke.color)}`);
+        }
+        if (v.typography) {
+          const t = v.typography;
+          const fontFamily = safeString(t.fontFamily);
+          const fontSize = safeString(t.fontSize);
+          const fontWeight = safeString(t.fontWeight);
+          if (fontFamily && fontSize && fontWeight) {
+            parts.push(`font: ${fontFamily} ${fontSize}px/${fontWeight}`);
+          }
+        }
+        if (v.spacing) {
+          if (v.spacing.padding && typeof v.spacing.padding === 'number') {
+            parts.push(`padding: ${v.spacing.padding}px`);
+          }
+          if (v.spacing.gap && typeof v.spacing.gap === 'number') {
+            parts.push(`gap: ${v.spacing.gap}px`);
+          }
+        }
+
+        if (parts.length > 0) {
+          const categoryStr = safeString(category);
+          if (categoryStr) {
+            lines.push(`- ${categoryStr}: ${parts.join(', ')}`);
+          }
+        }
+      } catch (err) {
+        // Skip this category if there's an error
+      }
+    });
+
+    lines.push('');
+
+    // Typography styles
+    lines.push('TYPOGRAPHY:');
+    textStyles.slice(0, 6).forEach(style => {
+      try {
+        const name = safeString(style.name);
+        const fontFamily = safeString(style.fontFamily);
+        const fontSize = safeString(style.fontSize);
+        const fontWeight = safeString(style.fontWeight);
+        if (name && fontFamily && fontSize && fontWeight) {
+          lines.push(`- ${name}: ${fontFamily} ${fontSize}px/${fontWeight}`);
+        }
+      } catch (err) {
+        // Skip this style if there's an error
+      }
+    });
+
+    return lines.join('\n');
+  } catch (error) {
+    // If visual language generation fails entirely, return minimal description
+    console.error('Error generating visual language:', error);
+    return 'PRIMARY COLORS: (unavailable)\n\nCOMPONENT VISUAL CHARACTERISTICS: (unavailable)\n\nTYPOGRAPHY: (unavailable)';
+  }
 }
