@@ -243,6 +243,37 @@ async function handleGetDesignSystem() {
     return defaultValue;
   }
 
+  /**
+   * Deeply sanitize an object to remove all Symbol values
+   */
+  function sanitizeObject(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => sanitizeObject(item)).filter(item => item !== undefined);
+    }
+
+    if (typeof obj === 'object') {
+      const sanitized: any = {};
+      for (const key in obj) {
+        const value = obj[key];
+        if (typeof value === 'symbol') {
+          continue; // Skip symbols
+        }
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          sanitized[key] = value;
+        } else if (typeof value === 'object') {
+          sanitized[key] = sanitizeObject(value);
+        }
+      }
+      return sanitized;
+    }
+
+    return obj;
+  }
+
   let analyzedCount = 0;
   const allComponents: ComponentData[] = allNodes.map((node) => {
     // Both ComponentNode and ComponentSetNode have these properties
@@ -276,7 +307,7 @@ async function handleGetDesignSystem() {
       width,
       height,
       category: inferComponentCategory(name),
-      visuals,
+      visuals: visuals ? sanitizeObject(visuals) : undefined,
     };
   });
 
