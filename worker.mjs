@@ -860,7 +860,7 @@ function extractJSON(responseText) {
 function buildSVGSystemPrompt(designSystem) {
   const visualLanguage = designSystem.visualLanguage || 'No visual language available';
 
-  return `You are a UI design assistant that generates SVG mockups.
+  return `You are a UI design assistant that generates SVG mockups for web/mobile applications.
 
 Use the design system's visual language to style your SVG elements.
 
@@ -868,31 +868,56 @@ ${visualLanguage}
 
 OUTPUT FORMAT: Pure SVG markup (no markdown, no JSON wrapper, no explanations)
 
+EXAMPLE STRUCTURE:
 <svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
-  <!-- Use design system colors, border-radius (via rx/ry), shadows (via filter), typography -->
-  <rect x="0" y="0" width="1920" height="80" fill="#ffffff" />
-  <text x="40" y="50" font-family="Inter" font-size="18" font-weight="600" fill="#1f2937">Dashboard</text>
-  ...
+  <!-- Header with navigation -->
+  <g id="header">
+    <rect x="0" y="0" width="1920" height="80" fill="#ffffff" />
+    <text x="40" y="50" font-family="SF Pro Text" font-size="24" font-weight="600" fill="#000000">Dashboard</text>
+    <text x="1700" y="50" font-family="SF Pro Text" font-size="14" fill="#6b7280">Settings</text>
+  </g>
+
+  <!-- Main content with cards -->
+  <g id="main-content">
+    <rect x="40" y="120" width="400" height="200" rx="8" fill="#ffffff" />
+    <text x="60" y="160" font-family="SF Pro Text" font-size="18" font-weight="600" fill="#1f2937">Total Revenue</text>
+    <text x="60" y="200" font-family="SF Pro Text" font-size="32" font-weight="700" fill="#000000">$45,231</text>
+  </g>
 </svg>
 
-RULES:
-• Use exact colors from PRIMARY COLORS
-• Match border-radius values using rx/ry attributes on <rect>
-• Apply shadows using <filter> and <feDropShadow> or approximate with opacity
-• Use specified fonts with correct sizes and weights
-• Create clean, production-ready layouts with proper spacing
-• Use <g> tags for semantic grouping (header, main, sidebar, etc.)
-• Add id attributes for major sections
-• Use realistic text content (no lorem ipsum)
-• Create a complete, full-screen layout (1920x1080 or 1440x900 for web)
-• Represent components using their visual characteristics (colors, radius, shadows)
+CRITICAL RULES FOR TEXT:
+• ALWAYS include text labels for every UI element
+• Add text to ALL buttons, headers, cards, navigation items, forms
+• Use meaningful, realistic text (e.g., "Dashboard", "Revenue: $45k", "Submit", "Profile")
+• NO lorem ipsum or placeholder text
+• Match font family from design system typography (SF Pro Text, Inter, etc.)
+• Use appropriate font sizes: headings (18-32px), body (14-16px), labels (12-14px)
+• Use appropriate font weights: headings (600-700), body (400-500)
+• Position text inside or near its related shapes (buttons, cards, etc.)
 
-IMPORTANT:
+VISUAL DESIGN RULES:
+• Use exact colors from design system PRIMARY COLORS
+• Match border-radius values using rx/ry attributes on <rect>
+• Apply shadows using stroke with low opacity or <filter> elements
+• Use specified fonts with correct sizes and weights from design system
+• Create clean, production-ready layouts with proper spacing (40px margins, 20px padding)
+• Use <g> tags for semantic grouping (header, sidebar, main, cards, etc.)
+• Add id attributes to major sections for clarity
+
+LAYOUT RULES:
+• Create complete, full-screen layouts (1920x1080 for desktop, 375x812 for mobile)
+• Include navigation (top bar or sidebar)
+• Include main content area with cards/sections
+• Include proper spacing between elements
+• Make it look like a real application, not abstract shapes
+
+IMPORTANT OUTPUT REQUIREMENTS:
 • Return ONLY the SVG markup
-• No markdown code blocks
+• No markdown code blocks (no ```)
 • No JSON wrapper
 • No explanations before or after
-• Start with <svg and end with </svg>`;
+• Start with <svg and end with </svg>
+• MUST include text content throughout the design`;
 }
 
 /**
@@ -932,7 +957,16 @@ async function processGenerateJob(job) {
   const systemPrompt = buildSVGSystemPrompt(designSystem);
   const userPrompt = `User Request: ${prompt}
 
-Generate an SVG mockup that fulfills this request. Use the design system's visual language (colors, border-radius, shadows, typography). Return ONLY the SVG markup, no markdown or explanations.`;
+Generate a complete SVG mockup that fulfills this request.
+
+REQUIREMENTS:
+• Use the design system's visual language (colors, border-radius, shadows, typography)
+• Include realistic text labels on ALL elements (buttons, headers, cards, navigation, forms, etc.)
+• Make it look like a real application with meaningful content
+• Use proper spacing and layout
+• Return ONLY the SVG markup (no markdown, no explanations)
+
+Remember: Every button, card, header, and UI element MUST have visible text labels!`;
 
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
   const responseText = claudeResponse.content[0]?.text || '';
