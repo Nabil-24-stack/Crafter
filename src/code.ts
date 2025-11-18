@@ -272,28 +272,36 @@ async function handleGetDesignSystem() {
   const localPaintStyles = await figma.getLocalPaintStylesAsync();
   const colorStyles: ColorStyle[] = localPaintStyles
     .map((style) => {
-      // Extract solid color if available
-      const paints = style.paints;
-      if (paints.length > 0 && paints[0].type === 'SOLID') {
-        const solidPaint = paints[0] as SolidPaint;
+      try {
+        // Extract solid color if available - safely check paints
+        const paints = style.paints;
+        if (Array.isArray(paints) && paints.length > 0 && paints[0] && paints[0].type === 'SOLID') {
+          const solidPaint = paints[0] as SolidPaint;
 
-        // Convert to hex
-        const r = Math.round(solidPaint.color.r * 255).toString(16).padStart(2, '0');
-        const g = Math.round(solidPaint.color.g * 255).toString(16).padStart(2, '0');
-        const b = Math.round(solidPaint.color.b * 255).toString(16).padStart(2, '0');
-        const hex = `#${r}${g}${b}`;
+          // Safely convert to hex
+          const r = Math.round(solidPaint.color.r * 255);
+          const g = Math.round(solidPaint.color.g * 255);
+          const b = Math.round(solidPaint.color.b * 255);
 
-        return {
-          id: style.id,
-          name: style.name,
-          hex, // Add hex for easier use
-          color: {
-            r: solidPaint.color.r,
-            g: solidPaint.color.g,
-            b: solidPaint.color.b,
-            a: solidPaint.opacity !== undefined ? solidPaint.opacity : 1,
-          },
-        };
+          const rHex = r.toString(16).padStart(2, '0');
+          const gHex = g.toString(16).padStart(2, '0');
+          const bHex = b.toString(16).padStart(2, '0');
+          const hex = `#${rHex}${gHex}${bHex}`;
+
+          return {
+            id: style.id,
+            name: style.name,
+            hex, // Add hex for easier use
+            color: {
+              r: solidPaint.color.r,
+              g: solidPaint.color.g,
+              b: solidPaint.color.b,
+              a: solidPaint.opacity !== undefined ? solidPaint.opacity : 1,
+            },
+          };
+        }
+      } catch (error) {
+        console.warn(`Failed to extract color from style ${style.name}:`, error);
       }
       return null;
     })

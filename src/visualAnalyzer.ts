@@ -27,41 +27,66 @@ export interface ComponentVisuals {
  * Analyze visual properties of a component
  */
 export function analyzeComponentVisuals(node: ComponentNode): ComponentVisuals {
-  const fills = node.fills as Paint[];
-  const effects = node.effects as Effect[];
-  const strokes = node.strokes as Paint[];
+  try {
+    // Safely extract fills, effects, and strokes (can be Symbol in some cases)
+    const fills = Array.isArray(node.fills) ? node.fills as Paint[] : [];
+    const effects = Array.isArray(node.effects) ? node.effects as Effect[] : [];
+    const strokes = Array.isArray(node.strokes) ? node.strokes as Paint[] : [];
 
-  // Extract dominant colors from component tree
-  const colors = extractDominantColors(node, 3);
+    // Extract dominant colors from component tree
+    const colors = extractDominantColors(node, 3);
 
-  // Extract shadow effects
-  const shadow = effects.find(e => e.type === 'DROP_SHADOW' && e.visible);
-  const shadowCSS = shadow ? convertFigmaShadowToCSS(shadow as DropShadowEffect) : undefined;
+    // Extract shadow effects
+    let shadowCSS: string | undefined;
+    try {
+      const shadow = effects.find(e => e && e.type === 'DROP_SHADOW' && e.visible);
+      shadowCSS = shadow ? convertFigmaShadowToCSS(shadow as DropShadowEffect) : undefined;
+    } catch (err) {
+      // Ignore shadow extraction errors
+    }
 
-  // Extract border radius
-  const radius = (node as any).cornerRadius || 0;
+    // Extract border radius
+    let radius = 0;
+    try {
+      radius = (node as any).cornerRadius || 0;
+    } catch (err) {
+      // Ignore radius extraction errors
+    }
 
-  // Extract stroke/border
-  const hasStroke = strokes.length > 0 && strokes[0].visible;
-  const strokeData = hasStroke ? {
-    color: rgbToHex((strokes[0] as SolidPaint).color),
-    width: node.strokeWeight as number || 1
-  } : undefined;
+    // Extract stroke/border
+    let strokeData: { color: string; width: number } | undefined;
+    try {
+      const hasStroke = strokes.length > 0 && strokes[0] && strokes[0].visible;
+      if (hasStroke && strokes[0].type === 'SOLID') {
+        strokeData = {
+          color: rgbToHex((strokes[0] as SolidPaint).color),
+          width: (node.strokeWeight as number) || 1
+        };
+      }
+    } catch (err) {
+      // Ignore stroke extraction errors
+    }
 
-  // Extract typography from TEXT children
-  const typography = extractTypography(node);
+    // Extract typography from TEXT children
+    const typography = extractTypography(node);
 
-  // Extract spacing (if Auto Layout)
-  const spacing = extractSpacing(node);
+    // Extract spacing (if Auto Layout)
+    const spacing = extractSpacing(node);
 
-  return {
-    colors,
-    borderRadius: radius > 0 ? radius : undefined,
-    shadow: shadowCSS,
-    stroke: strokeData,
-    typography,
-    spacing
-  };
+    return {
+      colors,
+      borderRadius: radius > 0 ? radius : undefined,
+      shadow: shadowCSS,
+      stroke: strokeData,
+      typography,
+      spacing
+    };
+  } catch (error) {
+    // If anything fails, return minimal visuals
+    return {
+      colors: []
+    };
+  }
 }
 
 /**
@@ -71,23 +96,31 @@ function extractDominantColors(node: SceneNode, maxColors = 3): string[] {
   const colorMap = new Map<string, number>();
 
   function traverse(n: SceneNode) {
-    // Extract fills
-    if ('fills' in n && n.fills) {
-      const fills = n.fills as Paint[];
-      fills.forEach(fill => {
-        if (fill.type === 'SOLID' && fill.visible !== false) {
-          const hex = rgbToHex(fill.color);
-          // Ignore white and very light grays (likely backgrounds)
-          if (hex !== '#ffffff' && hex !== '#fafafa' && hex !== '#f5f5f5') {
-            colorMap.set(hex, (colorMap.get(hex) || 0) + 1);
+    try {
+      // Extract fills - safely check if it's an array
+      if ('fills' in n && n.fills && Array.isArray(n.fills)) {
+        const fills = n.fills as Paint[];
+        fills.forEach(fill => {
+          try {
+            if (fill && fill.type === 'SOLID' && fill.visible !== false) {
+              const hex = rgbToHex(fill.color);
+              // Ignore white and very light grays (likely backgrounds)
+              if (hex !== '#ffffff' && hex !== '#fafafa' && hex !== '#f5f5f5') {
+                colorMap.set(hex, (colorMap.get(hex) || 0) + 1);
+              }
+            }
+          } catch (err) {
+            // Skip this fill if there's an error
           }
-        }
-      });
-    }
+        });
+      }
 
-    // Recursively traverse children
-    if ('children' in n) {
-      (n as ChildrenMixin).children.forEach(child => traverse(child));
+      // Recursively traverse children
+      if ('children' in n) {
+        (n as ChildrenMixin).children.forEach(child => traverse(child));
+      }
+    } catch (err) {
+      // Skip this node if there's an error
     }
   }
 
