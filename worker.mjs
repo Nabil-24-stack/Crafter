@@ -1135,49 +1135,78 @@ Please generate a Figma layout that fulfills this request using the available de
 }
 
 /**
- * Process an iterate job
+ * Build iteration system prompt for SVG
+ */
+function buildSVGIterationPrompt(designSystem) {
+  const visualLanguage = designSystem.visualLanguage || 'No visual language available';
+
+  return `You are a UI design assistant that modifies existing SVG mockups based on user feedback.
+
+Use the design system's visual language to maintain consistency.
+
+${visualLanguage}
+
+YOUR TASK:
+You will receive an existing SVG design and a user's modification request.
+Analyze the current SVG carefully and make ONLY the requested changes while preserving everything else.
+
+OUTPUT FORMAT: Pure SVG markup (no markdown, no JSON wrapper, no explanations)
+
+CRITICAL RULES:
+• Preserve the overall structure unless explicitly asked to change it
+• Maintain existing colors, fonts, and spacing unless asked to change them
+• Keep all existing text content unless asked to modify it
+• Only modify what the user specifically requests
+• Return a complete, valid SVG (not a partial modification)
+• Include ALL text labels (preserve existing + add new if needed)
+• Use design system visual language for any new elements
+
+IMPORTANT:
+• Return ONLY the modified SVG markup
+• No markdown code blocks
+• No JSON wrapper
+• No explanations before or after
+• Start with <svg and end with </svg>`;
+}
+
+/**
+ * Process an iterate job - SVG MODE
  */
 async function processIterateJob(job) {
-  const { prompt, frameData, designSystem } = job.input;
+  const { prompt, svgContent, designSystem } = job.input;
 
-  const systemPrompt = buildIterationSystemPrompt(designSystem);
-  const userPrompt = `Existing layout:
-${JSON.stringify(frameData, null, 2)}
+  console.log('🎨 SVG Iteration Mode: Using Claude 4.5');
 
-User request:
+  const systemPrompt = buildSVGIterationPrompt(designSystem);
+  const userPrompt = `Current SVG Design:
+${svgContent}
+
+User's Modification Request:
 "${prompt}"
 
-Please modify the layout according to the user's request. Return the updated layout JSON.`;
+Please modify the SVG according to the user's request. Preserve everything else that wasn't mentioned. Return the complete updated SVG with ALL text labels intact.`;
 
   const claudeResponse = await callClaude(systemPrompt, userPrompt);
-  const responseText = claudeResponse.content[0]?.text || '{}';
+  const responseText = claudeResponse.content[0]?.text || '';
 
   // Check if we hit the token limit
-  if (claudeResponse.stop_reason === 'max_tokens') {
+  if (claudeResponse.stop_reason === 'max_tokens' || claudeResponse.stop_reason === 'length') {
     console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
     console.warn('Usage:', JSON.stringify(claudeResponse.usage));
   }
 
-  // Extract and parse the updated layout JSON
-  const jsonText = extractJSON(responseText);
+  // Extract SVG from response
+  const updatedSVG = extractSVG(responseText);
 
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch (error) {
-    console.error('❌ JSON parse error:', error.message);
-    console.error('Failed JSON length:', jsonText.length, 'characters');
-    console.error('Failed JSON (first 1000 chars):', jsonText.substring(0, 1000));
-    console.error('Failed JSON (last 1000 chars):', jsonText.substring(Math.max(0, jsonText.length - 1000)));
-    throw new Error(`Failed to parse Claude response: ${error.message}`);
+  if (!updatedSVG || !updatedSVG.includes('<svg')) {
+    throw new Error('Failed to extract valid SVG from Claude response');
   }
 
-  // Sanitize the updated layout to fix common AI errors
-  const sanitizedLayout = sanitizeLayoutJSON(parsed.updatedLayout);
+  console.log('✅ SVG iteration complete');
 
   return {
-    updatedLayout: sanitizedLayout,
-    reasoning: parsed.reasoning,
+    svg: updatedSVG,
+    reasoning: 'SVG modified with Claude 4.5'
   };
 }
 
