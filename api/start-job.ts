@@ -27,7 +27,7 @@ export default async function handler(
   }
 
   try {
-    const { mode, prompt, designSystem, frameData } = req.body;
+    const { mode, prompt, designSystem, frameData, svgContent } = req.body;
 
     // Validate input
     if (!mode || !designSystem) {
@@ -51,9 +51,9 @@ export default async function handler(
       return;
     }
 
-    if (mode === 'iterate' && (!frameData || !prompt)) {
+    if (mode === 'iterate' && (!svgContent || !prompt)) {
       res.status(400).json({
-        error: 'Missing required fields: frameData and prompt (userPrompt) are required for iterate mode',
+        error: 'Missing required fields: svgContent and prompt are required for iterate mode',
       });
       return;
     }
@@ -65,7 +65,7 @@ export default async function handler(
       mode,
       prompt,
       designSystem,
-      frameData,
+      svgContent,
     };
 
     const jobId = await createJob(mode, input);
