@@ -233,6 +233,7 @@ async function handleGetDesignSystem() {
 
   console.log(`Found ${allNodes.length} component nodes in file`);
 
+  let analyzedCount = 0;
   const allComponents: ComponentData[] = allNodes.map((node) => {
     // Both ComponentNode and ComponentSetNode have these properties
     const component = node as ComponentNode | ComponentSetNode;
@@ -242,7 +243,7 @@ async function handleGetDesignSystem() {
     try {
       if (node.type === 'COMPONENT') {
         visuals = analyzeComponentVisuals(node as ComponentNode);
-        console.log(`Analyzed visuals for ${node.name}:`, visuals);
+        analyzedCount++;
       }
     } catch (error) {
       console.warn(`Failed to analyze visuals for ${node.name}:`, error);
@@ -265,6 +266,7 @@ async function handleGetDesignSystem() {
   });
 
   console.log(`Found ${allComponents.length} local components in file`);
+  console.log(`✅ Analyzed visual properties for ${analyzedCount} components`);
 
   // Get local color styles using async version
   const localPaintStyles = await figma.getLocalPaintStylesAsync();
@@ -314,7 +316,7 @@ async function handleGetDesignSystem() {
     textStyles
   );
 
-  console.log('Generated visual language description:\n', visualLanguage);
+  console.log('📝 Generated visual language (first 500 chars):\n', visualLanguage.substring(0, 500) + '...');
 
   const designSystem: DesignSystemData = {
     components: allComponents,
