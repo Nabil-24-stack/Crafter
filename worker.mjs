@@ -913,7 +913,7 @@ LAYOUT RULES:
 
 IMPORTANT OUTPUT REQUIREMENTS:
 • Return ONLY the SVG markup
-• No markdown code blocks (no ```)
+• No markdown code blocks
 • No JSON wrapper
 • No explanations before or after
 • Start with <svg and end with </svg>
