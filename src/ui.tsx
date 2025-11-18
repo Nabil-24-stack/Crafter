@@ -45,11 +45,11 @@ const App = () => {
           break;
 
         case 'selected-frame-data':
-          if (msg.payload.frame) {
-            setSelectedFrame(msg.payload.frame);
+          if (msg.payload.svgContent) {
+            setSelectedFrame(msg.payload.svgContent);
             setFrameId(msg.payload.frameId);
             setMode('iterate');
-            console.log('Frame selected for iteration:', msg.payload.frame.name);
+            console.log('Frame SVG exported for iteration');
           } else {
             setSelectedFrame(null);
             setFrameId(null);
@@ -232,7 +232,7 @@ const App = () => {
           pluginMessage: {
             type: 'iterate-design',
             payload: {
-              updatedLayout: iterationResult.updatedLayout,
+              svg: iterationResult.svg,
               frameId: frameId,
             },
           },
@@ -296,7 +296,7 @@ const App = () => {
             <div className="iteration-mode">
               <div className="mode-indicator">
                 <p className="mode-label">Iterating on:</p>
-                <p className="frame-name">{selectedFrame.name}</p>
+                <p className="frame-name">Selected Frame (SVG)</p>
               </div>
 
               <div className="input-group">
