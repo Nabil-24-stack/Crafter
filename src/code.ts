@@ -1034,17 +1034,17 @@ function createPlaceholderForComponent(layoutNode: LayoutNode): RectangleNode {
 
 /**
  * Handles getting the currently selected frame for iteration
- * Exports the frame as SVG for AI modification
+ * Exports the frame as PNG for visual reference
  */
 async function handleGetSelectedFrame() {
-  console.log('Getting selected frame for SVG iteration...');
+  console.log('Getting selected frame for PNG iteration...');
 
   const selection = figma.currentPage.selection;
 
   if (selection.length === 0) {
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { svgContent: null, message: 'No frame selected' },
+      payload: { imageData: null, message: 'No frame selected' },
     });
     return;
   }
@@ -1055,35 +1055,36 @@ async function handleGetSelectedFrame() {
   if (selectedNode.type !== 'FRAME') {
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { svgContent: null, message: 'Selected node is not a frame' },
+      payload: { imageData: null, message: 'Selected node is not a frame' },
     });
     return;
   }
 
-  // Export frame as SVG
+  // Export frame as PNG
   try {
-    const svgData = await selectedNode.exportAsync({
-      format: 'SVG',
-      svgIdAttribute: true,
+    const pngData = await selectedNode.exportAsync({
+      format: 'PNG',
+      constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
     });
 
-    // Convert Uint8Array to string (TextDecoder not available in Figma)
-    let svgString = '';
-    for (let i = 0; i < svgData.length; i++) {
-      svgString += String.fromCharCode(svgData[i]);
-    }
+    // Convert Uint8Array to base64
+    const base64 = figma.base64Encode(pngData);
 
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { svgContent: svgString, frameId: selectedNode.id },
+      payload: {
+        imageData: base64,
+        frameId: selectedNode.id,
+        frameName: selectedNode.name,
+      },
     });
 
-    console.log('SVG exported successfully for iteration');
+    console.log('PNG exported successfully for iteration');
   } catch (error) {
-    console.error('Error exporting SVG:', error);
+    console.error('Error exporting PNG:', error);
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { svgContent: null, message: 'Failed to export frame as SVG' },
+      payload: { imageData: null, message: 'Failed to export frame as PNG' },
     });
   }
 }

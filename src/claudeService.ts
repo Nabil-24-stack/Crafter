@@ -119,11 +119,11 @@ function generateMockLayout(prompt: string, designSystem: DesignSystemData): Gen
 }
 
 /**
- * Iterates on an existing SVG design using Claude API
+ * Iterates on an existing design using Claude API with vision
  * Uses async job queue to avoid timeouts
  */
 export async function iterateLayout(
-  svgContent: string,
+  imageData: string,
   userPrompt: string,
   designSystem: DesignSystemData
 ): Promise<IterationResult> {
@@ -137,7 +137,7 @@ export async function iterateLayout(
       body: JSON.stringify({
         mode: 'iterate',
         prompt: userPrompt,
-        svgContent,
+        imageData,
         designSystem,
       }),
     });

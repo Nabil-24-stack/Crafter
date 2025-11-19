@@ -45,11 +45,11 @@ const App = () => {
           break;
 
         case 'selected-frame-data':
-          if (msg.payload.svgContent) {
-            setSelectedFrame(msg.payload.svgContent);
+          if (msg.payload.imageData) {
+            setSelectedFrame(msg.payload.imageData);
             setFrameId(msg.payload.frameId);
             setMode('iterate');
-            console.log('Frame SVG exported for iteration');
+            console.log('Frame PNG exported for iteration');
           } else {
             setSelectedFrame(null);
             setFrameId(null);

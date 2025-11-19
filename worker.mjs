@@ -654,6 +654,51 @@ async function callClaude(systemPrompt, userPrompt) {
 }
 
 /**
+ * Call Claude with vision (image + text)
+ */
+async function callClaudeWithVision(systemPrompt, userPrompt, imageDataBase64) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 16384,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/png',
+                data: imageDataBase64,
+              },
+            },
+            {
+              type: 'text',
+              text: userPrompt,
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Claude API error ${response.status}: ${errorText}`);
+  }
+
+  return await response.json();
+}
+
+/**
  * Call Together AI API (fine-tuned Llama model)
  */
 async function callTogetherAI(systemPrompt, userPrompt) {
@@ -1170,23 +1215,33 @@ IMPORTANT:
 }
 
 /**
- * Process an iterate job - SVG MODE
+ * Process an iterate job - VISION MODE
+ * Uses PNG screenshot + design system to generate modified SVG
  */
 async function processIterateJob(job) {
-  const { prompt, svgContent, designSystem } = job.input;
+  const { prompt, imageData, designSystem } = job.input;
 
-  console.log('🎨 SVG Iteration Mode: Using Claude 4.5');
+  console.log('🎨 Vision Iteration Mode: Using Claude 4.5 with image');
 
-  const systemPrompt = buildSVGIterationPrompt(designSystem);
-  const userPrompt = `Current SVG Design:
-${svgContent}
+  const systemPrompt = buildSVGSystemPrompt(designSystem);
 
-User's Modification Request:
+  const userPrompt = `You are looking at an existing design (see image). The user wants to make the following change:
+
 "${prompt}"
 
-Please modify the SVG according to the user's request. Preserve everything else that wasn't mentioned. Return the complete updated SVG with ALL text labels intact.`;
+IMPORTANT INSTRUCTIONS:
+• Analyze the current design in the image carefully
+• Preserve the overall layout, structure, and spacing
+• Preserve all elements that are NOT mentioned in the change request
+• Only modify what the user specifically requested
+• Maintain the design system's visual language (colors, fonts, spacing, border-radius)
+• Keep all existing text labels unless the user asks to change them
+• Generate a complete SVG that looks like the current design but with the requested changes
 
-  const claudeResponse = await callClaude(systemPrompt, userPrompt);
+Remember: This is an ITERATION, not a complete redesign. Change only what was requested, preserve everything else.`;
+
+  // Call Claude with vision (image + text)
+  const claudeResponse = await callClaudeWithVision(systemPrompt, userPrompt, imageData);
   const responseText = claudeResponse.content[0]?.text || '';
 
   // Check if we hit the token limit
@@ -1202,11 +1257,11 @@ Please modify the SVG according to the user's request. Preserve everything else 
     throw new Error('Failed to extract valid SVG from Claude response');
   }
 
-  console.log('✅ SVG iteration complete');
+  console.log('✅ Vision iteration complete');
 
   return {
     svg: updatedSVG,
-    reasoning: 'SVG modified with Claude 4.5'
+    reasoning: 'SVG modified with Claude 4.5 Vision'
   };
 }
 
