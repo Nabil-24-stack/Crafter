@@ -7,6 +7,7 @@ export type MessageType =
   | 'generate-variations'
   | 'generate-single-variation'
   | 'iterate-design'
+  | 'iterate-design-variation'
   | 'get-design-system'
   | 'get-selected-frame'
   | 'export-frame-json'

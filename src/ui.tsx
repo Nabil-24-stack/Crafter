@@ -30,6 +30,9 @@ const App = () => {
   const [numberOfVariations, setNumberOfVariations] = React.useState<1 | 2 | 3>(1);
   const [isGeneratingVariations, setIsGeneratingVariations] = React.useState(false);
 
+  // Iteration variations state
+  const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<1 | 2 | 3>(1);
+
   // Set up message listener on mount
   React.useEffect(() => {
     // Listen for messages from plugin
@@ -206,7 +209,7 @@ const App = () => {
     }
   };
 
-  // Handle iterate button click
+  // Handle iterate button click - supports multiple variations
   const handleIterate = async () => {
     if (!iterationPrompt.trim()) {
       setError('Please enter an iteration request');
@@ -229,26 +232,46 @@ const App = () => {
 
     try {
       console.log('Starting iteration request...');
-      const iterationResult = await iterateLayout(selectedFrame, iterationPrompt, designSystem, selectedModel);
-      console.log('Iteration result received from worker:', iterationResult);
 
-      // Send the iteration result to the plugin code for applying
-      console.log('Sending SVG to plugin code for applying...');
-      parent.postMessage(
-        {
-          pluginMessage: {
-            type: 'iterate-design',
-            payload: {
-              svg: iterationResult.svg,
-              frameId: frameId,
-              mode: 'new', // Always create new design
+      // Generate variation prompts for iterations
+      const variationPrompts = generateVariationPrompts(iterationPrompt, numberOfIterationVariations);
+
+      // Start all iteration variations in parallel, but render each as soon as it's ready
+      variationPrompts.forEach(async (varPrompt, index) => {
+        try {
+          const iterationResult = await iterateLayout(selectedFrame, varPrompt, designSystem, selectedModel);
+          console.log(`Iteration variation ${index + 1} result received from worker:`, iterationResult);
+
+          // Send this iteration variation to the plugin immediately for rendering
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: 'iterate-design-variation',
+                payload: {
+                  svg: iterationResult.svg,
+                  frameId: frameId,
+                  variationIndex: index,
+                  totalVariations: numberOfIterationVariations,
+                },
+              },
             },
-          },
-        },
-        '*'
-      );
+            '*'
+          );
+        } catch (err) {
+          console.error(`Error iterating variation ${index + 1}:`, err);
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: 'iteration-error',
+                payload: { error: `Variation ${index + 1} failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
+              },
+            },
+            '*'
+          );
+        }
+      });
 
-      // The plugin will send back iteration-complete or iteration-error
+      // The plugin will send back iteration-complete or iteration-error for each
     } catch (err) {
       setIsIterating(false);
       setError(err instanceof Error ? err.message : 'Failed to iterate design');
@@ -339,13 +362,41 @@ const App = () => {
                 />
               </div>
 
+              {/* Number of Iteration Variations Selector */}
+              <div className="input-group">
+                <label htmlFor="iteration-variations" className="label">
+                  Number of Variations
+                </label>
+                <div className="variations-selector">
+                  {[1, 2, 3].map((num) => (
+                    <button
+                      key={num}
+                      className={`variation-button ${numberOfIterationVariations === num ? 'active' : ''}`}
+                      onClick={() => setNumberOfIterationVariations(num as 1 | 2 | 3)}
+                      disabled={isIterating}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+                <p className="hint-text">
+                  {numberOfIterationVariations === 1
+                    ? 'Generate 1 iteration variation'
+                    : `Generate ${numberOfIterationVariations} iteration variations side-by-side`
+                  }
+                </p>
+              </div>
+
               <button
                 className="button button-generate"
                 onClick={handleIterate}
                 disabled={isIterating}
               >
                 {isIterating && <div className="spinner" />}
-                {isIterating ? 'Iterating...' : 'Iterate Design'}
+                {isIterating
+                  ? `Iterating ${numberOfIterationVariations} variation${numberOfIterationVariations > 1 ? 's' : ''}...`
+                  : `Iterate ${numberOfIterationVariations} Variation${numberOfIterationVariations > 1 ? 's' : ''}`
+                }
               </button>
             </div>
           )}

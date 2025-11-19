@@ -190,6 +190,10 @@ figma.ui.onmessage = async (msg: Message) => {
         await handleIterateDesign(msg.payload);
         break;
 
+      case 'iterate-design-variation':
+        await handleIterateDesignVariation(msg.payload);
+        break;
+
       default:
         console.warn('Unknown message type:', msg.type);
     }
@@ -1315,6 +1319,93 @@ async function handleIterateDesign(payload: any) {
     figma.ui.postMessage({
       type: 'iteration-error',
       payload: { error: error instanceof Error ? error.message : 'Failed to apply SVG iteration' },
+    });
+  }
+}
+
+/**
+ * Handles iteration variation generation (multiple iterations side-by-side)
+ */
+async function handleIterateDesignVariation(payload: any) {
+  console.log('Handling iteration variation request...', payload);
+
+  const { svg, frameId, variationIndex, totalVariations } = payload;
+
+  if (!frameId || !svg) {
+    console.log('ERROR: Missing frameId or SVG');
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: { error: 'Missing frameId or SVG content' },
+    });
+    return;
+  }
+
+  // Find the original frame
+  const originalFrame = await figma.getNodeByIdAsync(frameId);
+
+  if (!originalFrame || originalFrame.type !== 'FRAME') {
+    console.log('ERROR: Original frame not found');
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: { error: 'Original frame not found' },
+    });
+    return;
+  }
+
+  try {
+    const frameNode = originalFrame as FrameNode;
+    console.log(`Creating iteration variation ${variationIndex + 1} of ${totalVariations}...`);
+
+    // Create SVG node
+    const svgNode = figma.createNodeFromSvg(svg);
+
+    // Create new frame to hold the iteration
+    const newFrame = figma.createFrame();
+    newFrame.name = `${frameNode.name} (Iteration ${variationIndex + 1})`;
+    newFrame.appendChild(svgNode);
+    newFrame.resize(svgNode.width, svgNode.height);
+
+    // Position to the right of the original frame, with spacing between variations
+    const spacing = 100;
+    newFrame.x = frameNode.x + frameNode.width + spacing + (variationIndex * (frameNode.width + spacing));
+    newFrame.y = frameNode.y;
+
+    // Add to same parent as original frame
+    if (frameNode.parent && frameNode.parent.type !== 'PAGE') {
+      (frameNode.parent as FrameNode).appendChild(newFrame);
+    }
+
+    console.log(`Iteration variation ${variationIndex + 1} created successfully`);
+
+    // If this is the last variation, send completion message and select all variations
+    if (variationIndex === totalVariations - 1) {
+      // Select all newly created iteration frames
+      const allIterations: SceneNode[] = [];
+      for (let i = 0; i < totalVariations; i++) {
+        const iterationName = `${frameNode.name} (Iteration ${i + 1})`;
+        const iterationFrame = figma.currentPage.findOne(
+          (node) => node.type === 'FRAME' && node.name === iterationName
+        );
+        if (iterationFrame) {
+          allIterations.push(iterationFrame);
+        }
+      }
+
+      if (allIterations.length > 0) {
+        figma.currentPage.selection = allIterations;
+        figma.viewport.scrollAndZoomIntoView(allIterations);
+      }
+
+      figma.ui.postMessage({
+        type: 'iteration-complete',
+        payload: { message: `${totalVariations} iteration variation${totalVariations > 1 ? 's' : ''} created successfully!` },
+      });
+    }
+  } catch (error) {
+    console.error('Error creating iteration variation:', error);
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: { error: error instanceof Error ? error.message : 'Failed to create iteration variation' },
     });
   }
 }
