@@ -34,7 +34,7 @@ const App = () => {
   const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<number>(1);
 
   // Ref to store pending iteration request (waiting for PNG export)
-  const pendingIterationRef = React.useRef<{prompt: string, variations: number, designSystem: DesignSystemData} | null>(null);
+  const pendingIterationRef = React.useRef<{prompt: string, variations: number, designSystem: DesignSystemData, frameId: string} | null>(null);
 
   // Set up message listener on mount
   React.useEffect(() => {
@@ -80,15 +80,15 @@ const App = () => {
 
             // If we have a pending iteration request, process it now
             if (pendingIterationRef.current) {
-              const { prompt: iterPrompt, variations, designSystem: ds } = pendingIterationRef.current;
+              const { prompt: iterPrompt, variations, designSystem: ds, frameId: fid } = pendingIterationRef.current;
               pendingIterationRef.current = null;
 
-              if (ds) {
+              if (ds && fid) {
                 // Start the iteration with the exported PNG
-                startIterationWithPNG(msg.payload.imageData, iterPrompt, variations, ds);
+                startIterationWithPNG(msg.payload.imageData, iterPrompt, variations, ds, fid);
               } else {
                 setIsIterating(false);
-                setError('Design system not loaded');
+                setError(ds ? 'Frame ID missing' : 'Design system not loaded');
               }
             }
           }
@@ -270,11 +270,12 @@ const App = () => {
 
     console.log('Requesting PNG export for iteration...');
 
-    // Store the iteration request WITH design system
+    // Store the iteration request WITH design system and frameId
     pendingIterationRef.current = {
       prompt: iterationPrompt,
       variations: numberOfIterationVariations,
       designSystem: designSystem, // Store design system in ref
+      frameId: frameId, // Store frameId in ref
     };
 
     // Request PNG export from plugin
@@ -290,7 +291,7 @@ const App = () => {
   };
 
   // Start iteration after PNG is exported
-  const startIterationWithPNG = async (imageData: string, iterPrompt: string, variations: number, ds: DesignSystemData) => {
+  const startIterationWithPNG = async (imageData: string, iterPrompt: string, variations: number, ds: DesignSystemData, fid: string) => {
     try {
       console.log('Starting iteration with exported PNG...');
 
@@ -310,7 +311,7 @@ const App = () => {
                 type: 'iterate-design-variation',
                 payload: {
                   svg: iterationResult.svg,
-                  frameId: frameId,
+                  frameId: fid, // Use frameId from parameter
                   variationIndex: index,
                   totalVariations: variations,
                 },
