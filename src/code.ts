@@ -1211,10 +1211,11 @@ async function serializeNode(node: SceneNode): Promise<any> {
 async function handleIterateDesign(payload: any) {
   console.log('Handling SVG iteration request...', payload);
 
-  const { svg, frameId } = payload;
+  const { svg, frameId, mode } = payload;
 
   console.log('Frame ID:', frameId);
   console.log('SVG length:', svg ? svg.length : 0);
+  console.log('Iteration mode:', mode);
 
   if (!frameId) {
     console.log('ERROR: No frame ID provided');
@@ -1247,38 +1248,68 @@ async function handleIterateDesign(payload: any) {
   }
 
   try {
-    console.log('Applying SVG to frame...');
-    // Replace frame contents with updated SVG
+    console.log('Applying SVG...');
     const frameNode = frame as FrameNode;
 
-    // Store frame position and name
-    const { x, y, name } = frameNode;
-    const parent = frameNode.parent;
+    if (mode === 'new') {
+      // Create new frame next to selected frame
+      console.log('Creating new frame next to selected...');
 
-    console.log('Removing old children...');
-    // Remove all children from frame
-    frameNode.children.forEach(child => child.remove());
+      const svgNode = figma.createNodeFromSvg(svg);
 
-    console.log('Importing new SVG...');
-    // Import the updated SVG into the frame
-    const svgNode = figma.createNodeFromSvg(svg);
-    frameNode.appendChild(svgNode);
+      // Create new frame to hold the SVG
+      const newFrame = figma.createFrame();
+      newFrame.name = `${frameNode.name} (Iteration)`;
+      newFrame.appendChild(svgNode);
+      newFrame.resize(svgNode.width, svgNode.height);
 
-    // Restore frame properties
-    frameNode.name = name;
-    frameNode.x = x;
-    frameNode.y = y;
+      // Position next to the original frame with some spacing
+      newFrame.x = frameNode.x + frameNode.width + 100;
+      newFrame.y = frameNode.y;
 
-    // Resize frame to fit SVG content
-    frameNode.resize(svgNode.width, svgNode.height);
+      // Add to same parent
+      if (frameNode.parent && frameNode.parent.type !== 'PAGE') {
+        (frameNode.parent as FrameNode).appendChild(newFrame);
+      }
 
-    console.log('Sending iteration-complete message...');
-    figma.ui.postMessage({
-      type: 'iteration-complete',
-      payload: { message: 'Design iteration applied successfully' },
-    });
+      // Select the new frame
+      figma.currentPage.selection = [newFrame];
+      figma.viewport.scrollAndZoomIntoView([newFrame]);
 
-    console.log('SVG iteration applied successfully');
+      console.log('New frame created successfully');
+      figma.ui.postMessage({
+        type: 'iteration-complete',
+        payload: { message: 'New iteration design created next to original' },
+      });
+    } else {
+      // Replace mode - update existing frame
+      console.log('Replacing existing frame contents...');
+
+      const { x, y, name } = frameNode;
+
+      console.log('Removing old children...');
+      frameNode.children.forEach(child => child.remove());
+
+      console.log('Importing new SVG...');
+      const svgNode = figma.createNodeFromSvg(svg);
+      frameNode.appendChild(svgNode);
+
+      // Restore frame properties
+      frameNode.name = name;
+      frameNode.x = x;
+      frameNode.y = y;
+
+      // Resize frame to fit SVG content
+      frameNode.resize(svgNode.width, svgNode.height);
+
+      console.log('Frame replaced successfully');
+      figma.ui.postMessage({
+        type: 'iteration-complete',
+        payload: { message: 'Design iteration applied successfully' },
+      });
+    }
+
+    console.log('SVG iteration complete');
   } catch (error) {
     console.error('Error applying SVG iteration:', error);
     figma.ui.postMessage({
