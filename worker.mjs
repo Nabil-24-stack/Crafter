@@ -728,9 +728,6 @@ async function callGeminiWithVision(systemPrompt, userPrompt, imageDataBase64) {
                   mimeType: 'image/png',
                   data: imageDataBase64,
                 },
-                mediaResolution: {
-                  level: 'media_resolution_high',
-                },
               },
             ],
           },
