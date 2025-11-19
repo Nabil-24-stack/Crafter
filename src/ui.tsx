@@ -34,7 +34,7 @@ const App = () => {
   const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<number>(1);
 
   // Ref to store pending iteration request (waiting for PNG export)
-  const pendingIterationRef = React.useRef<{prompt: string, variations: number} | null>(null);
+  const pendingIterationRef = React.useRef<{prompt: string, variations: number, designSystem: DesignSystemData} | null>(null);
 
   // Set up message listener on mount
   React.useEffect(() => {
@@ -79,16 +79,17 @@ const App = () => {
             console.log('Frame PNG exported, proceeding with iteration...');
 
             // If we have a pending iteration request, process it now
-            if (pendingIterationRef.current && designSystem) {
-              const { prompt: iterPrompt, variations } = pendingIterationRef.current;
+            if (pendingIterationRef.current) {
+              const { prompt: iterPrompt, variations, designSystem: ds } = pendingIterationRef.current;
               pendingIterationRef.current = null;
 
-              // Start the iteration with the exported PNG
-              startIterationWithPNG(msg.payload.imageData, iterPrompt, variations, designSystem);
-            } else if (pendingIterationRef.current && !designSystem) {
-              setIsIterating(false);
-              setError('Design system not loaded');
-              pendingIterationRef.current = null;
+              if (ds) {
+                // Start the iteration with the exported PNG
+                startIterationWithPNG(msg.payload.imageData, iterPrompt, variations, ds);
+              } else {
+                setIsIterating(false);
+                setError('Design system not loaded');
+              }
             }
           }
           break;
@@ -273,6 +274,7 @@ const App = () => {
     pendingIterationRef.current = {
       prompt: iterationPrompt,
       variations: numberOfIterationVariations,
+      designSystem: designSystem, // Store design system in ref
     };
 
     // Request PNG export from plugin
