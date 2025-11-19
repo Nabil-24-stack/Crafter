@@ -33,6 +33,9 @@ const App = () => {
   // Iteration variations state
   const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<number>(1);
 
+  // Ref to store pending iteration request (waiting for PNG export)
+  const pendingIterationRef = React.useRef<{prompt: string, variations: number} | null>(null);
+
   // Set up message listener on mount
   React.useEffect(() => {
     // Listen for messages from plugin
@@ -50,17 +53,39 @@ const App = () => {
           break;
 
         case 'selected-frame-data':
-          if (msg.payload.imageData) {
-            setSelectedFrame(msg.payload.imageData);
+          if (msg.payload.frameId) {
+            // Frame selected - switch to iteration mode (but no PNG yet)
             setFrameId(msg.payload.frameId);
             setFrameName(msg.payload.frameName || 'Selected Frame');
             setMode('iterate');
-            console.log('Frame PNG exported for iteration');
+            console.log('Frame selected for iteration:', msg.payload.frameName);
           } else {
+            // No frame selected - switch back to ideation mode
             setSelectedFrame(null);
             setFrameId(null);
             setFrameName(null);
             setMode('ideation');
+          }
+          break;
+
+        case 'frame-png-exported':
+          if (msg.payload.error) {
+            setIsIterating(false);
+            setError(`PNG export error: ${msg.payload.error}`);
+            pendingIterationRef.current = null;
+          } else if (msg.payload.imageData) {
+            // PNG exported successfully - store it
+            setSelectedFrame(msg.payload.imageData);
+            console.log('Frame PNG exported, proceeding with iteration...');
+
+            // If we have a pending iteration request, process it now
+            if (pendingIterationRef.current) {
+              const { prompt: iterPrompt, variations } = pendingIterationRef.current;
+              pendingIterationRef.current = null;
+
+              // Start the iteration with the exported PNG
+              startIterationWithPNG(msg.payload.imageData, iterPrompt, variations);
+            }
           }
           break;
 
@@ -211,14 +236,14 @@ const App = () => {
     }
   };
 
-  // Handle iterate button click - supports multiple variations
-  const handleIterate = async () => {
+  // Handle iterate button click - triggers PNG export first
+  const handleIterate = () => {
     if (!iterationPrompt.trim()) {
       setError('Please enter an iteration request');
       return;
     }
 
-    if (!selectedFrame || !frameId) {
+    if (!frameId) {
       setError('No frame selected');
       return;
     }
@@ -232,16 +257,38 @@ const App = () => {
     setError('');
     setResult('');
 
+    console.log('Requesting PNG export for iteration...');
+
+    // Store the iteration request
+    pendingIterationRef.current = {
+      prompt: iterationPrompt,
+      variations: numberOfIterationVariations,
+    };
+
+    // Request PNG export from plugin
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: 'export-frame-png',
+          payload: { frameId },
+        },
+      },
+      '*'
+    );
+  };
+
+  // Start iteration after PNG is exported
+  const startIterationWithPNG = async (imageData: string, iterPrompt: string, variations: number) => {
     try {
-      console.log('Starting iteration request...');
+      console.log('Starting iteration with exported PNG...');
 
       // Generate variation prompts for iterations
-      const variationPrompts = generateVariationPrompts(iterationPrompt, numberOfIterationVariations);
+      const variationPrompts = generateVariationPrompts(iterPrompt, variations);
 
       // Start all iteration variations in parallel, but render each as soon as it's ready
       variationPrompts.forEach(async (varPrompt, index) => {
         try {
-          const iterationResult = await iterateLayout(selectedFrame, varPrompt, designSystem, selectedModel);
+          const iterationResult = await iterateLayout(imageData, varPrompt, designSystem!, selectedModel);
           console.log(`Iteration variation ${index + 1} result received from worker:`, iterationResult);
 
           // Send this iteration variation to the plugin immediately for rendering
@@ -253,7 +300,7 @@ const App = () => {
                   svg: iterationResult.svg,
                   frameId: frameId,
                   variationIndex: index,
-                  totalVariations: numberOfIterationVariations,
+                  totalVariations: variations,
                 },
               },
             },
@@ -272,8 +319,6 @@ const App = () => {
           );
         }
       });
-
-      // The plugin will send back iteration-complete or iteration-error for each
     } catch (err) {
       setIsIterating(false);
       setError(err instanceof Error ? err.message : 'Failed to iterate design');

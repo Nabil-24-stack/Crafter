@@ -10,6 +10,8 @@ export type MessageType =
   | 'iterate-design-variation'
   | 'get-design-system'
   | 'get-selected-frame'
+  | 'export-frame-png'
+  | 'frame-png-exported'
   | 'export-frame-json'
   | 'frame-json-exported'
   | 'selected-frame-data'

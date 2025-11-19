@@ -47,15 +47,22 @@ initPlugin();
 figma.on('selectionchange', () => {
   const selection = figma.currentPage.selection;
 
-  // If exactly one frame is selected, automatically trigger iteration mode
+  // If exactly one frame is selected, send frame info to UI (but don't export PNG yet)
   if (selection.length === 1 && selection[0].type === 'FRAME') {
-    console.log('Frame selected, triggering iteration mode...');
-    handleGetSelectedFrame();
+    console.log('Frame selected for iteration mode...');
+    figma.ui.postMessage({
+      type: 'selected-frame-data',
+      payload: {
+        frameId: selection[0].id,
+        frameName: selection[0].name,
+        // No imageData yet - will be exported when user clicks Iterate
+      },
+    });
   } else if (selection.length === 0 || selection[0].type !== 'FRAME') {
     // No frame selected or not a frame - return to ideation mode
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { svgContent: null, message: 'No frame selected' },
+      payload: { frameId: null, frameName: null, message: 'No frame selected' },
     });
   }
 });
@@ -168,6 +175,10 @@ figma.ui.onmessage = async (msg: Message) => {
 
       case 'get-selected-frame':
         await handleGetSelectedFrame();
+        break;
+
+      case 'export-frame-png':
+        await handleExportFramePNG(msg.payload);
         break;
 
       case 'export-frame-json':
@@ -1089,6 +1100,60 @@ async function handleGetSelectedFrame() {
     figma.ui.postMessage({
       type: 'selected-frame-data',
       payload: { imageData: null, message: 'Failed to export frame as PNG' },
+    });
+  }
+}
+
+/**
+ * Exports a specific frame as PNG (called when user clicks Iterate button)
+ */
+async function handleExportFramePNG(payload: any) {
+  const { frameId } = payload;
+  console.log('Exporting frame PNG for iteration...', frameId);
+
+  if (!frameId) {
+    figma.ui.postMessage({
+      type: 'frame-png-exported',
+      payload: { error: 'No frame ID provided' },
+    });
+    return;
+  }
+
+  try {
+    // Find the frame by ID
+    const frameNode = await figma.getNodeByIdAsync(frameId);
+
+    if (!frameNode || frameNode.type !== 'FRAME') {
+      figma.ui.postMessage({
+        type: 'frame-png-exported',
+        payload: { error: 'Frame not found or invalid' },
+      });
+      return;
+    }
+
+    // Export frame as PNG
+    const pngData = await frameNode.exportAsync({
+      format: 'PNG',
+      constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
+    });
+
+    // Convert Uint8Array to base64
+    const base64 = figma.base64Encode(pngData);
+
+    figma.ui.postMessage({
+      type: 'frame-png-exported',
+      payload: {
+        imageData: base64,
+        frameId: frameNode.id,
+      },
+    });
+
+    console.log('Frame PNG exported successfully');
+  } catch (error) {
+    console.error('Error exporting frame PNG:', error);
+    figma.ui.postMessage({
+      type: 'frame-png-exported',
+      payload: { error: 'Failed to export frame as PNG' },
     });
   }
 }
