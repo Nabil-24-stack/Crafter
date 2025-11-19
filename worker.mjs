@@ -1054,6 +1054,7 @@ CRITICAL RULES FOR TEXT:
 • Match font family from design system typography (SF Pro Text, Inter, etc.)
 • Use appropriate font sizes: headings (18-32px), body (14-16px), labels (12-14px)
 • Use appropriate font weights: headings (600-700), body (400-500)
+• ALWAYS set font-style="normal" on ALL <text> elements (never use italic unless explicitly requested)
 • Position text inside or near its related shapes (buttons, cards, etc.)
 
 VISUAL DESIGN RULES:
