@@ -370,7 +370,7 @@ const App = () => {
       {designSystem && (
         <>
           {/* Iteration Mode */}
-          {mode === 'iterate' && selectedFrame && (
+          {mode === 'iterate' && frameId && (
             <div className="iteration-mode">
               <div className="mode-indicator">
                 <p className="mode-label">Iterating on:</p>
