@@ -130,12 +130,7 @@ const App = () => {
       `${masterPrompt} — Variation 2: Balanced layout, alternate component arrangements.`,
       `${masterPrompt} — Variation 3: More whitespace, simplified hierarchy.`,
       `${masterPrompt} — Variation 4: Bold typography, strong visual hierarchy.`,
-      `${masterPrompt} — Variation 5: Minimal approach, focus on content.`,
-      `${masterPrompt} — Variation 6: Card-based layout, organized sections.`,
-      `${masterPrompt} — Variation 7: Asymmetric design, dynamic composition.`,
-      `${masterPrompt} — Variation 8: Grid-based structure, systematic layout.`,
-      `${masterPrompt} — Variation 9: Colorful accents, vibrant visual elements.`,
-      `${masterPrompt} — Variation 10: Dark theme variant, modern aesthetic.`
+      `${masterPrompt} — Variation 5: Minimal approach, focus on content.`
     ];
     return variations.slice(0, n);
   };
@@ -375,7 +370,7 @@ const App = () => {
                   Number of Variations
                 </label>
                 <div className="variations-selector">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  {[1, 2, 3, 4, 5].map((num) => (
                     <button
                       key={num}
                       className={`variation-button ${numberOfIterationVariations === num ? 'active' : ''}`}
@@ -455,7 +450,7 @@ const App = () => {
                   Number of Variations
                 </label>
                 <div className="variations-selector">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  {[1, 2, 3, 4, 5].map((num) => (
                     <button
                       key={num}
                       className={`variation-button ${numberOfVariations === num ? 'active' : ''}`}
