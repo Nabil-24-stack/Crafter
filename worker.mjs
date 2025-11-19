@@ -1229,16 +1229,43 @@ async function processIterateJob(job) {
 
 "${prompt}"
 
-IMPORTANT INSTRUCTIONS:
-• Analyze the current design in the image carefully
-• Preserve the overall layout, structure, and spacing
-• Preserve all elements that are NOT mentioned in the change request
-• Only modify what the user specifically requested
-• Maintain the design system's visual language (colors, fonts, spacing, border-radius)
-• Keep all existing text labels unless the user asks to change them
-• Generate a complete SVG that looks like the current design but with the requested changes
+CRITICAL ITERATION RULES:
 
-Remember: This is an ITERATION, not a complete redesign. Change only what was requested, preserve everything else.`;
+1. PRESERVE EXACTLY (unless user explicitly mentions them):
+   • All existing text content and labels - keep the exact same words
+   • All UI elements (buttons, cards, inputs, navigation, etc.)
+   • Overall layout structure and component arrangement
+   • Spacing between elements
+   • All icons, images, and visual elements not mentioned
+   • Component sizes and proportions
+
+2. CHANGE ONLY:
+   • What the user EXPLICITLY requested in their prompt
+   • Nothing more, nothing less
+
+3. MAKE NATURAL ADJUSTMENTS:
+   • If you change one element, adjust nearby spacing/alignment if needed for visual harmony
+   • If you change colors, ensure proper contrast is maintained
+   • If you resize an element, adjust its container size proportionally
+   • Maintain visual balance and hierarchy
+
+4. REFERENCE THE CURRENT DESIGN:
+   • Study the image carefully - count elements, note text, observe layout
+   • Recreate the SAME structure with the requested modification
+   • Match the existing visual style (rounded corners, shadows, borders, etc.)
+   • Use the SAME number of elements (unless user asks to add/remove)
+
+5. OUTPUT REQUIREMENTS:
+   • Generate a complete, pixel-perfect SVG
+   • Include ALL text labels from the original (unless user changed them)
+   • Match fonts, sizes, weights, colors from the design system
+   • Maintain design system consistency
+
+EXAMPLE - If user says "make the header blue":
+✅ DO: Change header background to blue, adjust text color for contrast if needed, keep everything else identical
+❌ DON'T: Redesign the header, change text content, rearrange elements, or modify other sections
+
+This is an ITERATION - you're making a surgical change to an existing design, not creating something new.`;
 
   // Call Claude with vision (image + text)
   const claudeResponse = await callClaudeWithVision(systemPrompt, userPrompt, imageData);
