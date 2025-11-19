@@ -27,11 +27,11 @@ const App = () => {
   const [mode, setMode] = React.useState<'ideation' | 'iterate'>('ideation');
 
   // Variations state
-  const [numberOfVariations, setNumberOfVariations] = React.useState<1 | 2 | 3>(1);
+  const [numberOfVariations, setNumberOfVariations] = React.useState<number>(1);
   const [isGeneratingVariations, setIsGeneratingVariations] = React.useState(false);
 
   // Iteration variations state
-  const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<1 | 2 | 3>(1);
+  const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<number>(1);
 
   // Set up message listener on mount
   React.useEffect(() => {
@@ -128,7 +128,14 @@ const App = () => {
     const variations = [
       `${masterPrompt} — Variation 1: Same concept, tighter layout, emphasize primary actions.`,
       `${masterPrompt} — Variation 2: Balanced layout, alternate component arrangements.`,
-      `${masterPrompt} — Variation 3: More whitespace, simplified hierarchy.`
+      `${masterPrompt} — Variation 3: More whitespace, simplified hierarchy.`,
+      `${masterPrompt} — Variation 4: Bold typography, strong visual hierarchy.`,
+      `${masterPrompt} — Variation 5: Minimal approach, focus on content.`,
+      `${masterPrompt} — Variation 6: Card-based layout, organized sections.`,
+      `${masterPrompt} — Variation 7: Asymmetric design, dynamic composition.`,
+      `${masterPrompt} — Variation 8: Grid-based structure, systematic layout.`,
+      `${masterPrompt} — Variation 9: Colorful accents, vibrant visual elements.`,
+      `${masterPrompt} — Variation 10: Dark theme variant, modern aesthetic.`
     ];
     return variations.slice(0, n);
   };
@@ -368,11 +375,11 @@ const App = () => {
                   Number of Variations
                 </label>
                 <div className="variations-selector">
-                  {[1, 2, 3].map((num) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <button
                       key={num}
                       className={`variation-button ${numberOfIterationVariations === num ? 'active' : ''}`}
-                      onClick={() => setNumberOfIterationVariations(num as 1 | 2 | 3)}
+                      onClick={() => setNumberOfIterationVariations(num)}
                       disabled={isIterating}
                     >
                       {num}
@@ -448,11 +455,11 @@ const App = () => {
                   Number of Variations
                 </label>
                 <div className="variations-selector">
-                  {[1, 2, 3].map((num) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <button
                       key={num}
                       className={`variation-button ${numberOfVariations === num ? 'active' : ''}`}
-                      onClick={() => setNumberOfVariations(num as 1 | 2 | 3)}
+                      onClick={() => setNumberOfVariations(num)}
                       disabled={isGeneratingVariations || isLoading}
                     >
                       {num}

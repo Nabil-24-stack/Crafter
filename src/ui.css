@@ -334,12 +334,13 @@ body {
 /* Variations selector */
 .variations-selector {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .variation-button {
-  flex: 1;
-  padding: 10px 16px;
+  flex: 0 0 calc(20% - 6.4px); /* 5 buttons per row with gap */
+  padding: 10px 12px;
   border: 2px solid #e0e0e0;
   border-radius: 6px;
   background: white;
@@ -348,6 +349,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
 .variation-button:hover:not(:disabled) {
