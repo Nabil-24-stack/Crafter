@@ -699,6 +699,125 @@ async function callClaudeWithVision(systemPrompt, userPrompt, imageDataBase64) {
 }
 
 /**
+ * Call Gemini with vision (image + text)
+ */
+async function callGeminiWithVision(systemPrompt, userPrompt, imageDataBase64) {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
+  if (!geminiApiKey) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiApiKey,
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `${systemPrompt}\n\n${userPrompt}`,
+              },
+              {
+                inlineData: {
+                  mimeType: 'image/png',
+                  data: imageDataBase64,
+                },
+                mediaResolution: {
+                  level: 'media_resolution_high',
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Convert Gemini response format to Claude-like format for consistency
+  return {
+    content: [
+      {
+        type: 'text',
+        text: data.candidates?.[0]?.content?.parts?.[0]?.text || '',
+      },
+    ],
+    stop_reason: data.candidates?.[0]?.finishReason === 'MAX_TOKENS' ? 'max_tokens' : 'stop',
+    usage: {
+      input_tokens: data.usageMetadata?.promptTokenCount || 0,
+      output_tokens: data.usageMetadata?.candidatesTokenCount || 0,
+    },
+  };
+}
+
+/**
+ * Call Gemini (text only, no vision)
+ */
+async function callGemini(systemPrompt, userPrompt) {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
+  if (!geminiApiKey) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiApiKey,
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `${systemPrompt}\n\n${userPrompt}`,
+              },
+            ],
+          },
+        ],
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Convert Gemini response format to Claude-like format
+  return {
+    content: [
+      {
+        type: 'text',
+        text: data.candidates?.[0]?.content?.parts?.[0]?.text || '',
+      },
+    ],
+    stop_reason: data.candidates?.[0]?.finishReason === 'MAX_TOKENS' ? 'max_tokens' : 'stop',
+    usage: {
+      input_tokens: data.usageMetadata?.promptTokenCount || 0,
+      output_tokens: data.usageMetadata?.candidatesTokenCount || 0,
+    },
+  };
+}
+
+/**
  * Call Together AI API (fine-tuned Llama model)
  */
 async function callTogetherAI(systemPrompt, userPrompt) {
@@ -994,10 +1113,10 @@ function extractSVG(responseText) {
  * Process a generate job - SVG MODE
  */
 async function processGenerateJob(job) {
-  const { prompt, designSystem } = job.input;
+  const { prompt, designSystem, model } = job.input;
 
-  // SVG MODE: Use Claude only (no Together AI until retrained on SVG)
-  console.log('🎨 SVG Mode: Using Claude 4.5 for SVG generation');
+  const selectedModel = model || 'claude';
+  console.log(`🎨 SVG Mode: Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} for SVG generation`);
 
   const systemPrompt = buildSVGSystemPrompt(designSystem);
   const userPrompt = `User Request: ${prompt}
@@ -1013,27 +1132,30 @@ REQUIREMENTS:
 
 Remember: Every button, card, header, and UI element MUST have visible text labels!`;
 
-  const claudeResponse = await callClaude(systemPrompt, userPrompt);
-  const responseText = claudeResponse.content[0]?.text || '';
+  const aiResponse = selectedModel === 'gemini'
+    ? await callGemini(systemPrompt, userPrompt)
+    : await callClaude(systemPrompt, userPrompt);
+
+  const responseText = aiResponse.content[0]?.text || '';
 
   // Check if we hit the token limit
-  if (claudeResponse.stop_reason === 'max_tokens' || claudeResponse.stop_reason === 'length') {
-    console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
-    console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+  if (aiResponse.stop_reason === 'max_tokens' || aiResponse.stop_reason === 'length') {
+    console.warn('⚠️ Warning: Model hit max_tokens limit. Response may be truncated.');
+    console.warn('Usage:', JSON.stringify(aiResponse.usage));
   }
 
   // Extract SVG from response
   const svg = extractSVG(responseText);
 
   if (!svg || !svg.includes('<svg')) {
-    throw new Error('Failed to extract valid SVG from Claude response');
+    throw new Error('Failed to extract valid SVG from AI response');
   }
 
   console.log('✅ SVG generated successfully');
 
   return {
     svg,
-    reasoning: 'SVG mockup generated with Claude 4.5'
+    reasoning: `SVG mockup generated with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'}`
   };
 }
 
@@ -1219,9 +1341,10 @@ IMPORTANT:
  * Uses PNG screenshot + design system to generate modified SVG
  */
 async function processIterateJob(job) {
-  const { prompt, imageData, designSystem } = job.input;
+  const { prompt, imageData, designSystem, model } = job.input;
 
-  console.log('🎨 Vision Iteration Mode: Using Claude 4.5 with image');
+  const selectedModel = model || 'claude';
+  console.log(`🎨 Vision Iteration Mode: Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image`);
 
   const systemPrompt = buildSVGSystemPrompt(designSystem);
 
@@ -1267,14 +1390,17 @@ EXAMPLE - If user says "make the header blue":
 
 This is an ITERATION - you're making a surgical change to an existing design, not creating something new.`;
 
-  // Call Claude with vision (image + text)
-  const claudeResponse = await callClaudeWithVision(systemPrompt, userPrompt, imageData);
-  const responseText = claudeResponse.content[0]?.text || '';
+  // Call the selected AI model with vision (image + text)
+  const aiResponse = selectedModel === 'gemini'
+    ? await callGeminiWithVision(systemPrompt, userPrompt, imageData)
+    : await callClaudeWithVision(systemPrompt, userPrompt, imageData);
+
+  const responseText = aiResponse.content[0]?.text || '';
 
   // Check if we hit the token limit
-  if (claudeResponse.stop_reason === 'max_tokens' || claudeResponse.stop_reason === 'length') {
-    console.warn('⚠️ Warning: Claude hit max_tokens limit. Response may be truncated.');
-    console.warn('Usage:', JSON.stringify(claudeResponse.usage));
+  if (aiResponse.stop_reason === 'max_tokens' || aiResponse.stop_reason === 'length') {
+    console.warn('⚠️ Warning: Model hit max_tokens limit. Response may be truncated.');
+    console.warn('Usage:', JSON.stringify(aiResponse.usage));
   }
 
   // Extract SVG from response
@@ -1288,7 +1414,7 @@ This is an ITERATION - you're making a surgical change to an existing design, no
 
   return {
     svg: updatedSVG,
-    reasoning: 'SVG modified with Claude 4.5 Vision'
+    reasoning: `SVG modified with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} Vision`
   };
 }
 

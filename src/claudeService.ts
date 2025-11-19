@@ -45,7 +45,8 @@ async function pollJobStatus(jobId: string): Promise<any> {
 export async function generateLayout(
   prompt: string,
   designSystem: DesignSystemData,
-  apiKey: string
+  apiKey: string,
+  model: 'claude' | 'gemini' = 'claude'
 ): Promise<GenerationResult> {
   // Use mock mode if specified
   if (apiKey === 'MOCK_API_KEY' || !apiKey) {
@@ -63,6 +64,7 @@ export async function generateLayout(
         mode: 'generate',
         prompt,
         designSystem,
+        model,
       }),
     });
 
@@ -125,7 +127,8 @@ function generateMockLayout(prompt: string, designSystem: DesignSystemData): Gen
 export async function iterateLayout(
   imageData: string,
   userPrompt: string,
-  designSystem: DesignSystemData
+  designSystem: DesignSystemData,
+  model: 'claude' | 'gemini' = 'claude'
 ): Promise<IterationResult> {
   try {
     // Start the job
@@ -139,6 +142,7 @@ export async function iterateLayout(
         prompt: userPrompt,
         imageData,
         designSystem,
+        model,
       }),
     });
 

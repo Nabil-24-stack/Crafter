@@ -27,7 +27,7 @@ export default async function handler(
   }
 
   try {
-    const { mode, prompt, designSystem, imageData } = req.body;
+    const { mode, prompt, designSystem, imageData, model } = req.body;
 
     // Validate input
     if (!mode || !designSystem) {
@@ -66,6 +66,7 @@ export default async function handler(
       prompt,
       designSystem,
       imageData,
+      model: model || 'claude', // Default to Claude if not specified
     };
 
     const jobId = await createJob(mode, input);

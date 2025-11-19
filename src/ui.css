@@ -183,7 +183,8 @@ body {
 }
 
 .input,
-.textarea {
+.textarea,
+.select {
   width: 100%;
   padding: 10px;
   font-size: 13px;
@@ -191,10 +192,21 @@ body {
   border-radius: 6px;
   font-family: inherit;
   transition: all 0.2s;
+  background-color: white;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .input:focus,
-.textarea:focus {
+.textarea:focus,
+.select:focus {
   outline: none;
   border-color: #383838;
   box-shadow: 0 0 0 3px rgba(56, 56, 56, 0.1);

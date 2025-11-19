@@ -16,6 +16,7 @@ const App = () => {
   const [result, setResult] = React.useState<string>('');
   const [error, setError] = React.useState<string>('');
   const [promptError, setPromptError] = React.useState<string>('');
+  const [selectedModel, setSelectedModel] = React.useState<'claude' | 'gemini'>('claude');
 
   // Iteration mode state
   const [selectedFrame, setSelectedFrame] = React.useState<any | null>(null);
@@ -157,7 +158,7 @@ const App = () => {
       // Start all variations in parallel, but render each as soon as it's ready
       variationPrompts.forEach(async (varPrompt, index) => {
         try {
-          const variationResult = await generateLayout(varPrompt, designSystem, apiKey);
+          const variationResult = await generateLayout(varPrompt, designSystem, apiKey, selectedModel);
 
           // Send this variation to the plugin immediately for rendering
           parent.postMessage(
@@ -229,7 +230,7 @@ const App = () => {
 
     try {
       console.log('Starting iteration request...');
-      const iterationResult = await iterateLayout(selectedFrame, iterationPrompt, designSystem);
+      const iterationResult = await iterateLayout(selectedFrame, iterationPrompt, designSystem, selectedModel);
       console.log('Iteration result received from worker:', iterationResult);
 
       // Send the iteration result to the plugin code for applying
@@ -308,6 +309,22 @@ const App = () => {
               </div>
 
               <div className="input-group">
+                <label htmlFor="model-iterate" className="label">
+                  AI Model
+                </label>
+                <select
+                  id="model-iterate"
+                  className="select"
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value as 'claude' | 'gemini')}
+                  disabled={isIterating}
+                >
+                  <option value="claude">Claude 4.5 Sonnet</option>
+                  <option value="gemini">Google Gemini 3 Pro</option>
+                </select>
+              </div>
+
+              <div className="input-group">
                 <label className="label">Iteration Mode</label>
                 <div className="radio-group">
                   <label className="radio-label">
@@ -365,6 +382,23 @@ const App = () => {
           {/* Ideation Mode */}
           {mode === 'ideation' && (
             <>
+              {/* Model Selector */}
+              <div className="input-group">
+                <label htmlFor="model" className="label">
+                  AI Model
+                </label>
+                <select
+                  id="model"
+                  className="select"
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value as 'claude' | 'gemini')}
+                  disabled={isGeneratingVariations || isLoading}
+                >
+                  <option value="claude">Claude 4.5 Sonnet</option>
+                  <option value="gemini">Google Gemini 3 Pro</option>
+                </select>
+              </div>
+
               {/* Prompt Input */}
               <div className="input-group">
                 <label htmlFor="prompt" className="label">
