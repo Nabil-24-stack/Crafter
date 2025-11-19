@@ -79,12 +79,16 @@ const App = () => {
             console.log('Frame PNG exported, proceeding with iteration...');
 
             // If we have a pending iteration request, process it now
-            if (pendingIterationRef.current) {
+            if (pendingIterationRef.current && designSystem) {
               const { prompt: iterPrompt, variations } = pendingIterationRef.current;
               pendingIterationRef.current = null;
 
               // Start the iteration with the exported PNG
-              startIterationWithPNG(msg.payload.imageData, iterPrompt, variations);
+              startIterationWithPNG(msg.payload.imageData, iterPrompt, variations, designSystem);
+            } else if (pendingIterationRef.current && !designSystem) {
+              setIsIterating(false);
+              setError('Design system not loaded');
+              pendingIterationRef.current = null;
             }
           }
           break;
@@ -278,7 +282,7 @@ const App = () => {
   };
 
   // Start iteration after PNG is exported
-  const startIterationWithPNG = async (imageData: string, iterPrompt: string, variations: number) => {
+  const startIterationWithPNG = async (imageData: string, iterPrompt: string, variations: number, ds: DesignSystemData) => {
     try {
       console.log('Starting iteration with exported PNG...');
 
@@ -288,7 +292,7 @@ const App = () => {
       // Start all iteration variations in parallel, but render each as soon as it's ready
       variationPrompts.forEach(async (varPrompt, index) => {
         try {
-          const iterationResult = await iterateLayout(imageData, varPrompt, designSystem!, selectedModel);
+          const iterationResult = await iterateLayout(imageData, varPrompt, ds, selectedModel);
           console.log(`Iteration variation ${index + 1} result received from worker:`, iterationResult);
 
           // Send this iteration variation to the plugin immediately for rendering
