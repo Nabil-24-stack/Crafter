@@ -253,9 +253,15 @@ const App = () => {
     }
 
     if (!designSystem) {
-      setError('Design system not loaded. Please scan first.');
+      setError('Design system not loaded. Please scan your design system first.');
       return;
     }
+
+    console.log('Design system check:', {
+      hasDesignSystem: !!designSystem,
+      components: designSystem?.components?.length || 0,
+      colors: designSystem?.colors?.length || 0,
+    });
 
     setIsIterating(true);
     setError('');
@@ -263,7 +269,7 @@ const App = () => {
 
     console.log('Requesting PNG export for iteration...');
 
-    // Store the iteration request
+    // Store the iteration request WITH design system
     pendingIterationRef.current = {
       prompt: iterationPrompt,
       variations: numberOfIterationVariations,
