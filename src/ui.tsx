@@ -25,7 +25,6 @@ const App = () => {
   const [iterationPrompt, setIterationPrompt] = React.useState('');
   const [isIterating, setIsIterating] = React.useState(false);
   const [mode, setMode] = React.useState<'ideation' | 'iterate'>('ideation');
-  const [iterationMode, setIterationMode] = React.useState<'replace' | 'new'>('new');
 
   // Variations state
   const [numberOfVariations, setNumberOfVariations] = React.useState<1 | 2 | 3>(1);
@@ -242,7 +241,7 @@ const App = () => {
             payload: {
               svg: iterationResult.svg,
               frameId: frameId,
-              mode: iterationMode, // 'replace' or 'new'
+              mode: 'new', // Always create new design
             },
           },
         },
@@ -322,34 +321,6 @@ const App = () => {
                   <option value="claude">Claude 4.5 Sonnet</option>
                   <option value="gemini">Google Gemini 3 Pro</option>
                 </select>
-              </div>
-
-              <div className="input-group">
-                <label className="label">Iteration Mode</label>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="iteration-mode"
-                      value="new"
-                      checked={iterationMode === 'new'}
-                      onChange={(e) => setIterationMode(e.target.value as 'new' | 'replace')}
-                      disabled={isIterating}
-                    />
-                    <span>Iterate and create a new design</span>
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="iteration-mode"
-                      value="replace"
-                      checked={iterationMode === 'replace'}
-                      onChange={(e) => setIterationMode(e.target.value as 'new' | 'replace')}
-                      disabled={isIterating}
-                    />
-                    <span>Iterate selected design</span>
-                  </label>
-                </div>
               </div>
 
               <div className="input-group">
