@@ -49,12 +49,13 @@ figma.on('selectionchange', () => {
 
   // If exactly one frame is selected, send frame info to UI (but don't export PNG yet)
   if (selection.length === 1 && selection[0].type === 'FRAME') {
-    console.log('Frame selected for iteration mode...');
+    const frame = selection[0] as FrameNode;
+    console.log('Frame selected for iteration:', frame.name);
     figma.ui.postMessage({
       type: 'selected-frame-data',
       payload: {
-        frameId: selection[0].id,
-        frameName: selection[0].name,
+        frameId: frame.id,
+        frameName: frame.name,
         // No imageData yet - will be exported when user clicks Iterate
       },
     });

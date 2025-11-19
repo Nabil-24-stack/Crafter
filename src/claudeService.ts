@@ -131,6 +131,13 @@ export async function iterateLayout(
   model: 'claude' | 'gemini' = 'claude'
 ): Promise<IterationResult> {
   try {
+    console.log('iterateLayout called with:', {
+      imageDataLength: imageData?.length,
+      promptLength: userPrompt?.length,
+      hasDesignSystem: !!designSystem,
+      model,
+    });
+
     // Start the job
     const startResponse = await fetch(START_JOB_URL, {
       method: 'POST',
