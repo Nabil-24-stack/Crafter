@@ -20,6 +20,7 @@ const App = () => {
   // Iteration mode state
   const [selectedFrame, setSelectedFrame] = React.useState<any | null>(null);
   const [frameId, setFrameId] = React.useState<string | null>(null);
+  const [frameName, setFrameName] = React.useState<string | null>(null);
   const [iterationPrompt, setIterationPrompt] = React.useState('');
   const [isIterating, setIsIterating] = React.useState(false);
   const [mode, setMode] = React.useState<'ideation' | 'iterate'>('ideation');
@@ -48,11 +49,13 @@ const App = () => {
           if (msg.payload.imageData) {
             setSelectedFrame(msg.payload.imageData);
             setFrameId(msg.payload.frameId);
+            setFrameName(msg.payload.frameName || 'Selected Frame');
             setMode('iterate');
             console.log('Frame PNG exported for iteration');
           } else {
             setSelectedFrame(null);
             setFrameId(null);
+            setFrameName(null);
             setMode('ideation');
           }
           break;
@@ -299,7 +302,7 @@ const App = () => {
             <div className="iteration-mode">
               <div className="mode-indicator">
                 <p className="mode-label">Iterating on:</p>
-                <p className="frame-name">Selected Frame (SVG)</p>
+                <p className="frame-name">{frameName || 'Selected Frame'}</p>
               </div>
 
               <div className="input-group">
