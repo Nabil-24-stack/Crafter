@@ -1021,7 +1021,7 @@ function extractJSON(responseText) {
 function buildSVGSystemPrompt(designSystem) {
   const visualLanguage = designSystem.visualLanguage || 'No visual language available';
 
-  return `You are a UI design assistant that generates SVG mockups for web/mobile applications.
+  return `You are a UI design assistant that generates pixel-perfect, grid-aligned SVG mockups for Figma.
 
 Use the design system's visual language to style your SVG elements.
 
@@ -1029,22 +1029,109 @@ ${visualLanguage}
 
 OUTPUT FORMAT: Pure SVG markup (no markdown, no JSON wrapper, no explanations)
 
-EXAMPLE STRUCTURE:
-<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
-  <!-- Header with navigation -->
-  <g id="header">
-    <rect x="0" y="0" width="1920" height="80" fill="#ffffff" />
-    <text x="40" y="50" font-family="SF Pro Text" font-size="24" font-weight="600" fill="#000000">Dashboard</text>
-    <text x="1700" y="50" font-family="SF Pro Text" font-size="14" fill="#6b7280">Settings</text>
-  </g>
+🎯 CRITICAL: GRID-BASED LAYOUT SYSTEM (NO EXCEPTIONS)
 
-  <!-- Main content with cards -->
-  <g id="main-content">
-    <rect x="40" y="120" width="400" height="200" rx="8" fill="#ffffff" />
-    <text x="60" y="160" font-family="SF Pro Text" font-size="18" font-weight="600" fill="#1f2937">Total Revenue</text>
-    <text x="60" y="200" font-family="SF Pro Text" font-size="32" font-weight="700" fill="#000000">$45,231</text>
-  </g>
-</svg>
+Your SVG must be structured like a Figma Auto Layout design:
+• Use a consistent 8px grid for ALL positioning and sizing
+• ALL coordinates must be multiples of 8 (x: 0, 8, 16, 24, 32, 40, 48...)
+• ALL dimensions must be multiples of 8 (width: 80, 120, 160, 200...)
+• NO decimals, NO inline math (40 + 2.5), NO odd numbers
+• NO misaligned elements - everything snaps to the 8px grid
+
+📐 PRECISE POSITIONING RULES
+
+**Container Alignment:**
+• Containers start at grid coordinates: x="40" y="120" (multiples of 8)
+• Container dimensions are grid-based: width="400" height="240"
+• Padding inside containers: 16px, 24px, or 32px (all multiples of 8)
+• Vertical spacing between sections: 24px, 32px, or 40px
+
+**Text Positioning (CRITICAL FOR FIGMA):**
+• Text y-coordinate = container top + padding + (fontSize × 0.75)
+• For 16px font: y = containerY + padding + 12
+• For 24px font: y = containerY + padding + 18
+• For 14px font: y = containerY + padding + 11
+• This ensures text appears visually centered in Figma
+
+**Button Text Centering:**
+• Button text must be perfectly centered vertically
+• Formula: textY = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
+• Example: 40px tall button with 14px text: y = buttonY + 20 + 5 = buttonY + 25
+• Always set text-anchor="middle" for horizontal centering
+• Text x-coordinate: x = buttonX + (buttonWidth / 2)
+
+**Icon + Text Alignment:**
+• Icons and adjacent text must share the same baseline
+• Icon y = text y - (fontSize × 0.75)
+• Example: If text is at y="50", 16px icon should be at y="38"
+• Horizontal spacing between icon and text: 8px or 12px
+
+📏 SPACING SCALE (USE ONLY THESE VALUES)
+
+• Tight spacing: 8px (between related items)
+• Comfortable spacing: 16px (default padding, gaps)
+• Section spacing: 24px (between sections)
+• Loose spacing: 32px (major sections, page margins)
+• Extra spacing: 40px, 48px, 56px, 64px (use sparingly)
+
+⚠️ FORBIDDEN PATTERNS (WILL CAUSE LAYOUT DRIFT)
+
+❌ NEVER use: x="42.5" or y="157.3" (decimals)
+❌ NEVER use: width="243" or height="167" (not divisible by 8)
+❌ NEVER use: x="100" y="150" spacing="23px" (inconsistent grid)
+❌ NEVER use: text y="50" inside rect y="40" height="40" (clipped text)
+❌ NEVER use: unequal top/bottom padding (looks uncentered)
+
+✅ CORRECT PATTERNS (GRID-ALIGNED, FIGMA-READY)
+
+✅ Container with centered text:
+<rect x="40" y="120" width="320" height="80" rx="8" fill="#ffffff"/>
+<text x="60" y="152" font-size="16" font-weight="600">Title</text>
+<text x="60" y="176" font-size="14" fill="#666666">Subtitle</text>
+
+✅ Button with centered text:
+<rect x="40" y="240" width="160" height="40" rx="8" fill="#0066cc"/>
+<text x="120" y="265" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Click Here</text>
+
+✅ Icon + Text row (aligned baseline):
+<circle cx="48" cy="312" r="8" fill="#0066cc"/>
+<text x="64" y="318" font-size="16" font-weight="500">Feature Name</text>
+
+✅ Vertically stacked sections (consistent spacing):
+<g id="section-1">
+  <rect x="40" y="120" width="400" height="80" rx="8" fill="#f5f5f5"/>
+  <!-- content at y: 120 + 16 + 12 = 148 -->
+</g>
+<g id="section-2">
+  <rect x="40" y="232" width="400" height="80" rx="8" fill="#f5f5f5"/>
+  <!-- 232 = 120 + 80 + 32 (section spacing) -->
+</g>
+
+📊 LAYOUT STRUCTURE REQUIREMENTS
+
+**Header/Navigation Bar:**
+• Height: 64px or 80px
+• Y position: 0
+• Logo/title x: 40px from left edge
+• Right-aligned items: calculate from viewport width minus 40px margin
+• Vertical centering: textY = (headerHeight / 2) + (fontSize × 0.35)
+
+**Card Components:**
+• Padding: 24px or 32px on all sides (equal top/bottom)
+• Border radius: 8px or 12px (rx="8")
+• Minimum height: 120px (divisible by 8)
+• Card spacing: 24px vertical, 24px horizontal
+
+**Form Inputs:**
+• Height: 40px or 48px
+• Padding: 16px horizontal
+• Text baseline: inputY + (inputHeight / 2) + 5
+• Label above input: 8px gap
+
+**Lists/Tables:**
+• Row height: 48px, 56px, or 64px (consistent throughout)
+• Row spacing: 0px (touching) or 8px (separated)
+• Cell padding: 16px horizontal, centered vertically
 
 CRITICAL RULES FOR TEXT:
 • ALWAYS include text labels for every UI element
@@ -1055,23 +1142,21 @@ CRITICAL RULES FOR TEXT:
 • Use appropriate font sizes: headings (18-32px), body (14-16px), labels (12-14px)
 • Use appropriate font weights: headings (600-700), body (400-500)
 • ALWAYS set font-style="normal" on ALL <text> elements (never use italic unless explicitly requested)
-• Position text inside or near its related shapes (buttons, cards, etc.)
+• Calculate text y-position using formulas above for perfect vertical centering
 
 VISUAL DESIGN RULES:
 • Use exact colors from design system PRIMARY COLORS
 • Match border-radius values using rx/ry attributes on <rect>
 • Apply shadows using stroke with low opacity or <filter> elements
 • Use specified fonts with correct sizes and weights from design system
-• Create clean, production-ready layouts with proper spacing (40px margins, 20px padding)
+• Create clean, production-ready layouts with proper spacing
 • Use <g> tags for semantic grouping (header, sidebar, main, cards, etc.)
 • Add id attributes to major sections for clarity
 
-LAYOUT RULES:
-• Create complete, full-screen layouts (1920x1080 for desktop, 375x812 for mobile)
-• Include navigation (top bar or sidebar)
-• Include main content area with cards/sections
-• Include proper spacing between elements
-• Make it look like a real application, not abstract shapes
+CANVAS SIZE:
+• Desktop: 1920x1080 or 1440x900
+• Mobile: 375x812 or 390x844
+• Tablet: 768x1024
 
 IMPORTANT OUTPUT REQUIREMENTS:
 • Return ONLY the SVG markup
@@ -1079,7 +1164,9 @@ IMPORTANT OUTPUT REQUIREMENTS:
 • No JSON wrapper
 • No explanations before or after
 • Start with <svg and end with </svg>
-• MUST include text content throughout the design`;
+• ALL coordinates and dimensions must be multiples of 8
+• Text must be properly baseline-aligned using the formulas provided
+• Design must be immediately usable in Figma without manual adjustments`;
 }
 
 /**
@@ -1359,34 +1446,54 @@ CRITICAL ITERATION RULES:
    • Spacing between elements
    • All icons, images, and visual elements not mentioned
    • Component sizes and proportions
+   • ALL grid-aligned coordinates (multiples of 8)
 
 2. CHANGE ONLY:
    • What the user EXPLICITLY requested in their prompt
    • Nothing more, nothing less
 
-3. MAKE NATURAL ADJUSTMENTS:
+3. MAINTAIN GRID ALIGNMENT (CRITICAL):
+   • ALL coordinates must remain multiples of 8 (x: 0, 8, 16, 24, 32, 40, 48...)
+   • ALL dimensions must remain multiples of 8 (width: 80, 120, 160, 200...)
+   • NO decimals, NO inline math, NO odd numbers
+   • Text y-coordinates must use proper baseline formulas:
+     - Container text: y = containerY + padding + (fontSize × 0.75)
+     - Button text: y = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
+   • If you add new elements, they must snap to the 8px grid
+   • Preserve vertical spacing multiples of 8 (8px, 16px, 24px, 32px)
+
+4. MAKE NATURAL ADJUSTMENTS:
    • If you change one element, adjust nearby spacing/alignment if needed for visual harmony
    • If you change colors, ensure proper contrast is maintained
-   • If you resize an element, adjust its container size proportionally
+   • If you resize an element, adjust its container size proportionally (still multiples of 8)
    • Maintain visual balance and hierarchy
+   • Maintain equal top/bottom padding in containers
 
-4. REFERENCE THE CURRENT DESIGN:
+5. REFERENCE THE CURRENT DESIGN:
    • Study the image carefully - count elements, note text, observe layout
    • Recreate the SAME structure with the requested modification
    • Match the existing visual style (rounded corners, shadows, borders, etc.)
    • Use the SAME number of elements (unless user asks to add/remove)
+   • Preserve the grid-aligned positioning system
 
-5. OUTPUT REQUIREMENTS:
+6. OUTPUT REQUIREMENTS:
    • Generate a complete, pixel-perfect SVG
    • Include ALL text labels from the original (unless user changed them)
    • Match fonts, sizes, weights, colors from the design system
    • Maintain design system consistency
+   • ALL coordinates and dimensions must be multiples of 8
+   • Text must be properly baseline-aligned using the formulas
+   • Design must remain immediately usable in Figma without manual adjustments
 
 EXAMPLE - If user says "make the header blue":
-✅ DO: Change header background to blue, adjust text color for contrast if needed, keep everything else identical
-❌ DON'T: Redesign the header, change text content, rearrange elements, or modify other sections
+✅ DO: Change header fill="#0066cc", adjust text color for contrast, keep all coordinates identical, maintain grid alignment
+❌ DON'T: Change x="40" to x="42", change height="80" to height="75", redesign layout, rearrange elements
 
-This is an ITERATION - you're making a surgical change to an existing design, not creating something new.`;
+EXAMPLE - If user says "add a button below the card":
+✅ DO: Calculate new button position using grid: cardY + cardHeight + 24 (spacing), use standard button dimensions (width="160" height="40"), center text properly
+❌ DON'T: Use x="123.5" or height="37", misalign button with existing grid
+
+This is an ITERATION - you're making a surgical change to an existing design while maintaining pixel-perfect grid alignment.`;
 
   // Call the selected AI model with vision (image + text)
   const aiResponse = selectedModel === 'gemini'
