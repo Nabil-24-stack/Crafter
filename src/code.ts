@@ -1459,15 +1459,19 @@ async function handleIterateDesignVariation(payload: any) {
     // Store the newly created frame in the session
     currentIterationSession.createdFrames.push(newFrame);
     console.log(`Stored frame ${variationIndex + 1} in session (total: ${currentIterationSession.createdFrames.length}/${totalVariations})`);
+    console.log(`Frame ID: ${newFrame.id}, Frame name: ${newFrame.name}`);
 
     console.log(`Iteration variation ${variationIndex + 1} created successfully`);
 
     // Check if ALL variations have been created (not just if this is the last index)
     if (currentIterationSession.createdFrames.length === totalVariations) {
       console.log(`All ${totalVariations} variations complete. Frames created successfully.`);
+      console.log(`Current selection BEFORE clearing:`, figma.currentPage.selection.map(n => `${n.name} (${n.id})`));
 
       // Clear the session
       currentIterationSession = null;
+
+      console.log(`Current selection AFTER clearing session:`, figma.currentPage.selection.map(n => `${n.name} (${n.id})`));
 
       figma.ui.postMessage({
         type: 'iteration-complete',
