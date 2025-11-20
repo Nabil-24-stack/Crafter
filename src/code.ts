@@ -218,6 +218,11 @@ figma.ui.onmessage = async (msg: Message) => {
         await handleIterateDesignVariation(msg.payload);
         break;
 
+      case 'iteration-error':
+        // Error from UI during iteration - just log it, UI already handles display
+        console.error('Iteration error:', msg.payload.error);
+        break;
+
       default:
         console.warn('Unknown message type:', msg.type);
     }

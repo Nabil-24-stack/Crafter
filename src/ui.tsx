@@ -137,6 +137,10 @@ const App = () => {
           setResult('Frame exported successfully!');
           setError('');
           break;
+
+        default:
+          console.warn('Unknown message type:', msg.type);
+          break;
       }
     };
   }, []);
