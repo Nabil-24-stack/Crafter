@@ -64,7 +64,6 @@ figma.on('selectionchange', () => {
   // If exactly one frame is selected, send frame info to UI (but don't export PNG yet)
   if (selection.length === 1 && selection[0].type === 'FRAME') {
     const frame = selection[0] as FrameNode;
-    console.log('Frame selected for iteration:', frame.name);
     figma.ui.postMessage({
       type: 'selected-frame-data',
       payload: {
@@ -180,7 +179,6 @@ function createAutoLayoutFrame(config: AutoLayoutConfig): FrameNode {
 
 // Handle messages from the UI
 figma.ui.onmessage = async (msg: Message) => {
-  console.log('Received message:', msg.type);
 
   try {
     switch (msg.type) {
@@ -1124,7 +1122,6 @@ async function handleGetSelectedFrame() {
  */
 async function handleExportFramePNG(payload: any) {
   const { frameId } = payload;
-  console.log('Exporting frame PNG for iteration...', frameId);
 
   if (!frameId) {
     figma.ui.postMessage({
@@ -1163,7 +1160,6 @@ async function handleExportFramePNG(payload: any) {
       },
     });
 
-    console.log('Frame PNG exported successfully');
   } catch (error) {
     console.error('Error exporting frame PNG:', error);
     figma.ui.postMessage({
@@ -1407,8 +1403,6 @@ async function handleIterateDesign(payload: any) {
  * Handles iteration variation generation (multiple iterations side-by-side)
  */
 async function handleIterateDesignVariation(payload: any) {
-  console.log('Handling iteration variation request...', payload);
-
   const { svg, frameId, variationIndex, totalVariations } = payload;
 
   if (!frameId || !svg) {
@@ -1434,7 +1428,6 @@ async function handleIterateDesignVariation(payload: any) {
 
   try {
     const frameNode = originalFrame as FrameNode;
-    console.log(`Creating iteration variation ${variationIndex + 1} of ${totalVariations}...`);
 
     // Initialize session if it doesn't exist yet
     if (!currentIterationSession) {
@@ -1442,7 +1435,6 @@ async function handleIterateDesignVariation(payload: any) {
         createdFrames: [],
         totalVariations: totalVariations,
       };
-      console.log('Initialized new iteration session');
     }
 
     // Create SVG node
@@ -1466,25 +1458,18 @@ async function handleIterateDesignVariation(payload: any) {
 
     // Store the newly created frame in the session
     currentIterationSession.createdFrames.push(newFrame);
-    console.log(`Stored frame ${variationIndex + 1} in session (total: ${currentIterationSession.createdFrames.length}/${totalVariations})`);
-    console.log(`Frame ID: ${newFrame.id}, Frame name: ${newFrame.name}`);
 
     // Clear selection to prevent automatic selection of newly created frame
     isUpdatingSelectionProgrammatically = true;
     figma.currentPage.selection = [];
     isUpdatingSelectionProgrammatically = false;
 
-    console.log(`Iteration variation ${variationIndex + 1} created successfully`);
-
     // Check if ALL variations have been created (not just if this is the last index)
     if (currentIterationSession.createdFrames.length === totalVariations) {
-      console.log(`All ${totalVariations} variations complete. Frames created successfully.`);
-      console.log(`Current selection BEFORE clearing:`, figma.currentPage.selection.map(n => `${n.name} (${n.id})`));
+      console.log(`✨ ${totalVariations} iteration${totalVariations > 1 ? 's' : ''} created successfully`);
 
       // Clear the session
       currentIterationSession = null;
-
-      console.log(`Current selection AFTER clearing session:`, figma.currentPage.selection.map(n => `${n.name} (${n.id})`));
 
       figma.ui.postMessage({
         type: 'iteration-complete',
