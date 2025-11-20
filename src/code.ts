@@ -1428,8 +1428,8 @@ async function handleIterateDesignVariation(payload: any) {
     const frameNode = originalFrame as FrameNode;
     console.log(`Creating iteration variation ${variationIndex + 1} of ${totalVariations}...`);
 
-    // Initialize session on first variation
-    if (variationIndex === 0) {
+    // Initialize session if it doesn't exist yet
+    if (!currentIterationSession) {
       currentIterationSession = {
         createdFrames: [],
         totalVariations: totalVariations,
@@ -1457,26 +1457,22 @@ async function handleIterateDesignVariation(payload: any) {
     }
 
     // Store the newly created frame in the session
-    if (currentIterationSession) {
-      currentIterationSession.createdFrames.push(newFrame);
-      console.log(`Stored frame ${variationIndex + 1} in session (total: ${currentIterationSession.createdFrames.length})`);
-    }
+    currentIterationSession.createdFrames.push(newFrame);
+    console.log(`Stored frame ${variationIndex + 1} in session (total: ${currentIterationSession.createdFrames.length}/${totalVariations})`);
 
     console.log(`Iteration variation ${variationIndex + 1} created successfully`);
 
-    // If this is the last variation, send completion message and select all variations
-    if (variationIndex === totalVariations - 1) {
+    // Check if ALL variations have been created (not just if this is the last index)
+    if (currentIterationSession.createdFrames.length === totalVariations) {
       // Select all newly created iteration frames from the session
-      if (currentIterationSession && currentIterationSession.createdFrames.length > 0) {
-        const allIterations = currentIterationSession.createdFrames;
-        figma.currentPage.selection = allIterations;
-        figma.viewport.scrollAndZoomIntoView(allIterations);
+      const allIterations = currentIterationSession.createdFrames;
+      figma.currentPage.selection = allIterations;
+      figma.viewport.scrollAndZoomIntoView(allIterations);
 
-        console.log(`Selected ${allIterations.length} newly created frames`);
+      console.log(`All ${totalVariations} variations complete. Selected ${allIterations.length} newly created frames`);
 
-        // Clear the session
-        currentIterationSession = null;
-      }
+      // Clear the session
+      currentIterationSession = null;
 
       figma.ui.postMessage({
         type: 'iteration-complete',
