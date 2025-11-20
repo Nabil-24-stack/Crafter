@@ -27,6 +27,12 @@ let currentVariationsSession: {
   completedCount: number;
 } | null = null;
 
+// Global state for tracking iteration variations in current session
+let currentIterationSession: {
+  createdFrames: FrameNode[];
+  totalVariations: number;
+} | null = null;
+
 // Global cache for design system (for schema expansion)
 let cachedDesignSystem: DesignSystemData | null = null;
 
@@ -1422,6 +1428,15 @@ async function handleIterateDesignVariation(payload: any) {
     const frameNode = originalFrame as FrameNode;
     console.log(`Creating iteration variation ${variationIndex + 1} of ${totalVariations}...`);
 
+    // Initialize session on first variation
+    if (variationIndex === 0) {
+      currentIterationSession = {
+        createdFrames: [],
+        totalVariations: totalVariations,
+      };
+      console.log('Initialized new iteration session');
+    }
+
     // Create SVG node
     const svgNode = figma.createNodeFromSvg(svg);
 
@@ -1441,25 +1456,26 @@ async function handleIterateDesignVariation(payload: any) {
       (frameNode.parent as FrameNode).appendChild(newFrame);
     }
 
+    // Store the newly created frame in the session
+    if (currentIterationSession) {
+      currentIterationSession.createdFrames.push(newFrame);
+      console.log(`Stored frame ${variationIndex + 1} in session (total: ${currentIterationSession.createdFrames.length})`);
+    }
+
     console.log(`Iteration variation ${variationIndex + 1} created successfully`);
 
     // If this is the last variation, send completion message and select all variations
     if (variationIndex === totalVariations - 1) {
-      // Select all newly created iteration frames
-      const allIterations: SceneNode[] = [];
-      for (let i = 0; i < totalVariations; i++) {
-        const iterationName = `${frameNode.name} (Iteration ${i + 1})`;
-        const iterationFrame = figma.currentPage.findOne(
-          (node) => node.type === 'FRAME' && node.name === iterationName
-        );
-        if (iterationFrame) {
-          allIterations.push(iterationFrame);
-        }
-      }
-
-      if (allIterations.length > 0) {
+      // Select all newly created iteration frames from the session
+      if (currentIterationSession && currentIterationSession.createdFrames.length > 0) {
+        const allIterations = currentIterationSession.createdFrames;
         figma.currentPage.selection = allIterations;
         figma.viewport.scrollAndZoomIntoView(allIterations);
+
+        console.log(`Selected ${allIterations.length} newly created frames`);
+
+        // Clear the session
+        currentIterationSession = null;
       }
 
       figma.ui.postMessage({
