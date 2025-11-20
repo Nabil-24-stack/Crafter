@@ -1464,12 +1464,7 @@ async function handleIterateDesignVariation(payload: any) {
 
     // Check if ALL variations have been created (not just if this is the last index)
     if (currentIterationSession.createdFrames.length === totalVariations) {
-      // Select all newly created iteration frames from the session
-      const allIterations = currentIterationSession.createdFrames;
-      figma.currentPage.selection = allIterations;
-      figma.viewport.scrollAndZoomIntoView(allIterations);
-
-      console.log(`All ${totalVariations} variations complete. Selected ${allIterations.length} newly created frames`);
+      console.log(`All ${totalVariations} variations complete. Frames created successfully.`);
 
       // Clear the session
       currentIterationSession = null;
