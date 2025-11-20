@@ -33,6 +33,9 @@ let currentIterationSession: {
   totalVariations: number;
 } | null = null;
 
+// Flag to prevent selectionchange handler from firing during programmatic selection changes
+let isUpdatingSelectionProgrammatically = false;
+
 // Global cache for design system (for schema expansion)
 let cachedDesignSystem: DesignSystemData | null = null;
 
@@ -51,6 +54,11 @@ initPlugin();
 
 // Listen for selection changes to detect frame selection for iteration
 figma.on('selectionchange', () => {
+  // Ignore selection changes that we're making programmatically
+  if (isUpdatingSelectionProgrammatically) {
+    return;
+  }
+
   const selection = figma.currentPage.selection;
 
   // If exactly one frame is selected, send frame info to UI (but don't export PNG yet)
@@ -1462,7 +1470,9 @@ async function handleIterateDesignVariation(payload: any) {
     console.log(`Frame ID: ${newFrame.id}, Frame name: ${newFrame.name}`);
 
     // Clear selection to prevent automatic selection of newly created frame
+    isUpdatingSelectionProgrammatically = true;
     figma.currentPage.selection = [];
+    isUpdatingSelectionProgrammatically = false;
 
     console.log(`Iteration variation ${variationIndex + 1} created successfully`);
 
