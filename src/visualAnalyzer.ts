@@ -229,6 +229,128 @@ function safeString(value: any): string {
 }
 
 /**
+ * Extract layout tokens from frames in the file
+ */
+function extractLayoutTokens(): {
+  containerWidths: number[];
+  paddingScale: number[];
+  gapScale: number[];
+  layoutStyle: string;
+} {
+  try {
+    // Find top-level frames that look like pages/screens
+    const topFrames = figma.currentPage.findAll(node => {
+      if (node.type !== 'FRAME') return false;
+      const name = node.name.toLowerCase();
+      return (
+        name.includes('page') ||
+        name.includes('screen') ||
+        name.includes('dashboard') ||
+        name.includes('layout') ||
+        node.parent?.type === 'PAGE'
+      );
+    }) as FrameNode[];
+
+    // Build histograms
+    const widthMap = new Map<number, number>();
+    const paddingMap = new Map<number, number>();
+    const gapMap = new Map<number, number>();
+    let cardLayoutCount = 0;
+    let fullWidthCount = 0;
+
+    topFrames.slice(0, 50).forEach(frame => {
+      try {
+        // Collect width (rounded to nearest 10)
+        const width = Math.round(frame.width / 10) * 10;
+        if (width > 0) {
+          widthMap.set(width, (widthMap.get(width) || 0) + 1);
+        }
+
+        // Collect Auto Layout properties
+        if ('layoutMode' in frame && frame.layoutMode !== 'NONE') {
+          const paddings = [
+            frame.paddingLeft,
+            frame.paddingRight,
+            frame.paddingTop,
+            frame.paddingBottom
+          ].filter((p): p is number => typeof p === 'number' && p > 0);
+
+          paddings.forEach(p => {
+            paddingMap.set(p, (paddingMap.get(p) || 0) + 1);
+          });
+
+          const gap = frame.itemSpacing as number;
+          if (gap > 0) {
+            gapMap.set(gap, (gapMap.get(gap) || 0) + 1);
+          }
+        }
+
+        // Detect layout style - check if content is in cards
+        const children = 'children' in frame ? frame.children : [];
+        const hasCards = children.some(child => {
+          if (child.type !== 'FRAME') return false;
+          const childFrame = child as FrameNode;
+          const radius = typeof childFrame.cornerRadius === 'number' ? childFrame.cornerRadius : 0;
+          return (
+            childFrame.fills &&
+            Array.isArray(childFrame.fills) &&
+            childFrame.fills.length > 0 &&
+            radius > 0
+          );
+        });
+
+        if (hasCards) {
+          cardLayoutCount++;
+        } else {
+          fullWidthCount++;
+        }
+      } catch (err) {
+        // Skip this frame
+      }
+    });
+
+    // Get top 3 most common values
+    const topWidths = Array.from(widthMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([w]) => w);
+
+    const topPaddings = Array.from(paddingMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([p]) => p);
+
+    const topGaps = Array.from(gapMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([g]) => g);
+
+    // Determine layout style
+    let layoutStyle = 'mixed';
+    if (cardLayoutCount > fullWidthCount * 2) {
+      layoutStyle = 'card-based (grouped content in rounded containers)';
+    } else if (fullWidthCount > cardLayoutCount * 2) {
+      layoutStyle = 'full-width (sections span entire width)';
+    }
+
+    return {
+      containerWidths: topWidths.length > 0 ? topWidths : [1440],
+      paddingScale: topPaddings.length > 0 ? topPaddings : [16, 24, 32],
+      gapScale: topGaps.length > 0 ? topGaps : [16, 24],
+      layoutStyle
+    };
+  } catch (error) {
+    console.warn('Error extracting layout tokens:', error);
+    return {
+      containerWidths: [1440],
+      paddingScale: [16, 24, 32],
+      gapScale: [16, 24],
+      layoutStyle: 'mixed'
+    };
+  }
+}
+
+/**
  * Generate visual language description for AI prompts
  */
 export function generateVisualLanguageDescription(
@@ -238,6 +360,9 @@ export function generateVisualLanguageDescription(
 ): string {
   try {
     const lines: string[] = [];
+
+    // Extract layout tokens
+    const layoutTokens = extractLayoutTokens();
 
     // Primary colors - safely extract hex values
     const primaryColors = colors
@@ -250,6 +375,23 @@ export function generateVisualLanguageDescription(
       lines.push(`PRIMARY COLORS: ${primaryColors}`);
       lines.push('');
     }
+
+    // Layout preferences
+    lines.push('LAYOUT PREFERENCES:');
+    if (layoutTokens.containerWidths.length > 0) {
+      const widths = layoutTokens.containerWidths.join('px, ') + 'px';
+      lines.push(`- Container widths: ${widths}`);
+    }
+    if (layoutTokens.paddingScale.length > 0) {
+      const paddings = layoutTokens.paddingScale.join('px, ') + 'px';
+      lines.push(`- Common padding values: ${paddings}`);
+    }
+    if (layoutTokens.gapScale.length > 0) {
+      const gaps = layoutTokens.gapScale.join('px, ') + 'px';
+      lines.push(`- Common spacing between elements: ${gaps}`);
+    }
+    lines.push(`- Layout style: ${layoutTokens.layoutStyle}`);
+    lines.push('');
 
     // Component visual characteristics grouped by category
     lines.push('COMPONENT VISUAL CHARACTERISTICS:');
