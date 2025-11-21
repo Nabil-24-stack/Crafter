@@ -109,8 +109,8 @@ Generate 10 distinct high-level layout concepts. Return ONLY valid JSON array, n
       throw new Error(`Claude API error ${claudeResponse.status}: ${errorText}`);
     }
 
-    const data = await claudeResponse.json();
-    const responseText = data.content[0]?.text || '[]';
+    const data = await claudeResponse.json() as any;
+    const responseText = data.content?.[0]?.text || '[]';
 
     console.log('Claude response received');
 
