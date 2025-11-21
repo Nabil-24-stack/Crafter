@@ -278,17 +278,38 @@ async function handleGetDesignSystem() {
 
   const MAX_COMPONENTS = 3000; // Limit to prevent performance issues on huge files
 
-  // Find all local component definitions (COMPONENT and COMPONENT_SET nodes)
-  let allNodes = figma.root.findAll(
-    (node) => node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
-  );
+  // Find component definitions, but stop scanning at MAX_COMPONENTS
+  const allNodes: SceneNode[] = [];
+  let totalFound = 0;
+  let limitReached = false;
 
-  console.log(`Found ${allNodes.length} component nodes in file`);
+  function scanForComponents(node: BaseNode) {
+    if (limitReached) return;
 
-  // Limit to MAX_COMPONENTS if file is too large
-  if (allNodes.length > MAX_COMPONENTS) {
-    console.log(`⚠️ File has ${allNodes.length} components - limiting to ${MAX_COMPONENTS} for performance`);
-    allNodes = allNodes.slice(0, MAX_COMPONENTS);
+    if (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') {
+      totalFound++;
+      if (allNodes.length < MAX_COMPONENTS) {
+        allNodes.push(node as SceneNode);
+      } else {
+        limitReached = true;
+        return;
+      }
+    }
+
+    if ('children' in node) {
+      for (const child of node.children) {
+        if (limitReached) break;
+        scanForComponents(child);
+      }
+    }
+  }
+
+  scanForComponents(figma.root);
+
+  console.log(`Found ${totalFound} component nodes in file${limitReached ? ` (stopped at ${MAX_COMPONENTS})` : ''}`);
+
+  if (limitReached) {
+    console.log(`⚠️ File has ${totalFound}+ components - limited to ${MAX_COMPONENTS} for performance`);
   }
 
   /**
@@ -461,8 +482,8 @@ async function handleGetDesignSystem() {
   cachedDesignSystem = designSystem;
 
   // Show warning if components were limited
-  if (allNodes.length > allComponents.length) {
-    figma.notify(`⚠️ Scanned ${allComponents.length} of ${allNodes.length} components (limited for performance)`, { timeout: 5000 });
+  if (limitReached) {
+    figma.notify(`⚠️ Scanned ${allComponents.length} components - file has more (limited for performance)`, { timeout: 5000 });
   }
 
   // Send the design system back to UI
