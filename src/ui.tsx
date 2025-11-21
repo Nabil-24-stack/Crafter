@@ -157,16 +157,39 @@ const App = () => {
     }, '*');
   };
 
-  // Generate variation prompts helper
-  const generateVariationPrompts = (masterPrompt: string, n: number): string[] => {
-    const variations = [
-      `${masterPrompt} — Variation 1: Same concept, tighter layout, emphasize primary actions.`,
-      `${masterPrompt} — Variation 2: Balanced layout, alternate component arrangements.`,
-      `${masterPrompt} — Variation 3: More whitespace, simplified hierarchy.`,
-      `${masterPrompt} — Variation 4: Bold typography, strong visual hierarchy.`,
-      `${masterPrompt} — Variation 5: Minimal approach, focus on content.`
-    ];
-    return variations.slice(0, n);
+  // Generate variation prompts using LLM
+  const generateVariationPrompts = async (masterPrompt: string, n: number): Promise<string[]> => {
+    try {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-variation-prompts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: masterPrompt,
+          numVariations: n,
+          designSystem: designSystem,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate variation prompts');
+      }
+
+      const data = await response.json();
+      return data.variationPrompts;
+    } catch (error) {
+      console.error('Error generating variation prompts, using fallbacks:', error);
+      // Fallback to hardcoded prompts if API fails
+      const fallbackVariations = [
+        `${masterPrompt} — Tighter layout, emphasize primary actions`,
+        `${masterPrompt} — Balanced composition, alternate arrangements`,
+        `${masterPrompt} — More whitespace, simplified hierarchy`,
+        `${masterPrompt} — Bold typography, strong visual hierarchy`,
+        `${masterPrompt} — Minimal approach, focus on content`
+      ];
+      return fallbackVariations.slice(0, n);
+    }
   };
 
   // Handle generate variations - renders each as soon as it's ready
@@ -190,8 +213,10 @@ const App = () => {
     try {
       const apiKey = 'USE_PROXY';
 
-      // Generate variation prompts
-      const variationPrompts = generateVariationPrompts(prompt, numberOfVariations);
+      // Generate variation prompts using LLM
+      const variationPrompts = await generateVariationPrompts(prompt, numberOfVariations);
+
+      console.log('Generated variation prompts:', variationPrompts);
 
       // Start all variations in parallel, but render each as soon as it's ready
       variationPrompts.forEach(async (varPrompt, index) => {
@@ -300,8 +325,10 @@ const App = () => {
     try {
       console.log('Starting iteration with exported PNG...');
 
-      // Generate variation prompts for iterations
-      const variationPrompts = generateVariationPrompts(iterPrompt, variations);
+      // Generate variation prompts for iterations using LLM
+      const variationPrompts = await generateVariationPrompts(iterPrompt, variations);
+
+      console.log('Generated iteration variation prompts:', variationPrompts);
 
       // Start all iteration variations in parallel, but render each as soon as it's ready
       variationPrompts.forEach(async (varPrompt, index) => {

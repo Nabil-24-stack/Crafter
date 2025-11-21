@@ -1027,6 +1027,31 @@ Use the design system's visual language to style your SVG elements.
 
 ${visualLanguage}
 
+🎨 CONCEPT EXPLORATION (CRITICAL FOR VARIATIONS)
+
+When generating design variations, your goal is to explore DISTINCTLY DIFFERENT interpretations of the same idea.
+Each variation must change at least TWO of these design axes:
+
+1. LAYOUT STRUCTURE:
+   - Single column, split view, grid, sidebar, card-based, timeline, dashboard, masonry
+
+2. VISUAL MOOD:
+   - Minimal, bold, editorial, futuristic, playful, data-dense, elegant, professional
+
+3. INTERACTION EMPHASIS:
+   - Navigation-centric, analytics-focused, social, input-heavy, browsing-focused, action-driven
+
+4. COMPOSITION RHYTHM:
+   - Symmetrical, asymmetrical, stacked, masonry, centered, edge-aligned, floating
+
+5. CONTENT HIERARCHY:
+   - Hero-driven, equal-weight sections, progressive disclosure, scannable cards, list-based
+
+Each variation should feel like the same brand system, but represent a UNIQUE DESIGN CONCEPT.
+Prioritize creativity and structural contrast over minor tweaks (colors, spacing alone).
+
+Think: "Would a designer look at these variations and say they're meaningfully different approaches, or just slight adjustments?"
+
 OUTPUT FORMAT: Pure SVG markup (no markdown, no JSON wrapper, no explanations)
 
 🎯 CRITICAL: GRID-BASED LAYOUT SYSTEM (NO EXCEPTIONS)

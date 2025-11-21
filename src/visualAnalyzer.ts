@@ -238,6 +238,8 @@ function extractLayoutTokens(): {
   layoutStyle: string;
 } {
   try {
+    const startTime = Date.now();
+
     // Find top-level frames that look like pages/screens
     const topFrames = figma.currentPage.findAll(node => {
       if (node.type !== 'FRAME') return false;
@@ -333,12 +335,17 @@ function extractLayoutTokens(): {
       layoutStyle = 'full-width (sections span entire width)';
     }
 
-    return {
+    const result = {
       containerWidths: topWidths.length > 0 ? topWidths : [1440],
       paddingScale: topPaddings.length > 0 ? topPaddings : [16, 24, 32],
       gapScale: topGaps.length > 0 ? topGaps : [16, 24],
       layoutStyle
     };
+
+    const endTime = Date.now();
+    console.log(`⏱️ Layout token extraction took ${endTime - startTime}ms`);
+
+    return result;
   } catch (error) {
     console.warn('Error extracting layout tokens:', error);
     return {
