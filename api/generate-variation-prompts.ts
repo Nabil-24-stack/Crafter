@@ -47,9 +47,24 @@ export default async function handler(
       designSystem: DesignSystemData;
     };
 
+    console.log('Received request:', {
+      hasPrompt: !!prompt,
+      hasNumVariations: !!numVariations,
+      hasDesignSystem: !!designSystem,
+      numVariations,
+      designSystemKeys: designSystem ? Object.keys(designSystem) : 'null',
+    });
+
     if (!prompt || !numVariations || !designSystem) {
+      const missingFields = [];
+      if (!prompt) missingFields.push('prompt');
+      if (!numVariations) missingFields.push('numVariations');
+      if (!designSystem) missingFields.push('designSystem');
+
       res.status(400).json({
-        error: 'Missing required fields: prompt, numVariations, and designSystem are required',
+        error: 'Missing required fields',
+        missingFields,
+        received: { prompt: !!prompt, numVariations: !!numVariations, designSystem: !!designSystem },
       });
       return;
     }

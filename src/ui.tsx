@@ -158,7 +158,21 @@ const App = () => {
   };
 
   // Generate variation prompts using LLM
-  const generateVariationPrompts = async (masterPrompt: string, n: number): Promise<string[]> => {
+  const generateVariationPrompts = async (masterPrompt: string, n: number, ds?: DesignSystemData): Promise<string[]> => {
+    const systemToUse = ds || designSystem;
+
+    if (!systemToUse) {
+      console.warn('No design system available for variation prompt generation, using fallbacks');
+      const fallbackVariations = [
+        `${masterPrompt} — Tighter layout, emphasize primary actions`,
+        `${masterPrompt} — Balanced composition, alternate arrangements`,
+        `${masterPrompt} — More whitespace, simplified hierarchy`,
+        `${masterPrompt} — Bold typography, strong visual hierarchy`,
+        `${masterPrompt} — Minimal approach, focus on content`
+      ];
+      return fallbackVariations.slice(0, n);
+    }
+
     try {
       const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-variation-prompts', {
         method: 'POST',
@@ -168,7 +182,7 @@ const App = () => {
         body: JSON.stringify({
           prompt: masterPrompt,
           numVariations: n,
-          designSystem: designSystem,
+          designSystem: systemToUse,
         }),
       });
 
@@ -326,7 +340,7 @@ const App = () => {
       console.log('Starting iteration with exported PNG...');
 
       // Generate variation prompts for iterations using LLM
-      const variationPrompts = await generateVariationPrompts(iterPrompt, variations);
+      const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds);
 
       console.log('Generated iteration variation prompts:', variationPrompts);
 
