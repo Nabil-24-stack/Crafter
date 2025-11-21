@@ -276,12 +276,20 @@ function inferComponentCategory(name: string): string {
 async function handleGetDesignSystem() {
   console.log('Extracting design system from current file...');
 
+  const MAX_COMPONENTS = 3000; // Limit to prevent performance issues on huge files
+
   // Find all local component definitions (COMPONENT and COMPONENT_SET nodes)
-  const allNodes = figma.root.findAll(
+  let allNodes = figma.root.findAll(
     (node) => node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
   );
 
   console.log(`Found ${allNodes.length} component nodes in file`);
+
+  // Limit to MAX_COMPONENTS if file is too large
+  if (allNodes.length > MAX_COMPONENTS) {
+    console.log(`⚠️ File has ${allNodes.length} components - limiting to ${MAX_COMPONENTS} for performance`);
+    allNodes = allNodes.slice(0, MAX_COMPONENTS);
+  }
 
   /**
    * Safely convert value to string or number
@@ -451,6 +459,11 @@ async function handleGetDesignSystem() {
 
   // Cache the design system for schema expansion
   cachedDesignSystem = designSystem;
+
+  // Show warning if components were limited
+  if (allNodes.length > allComponents.length) {
+    figma.notify(`⚠️ Scanned ${allComponents.length} of ${allNodes.length} components (limited for performance)`, { timeout: 5000 });
+  }
 
   // Send the design system back to UI
   figma.ui.postMessage({
