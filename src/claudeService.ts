@@ -8,7 +8,7 @@ const JOB_STATUS_URL = config.BACKEND_URL.replace('/api/generate', '/api/job-sta
 
 // Polling configuration
 const POLL_INTERVAL_MS = 3000; // Poll every 3 seconds
-const MAX_POLL_ATTEMPTS = 60; // Max 3 minutes (60 * 3s)
+const MAX_POLL_ATTEMPTS = 120; // Max 6 minutes (120 * 3s) - increased for vision jobs
 
 /**
  * Helper function to poll job status

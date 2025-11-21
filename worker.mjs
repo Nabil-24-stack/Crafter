@@ -1577,8 +1577,8 @@ async function main() {
       const jobs = await getQueuedJobs(MAX_CONCURRENT_JOBS);
 
       if (jobs.length === 0) {
-        // No jobs, wait 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // No jobs, wait 1 second (faster polling for better responsiveness)
+        await new Promise(resolve => setTimeout(resolve, 1000));
         continue;
       }
 
