@@ -1442,13 +1442,16 @@ async function handleIterateDesign(payload: any) {
  * Handles iteration variation generation (multiple iterations side-by-side)
  */
 async function handleIterateDesignVariation(payload: any) {
-  const { svg, frameId, variationIndex, totalVariations } = payload;
+  const { svg, reasoning, frameId, variationIndex, totalVariations } = payload;
 
   if (!frameId || !svg) {
     console.log('ERROR: Missing frameId or SVG');
     figma.ui.postMessage({
       type: 'iteration-error',
-      payload: { error: 'Missing frameId or SVG content' },
+      payload: {
+        error: 'Missing frameId or SVG content',
+        variationIndex,
+      },
     });
     return;
   }
@@ -1460,7 +1463,10 @@ async function handleIterateDesignVariation(payload: any) {
     console.log('ERROR: Original frame not found');
     figma.ui.postMessage({
       type: 'iteration-error',
-      payload: { error: 'Original frame not found' },
+      payload: {
+        error: 'Original frame not found',
+        variationIndex,
+      },
     });
     return;
   }
@@ -1475,6 +1481,17 @@ async function handleIterateDesignVariation(payload: any) {
         totalVariations: totalVariations,
       };
     }
+
+    // Send status update: rendering (creating in Figma)
+    console.log(`Creating variation ${variationIndex + 1} in Figma...`);
+    figma.ui.postMessage({
+      type: 'variation-status-update',
+      payload: {
+        variationIndex,
+        status: 'rendering',
+        statusText: 'Creating in Figma',
+      },
+    });
 
     // Create SVG node
     const svgNode = figma.createNodeFromSvg(svg);
@@ -1503,6 +1520,19 @@ async function handleIterateDesignVariation(payload: any) {
     figma.currentPage.selection = [];
     isUpdatingSelectionProgrammatically = false;
 
+    // Send status update: complete
+    console.log(`✅ Variation ${variationIndex + 1} created successfully`);
+    figma.ui.postMessage({
+      type: 'variation-status-update',
+      payload: {
+        variationIndex,
+        status: 'complete',
+        statusText: 'Iteration Complete',
+        reasoning: reasoning || undefined,
+        createdNodeId: newFrame.id,
+      },
+    });
+
     // Check if ALL variations have been created (not just if this is the last index)
     if (currentIterationSession.createdFrames.length === totalVariations) {
       console.log(`✨ ${totalVariations} iteration${totalVariations > 1 ? 's' : ''} created successfully`);
@@ -1510,16 +1540,27 @@ async function handleIterateDesignVariation(payload: any) {
       // Clear the session
       currentIterationSession = null;
 
+      // Notify UI that all variations are complete
       figma.ui.postMessage({
-        type: 'iteration-complete',
-        payload: { message: `${totalVariations} iteration variation${totalVariations > 1 ? 's' : ''} created successfully!` },
+        type: 'all-variations-complete',
+        payload: {
+          totalVariations,
+          completedCount: totalVariations,
+        },
       });
     }
   } catch (error) {
     console.error('Error creating iteration variation:', error);
+
+    // Send error status update for this specific variation
     figma.ui.postMessage({
-      type: 'iteration-error',
-      payload: { error: error instanceof Error ? error.message : 'Failed to create iteration variation' },
+      type: 'variation-status-update',
+      payload: {
+        variationIndex,
+        status: 'error',
+        statusText: 'Error when trying to create the design',
+        error: error instanceof Error ? error.message : 'Failed to create iteration variation',
+      },
     });
   }
 }

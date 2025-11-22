@@ -93,6 +93,25 @@ const App = () => {
           }
           break;
 
+        case 'variation-status-update':
+          if (msg.payload.variationIndex !== undefined) {
+            updateVariationStatus(
+              msg.payload.variationIndex,
+              msg.payload.status,
+              msg.payload.statusText,
+              msg.payload.reasoning,
+              msg.payload.error
+            );
+          }
+          break;
+
+        case 'all-variations-complete':
+          console.log('All variations complete:', msg.payload);
+          if (currentMessageRef.current) {
+            finalizeIteration(currentMessageRef.current);
+          }
+          break;
+
         case 'iteration-complete':
           console.log('Iteration complete:', msg.payload);
           break;
@@ -462,20 +481,53 @@ const App = () => {
   const finalizeIteration = async (messageId: string) => {
     console.log('Finalizing iteration...');
 
-    // TODO: Generate summary using LLM
-    // For now, use a simple summary
     const message = chat.messages.find((m) => m.id === messageId);
     if (!message || !message.iterationData) return;
 
-    const completedCount = message.iterationData.variations.filter(
-      (v) => v.status === 'complete'
-    ).length;
+    // Prepare variation results for summary generation
+    const variationResults = message.iterationData.variations.map((v) => ({
+      index: v.index,
+      status: v.status,
+      subPrompt: v.subPrompt,
+      reasoning: v.reasoning,
+      error: v.error,
+    }));
 
-    const summary = `I've designed ${completedCount} out of ${message.iterationData.numVariations} variations for your design. ${
-      completedCount < message.iterationData.numVariations
-        ? 'Some variations encountered errors during generation.'
-        : 'Here are the differences in the variations:'
-    }`;
+    let summary = '';
+
+    try {
+      // Generate summary using LLM
+      const response = await fetch('https://crafter-worker.nabilhasan24.workers.dev/api/generate-iteration-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          masterPrompt: chat.messages.find(m => m.role === 'user')?.content || '',
+          variations: variationResults,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        summary = data.summary || '';
+      } else {
+        console.error('Failed to generate summary:', response.status);
+      }
+    } catch (error) {
+      console.error('Error generating summary:', error);
+    }
+
+    // Fallback summary if LLM fails
+    if (!summary) {
+      const completedCount = message.iterationData.variations.filter(
+        (v) => v.status === 'complete'
+      ).length;
+
+      summary = `I've designed ${completedCount} out of ${message.iterationData.numVariations} variations for your design. ${
+        completedCount < message.iterationData.numVariations
+          ? 'Some variations encountered errors during generation.'
+          : 'Here are the differences in the variations:'
+      }`;
+    }
 
     setChat((prev) => ({
       ...prev,
