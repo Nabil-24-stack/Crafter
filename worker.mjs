@@ -1175,7 +1175,7 @@ Figma's SVG importer does NOT support:
 • ❌ <style> tags with @import (Google Fonts, external CSS) - Use inline font-family instead
 • ❌ SVG filters (<filter>, <feDropShadow>, <feGaussianBlur>) - Use simple shadows with opacity
 • ❌ <foreignObject> or embedded HTML - Use native SVG elements only
-• ❌ <image> tags with data: URIs or embedded images - Use basic shapes instead
+• ❌ <image> tags - NEVER USE <image> AT ALL (not even with empty href="")
 • ❌ External references (xlink:href to external files)
 • ❌ <script> tags or JavaScript
 
@@ -1184,7 +1184,8 @@ INSTEAD, use Figma-compatible alternatives:
 • ✅ Simple shadows: Overlapping shapes with reduced opacity
 • ✅ Native SVG shapes: <rect>, <circle>, <path>, <text>, <g>
 • ✅ Solid fills and strokes: fill="#0066cc" stroke="#dddddd"
-• ✅ For avatars/images: Use <circle> with solid fill color instead of <image> tags
+• ✅ For avatars/profile pictures: Use <circle fill="#D0D5DD"> with initials in <text>
+• ✅ For placeholder images: Use <rect fill="#F2F4F7"> with an icon in <path>
 • ✅ Gradients ARE supported - but you MUST define them in <defs> before using them!
 
 CORRECT GRADIENT USAGE:
@@ -1295,16 +1296,11 @@ function sanitizeSVG(svg) {
     changes.push('Removed foreignObject');
   }
 
-  // Remove <image> tags with data: URIs (Figma doesn't support embedded images)
-  if (svg.includes('<image') && svg.includes('data:')) {
-    sanitized = sanitized.replace(/<image[^>]*href=["']data:[^"']*["'][^>]*\/?>/gi, '');
-    changes.push('Removed data URI images');
-  }
-
-  // Remove <image> tags with xlink:href data URIs
-  if (svg.includes('xlink:href="data:')) {
-    sanitized = sanitized.replace(/<image[^>]*xlink:href=["']data:[^"']*["'][^>]*\/?>/gi, '');
-    changes.push('Removed xlink:href data URI images');
+  // Remove ALL <image> tags (Figma doesn't support <image> elements at all)
+  // This includes data URIs, empty hrefs, external URLs, etc.
+  if (svg.includes('<image')) {
+    sanitized = sanitized.replace(/<image[^>]*\/?>/gi, '');
+    changes.push('Removed <image> tags (use <circle> or <rect> instead)');
   }
 
   // Fix invalid stroke attributes (stroke-right, stroke-left, etc.)
