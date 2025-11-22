@@ -1297,6 +1297,21 @@ function sanitizeSVG(svg) {
   sanitized = sanitized.replace(/\s+stroke-width-right="[^"]*"/gi, '');
   sanitized = sanitized.replace(/\s+border-[^=]*="[^"]*"/gi, '');
 
+  // Remove url() references to undefined gradients/patterns
+  // Check if <defs> is empty or missing, then remove all url(#...) references
+  const hasEmptyDefs = /<defs>\s*<\/defs>/.test(sanitized) || !sanitized.includes('<defs>');
+  const hasUrlReferences = /(?:fill|stroke)="url\(#[^)]+\)"/.test(sanitized);
+
+  if (hasEmptyDefs && hasUrlReferences) {
+    sanitized = sanitized.replace(/\s*(?:fill|stroke)="url\(#[^)]+\)"/gi, '');
+    changes.push('Removed undefined gradient/pattern references');
+  }
+
+  // Remove empty <defs> tags
+  if (sanitized.includes('<defs>') && sanitized.includes('</defs>')) {
+    sanitized = sanitized.replace(/<defs>\s*<\/defs>/gi, '');
+  }
+
   // Log if sanitization made changes
   if (changes.length > 0) {
     console.log('⚠️ SVG sanitized - removed Figma-unsupported features:');
