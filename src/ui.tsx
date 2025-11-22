@@ -63,6 +63,7 @@ const App = () => {
           break;
 
         case 'selected-frame-data':
+          console.log('Payload received:', JSON.stringify(msg.payload));
           if (msg.payload.frameId && msg.payload.frameName) {
             setSelectedFrameInfo({
               frameId: msg.payload.frameId,
@@ -71,7 +72,7 @@ const App = () => {
             console.log('Frame selected:', msg.payload.frameName);
           } else {
             setSelectedFrameInfo(null);
-            console.log('No frame selected');
+            console.log('No frame selected - payload:', JSON.stringify(msg.payload));
           }
           break;
 
@@ -262,7 +263,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://crafter-worker.nabilhasan24.workers.dev/api/generate-variation-prompts', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-variation-prompts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -532,7 +533,7 @@ const App = () => {
 
     try {
       // Generate summary using LLM
-      const response = await fetch('https://crafter-worker.nabilhasan24.workers.dev/api/generate-iteration-summary', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-iteration-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

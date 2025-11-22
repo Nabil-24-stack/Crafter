@@ -12,8 +12,7 @@
   ],
   "networkAccess": {
     "allowedDomains": [
-      "https://*.vercel.app",
-      "https://crafter-worker.nabilhasan24.workers.dev"
+      "https://*.vercel.app"
     ],
     "devAllowedDomains": [
       "http://localhost:3000"
