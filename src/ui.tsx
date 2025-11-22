@@ -1,44 +1,50 @@
-// UI code - runs in the browser iframe
-// This renders the plugin panel using React
+// UI code - Chat-based iteration interface
+// Refactored from tab-based to chat-based design
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { generateLayout, iterateLayout } from './claudeService';
-import { DesignSystemData, Message } from './types';
+import { iterateLayout } from './claudeService';
+import {
+  Chat,
+  ChatMessage,
+  DesignSystemData,
+  IterationData,
+  Message,
+  VariationStatus,
+} from './types';
+import { ChatInterface } from './components/ChatInterface';
 import './ui.css';
 
 const App = () => {
-  // State management
-  const [prompt, setPrompt] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isScanning, setIsScanning] = React.useState(false);
+  // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
-  const [result, setResult] = React.useState<string>('');
-  const [error, setError] = React.useState<string>('');
-  const [promptError, setPromptError] = React.useState<string>('');
-  const [selectedModel, setSelectedModel] = React.useState<'claude' | 'gemini'>('claude');
+  const [isScanning, setIsScanning] = React.useState(false);
 
-  // Iteration mode state
-  const [selectedFrame, setSelectedFrame] = React.useState<any | null>(null);
-  const [frameId, setFrameId] = React.useState<string | null>(null);
-  const [frameName, setFrameName] = React.useState<string | null>(null);
-  const [iterationPrompt, setIterationPrompt] = React.useState('');
-  const [isIterating, setIsIterating] = React.useState(false);
-  const [mode, setMode] = React.useState<'ideation' | 'iterate'>('ideation');
+  // Chat state
+  const [chat, setChat] = React.useState<Chat>({
+    id: generateId(),
+    name: 'Blank Chat',
+    messages: [],
+    createdAt: Date.now(),
+  });
 
-  // Variations state
-  const [numberOfVariations, setNumberOfVariations] = React.useState<number>(1);
-  const [isGeneratingVariations, setIsGeneratingVariations] = React.useState(false);
+  // Selected frame state
+  const [selectedFrameInfo, setSelectedFrameInfo] = React.useState<{
+    frameId: string;
+    frameName: string;
+  } | null>(null);
 
-  // Iteration variations state
-  const [numberOfIterationVariations, setNumberOfIterationVariations] = React.useState<number>(1);
+  // Generation state
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [activeJobIds, setActiveJobIds] = React.useState<string[]>([]);
 
-  // Ref to store pending iteration request (waiting for PNG export)
-  const pendingIterationRef = React.useRef<{prompt: string, variations: number, designSystem: DesignSystemData, frameId: string, model: 'claude' | 'gemini'} | null>(null);
+  // Generate unique ID
+  function generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
 
   // Set up message listener on mount
   React.useEffect(() => {
-    // Listen for messages from plugin
     window.onmessage = (event) => {
       const msg: Message = event.data.pluginMessage;
       if (!msg) return;
@@ -49,136 +55,197 @@ const App = () => {
         case 'design-system-data':
           setDesignSystem(msg.payload);
           setIsScanning(false);
-          console.log('Design system loaded:', msg.payload);
+          console.log('Design system received:', {
+            components: msg.payload?.components?.length,
+            colors: msg.payload?.colors?.length,
+            textStyles: msg.payload?.textStyles?.length,
+          });
           break;
 
         case 'selected-frame-data':
-          if (msg.payload.frameId) {
-            // Frame selected - switch to iteration mode (but no PNG yet)
-            setFrameId(msg.payload.frameId);
-            setFrameName(msg.payload.frameName || 'Selected Frame');
-            setMode('iterate');
-            console.log('Frame selected for iteration:', msg.payload.frameName);
+          if (msg.payload.frameId && msg.payload.frameName) {
+            setSelectedFrameInfo({
+              frameId: msg.payload.frameId,
+              frameName: msg.payload.frameName,
+            });
+            console.log('Frame selected:', msg.payload.frameName);
           } else {
-            // No frame selected - switch back to ideation mode
-            setSelectedFrame(null);
-            setFrameId(null);
-            setFrameName(null);
-            setMode('ideation');
+            setSelectedFrameInfo(null);
+            console.log('No frame selected');
           }
           break;
 
         case 'frame-png-exported':
-          if (msg.payload.error) {
-            setIsIterating(false);
-            setError(`PNG export error: ${msg.payload.error}`);
-            pendingIterationRef.current = null;
-          } else if (msg.payload.imageData) {
-            // PNG exported successfully - store it
-            setSelectedFrame(msg.payload.imageData);
-            console.log('Frame PNG exported, proceeding with iteration...');
-
-            // If we have a pending iteration request, process it now
-            if (pendingIterationRef.current) {
-              const { prompt: iterPrompt, variations, designSystem: ds, frameId: fid, model } = pendingIterationRef.current;
+          if (msg.payload.imageData) {
+            // Start iteration with the exported PNG
+            const pending = pendingIterationRef.current;
+            if (pending) {
+              startIterationWithPNG(
+                msg.payload.imageData,
+                pending.prompt,
+                pending.variations,
+                pending.designSystem,
+                pending.frameId,
+                pending.model
+              );
               pendingIterationRef.current = null;
-
-              if (ds && fid) {
-                // Start the iteration with the exported PNG
-                startIterationWithPNG(msg.payload.imageData, iterPrompt, variations, ds, fid, model);
-              } else {
-                setIsIterating(false);
-                setError(ds ? 'Frame ID missing' : 'Design system not loaded');
-              }
             }
           }
           break;
 
-        case 'generation-complete':
-          setIsLoading(false);
-          setIsGeneratingVariations(false);
-          setResult(
-            msg.payload.reasoning
-              ? `Success! ${msg.payload.reasoning}`
-              : 'Layout generated successfully!'
-          );
-          setError('');
-          break;
-
         case 'iteration-complete':
-          setIsIterating(false);
-          setResult(msg.payload.message || 'Iteration applied successfully!');
-          setError('');
-          break;
-
-        case 'generation-error':
-          setIsLoading(false);
-          setError(`Error: ${msg.payload.error}`);
-          setResult('');
+          console.log('Iteration complete:', msg.payload);
           break;
 
         case 'iteration-error':
-          setIsIterating(false);
-          setError(`Error: ${msg.payload.error}`);
-          setResult('');
-          break;
-
-        case 'frame-json-exported':
-          // Download the JSON file
-          const { json, fileName } = msg.payload;
-          const jsonString = JSON.stringify(json, null, 2);
-          const blob = new Blob([jsonString], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          link.click();
-          URL.revokeObjectURL(url);
-          setResult('Frame exported successfully!');
-          setError('');
+          console.error('Iteration error:', msg.payload);
+          handleVariationError(msg.payload.error);
           break;
 
         default:
-          console.warn('Unknown message type:', msg.type);
           break;
       }
     };
+
+    // Request design system on mount
+    parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
   }, []);
 
+  // Ref to store pending iteration request (waiting for PNG export)
+  const pendingIterationRef = React.useRef<{
+    prompt: string;
+    variations: number;
+    designSystem: DesignSystemData;
+    frameId: string;
+    model: 'claude' | 'gemini';
+  } | null>(null);
 
-  // Handle scan design system button click
+  // Ref to track current message being generated
+  const currentMessageRef = React.useRef<string | null>(null);
+
+  // Scan design system
   const handleScanDesignSystem = () => {
     setIsScanning(true);
-    setError('');
-    parent.postMessage({
-      pluginMessage: {
-        type: 'get-design-system'
-      }
-    }, '*');
+    parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
+  };
+
+  // Handle new chat
+  const handleNewChat = () => {
+    setChat({
+      id: generateId(),
+      name: 'Blank Chat',
+      messages: [],
+      createdAt: Date.now(),
+    });
+    setIsGenerating(false);
+    setActiveJobIds([]);
+    currentMessageRef.current = null;
+  };
+
+  // Handle send message
+  const handleSendMessage = async (
+    prompt: string,
+    numVariations: number,
+    model: 'claude' | 'gemini'
+  ) => {
+    if (!selectedFrameInfo || !designSystem) {
+      console.error('No frame selected or design system not loaded');
+      return;
+    }
+
+    // Lock the frame for this iteration
+    const lockedFrameId = selectedFrameInfo.frameId;
+    const lockedFrameName = selectedFrameInfo.frameName;
+
+    // Update chat name on first message
+    if (chat.messages.length === 0) {
+      setChat((prev) => ({
+        ...prev,
+        name: `Iterating on ${lockedFrameName}`,
+        lockedFrameName,
+      }));
+    }
+
+    // Add user message
+    const userMessage: ChatMessage = {
+      id: generateId(),
+      role: 'user',
+      content: prompt,
+      timestamp: Date.now(),
+    };
+
+    // Add assistant message with iteration data
+    const assistantMessageId = generateId();
+    const assistantMessage: ChatMessage = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: `Ok. I'll iterate on this design to create ${numVariations} variation${numVariations > 1 ? 's' : ''} of ${prompt.toLowerCase()}.`,
+      timestamp: Date.now(),
+      iterationData: {
+        frameId: lockedFrameId,
+        frameName: lockedFrameName,
+        model,
+        numVariations,
+        status: 'generating-prompts',
+        startTime: Date.now(),
+        variations: Array.from({ length: numVariations }, (_, i) => ({
+          index: i,
+          status: 'thinking',
+          statusText: 'Thinking of approach',
+          isExpanded: false,
+        })),
+      },
+    };
+
+    setChat((prev) => ({
+      ...prev,
+      messages: [...prev.messages, userMessage, assistantMessage],
+      currentFrameId: lockedFrameId,
+    }));
+
+    currentMessageRef.current = assistantMessageId;
+    setIsGenerating(true);
+
+    // Store pending iteration and request PNG export
+    pendingIterationRef.current = {
+      prompt,
+      variations: numVariations,
+      designSystem,
+      frameId: lockedFrameId,
+      model,
+    };
+
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: 'export-frame-png',
+          payload: { frameId: lockedFrameId },
+        },
+      },
+      '*'
+    );
   };
 
   // Generate variation prompts using LLM
-  const generateVariationPrompts = async (masterPrompt: string, n: number, ds?: DesignSystemData): Promise<string[]> => {
+  const generateVariationPrompts = async (
+    masterPrompt: string,
+    n: number,
+    ds?: DesignSystemData
+  ): Promise<string[]> => {
     const systemToUse = ds || designSystem;
 
     if (!systemToUse) {
-      console.warn('No design system available for variation prompt generation, using fallbacks');
-      const fallbackVariations = [
-        `${masterPrompt} — Tighter layout, emphasize primary actions`,
-        `${masterPrompt} — Balanced composition, alternate arrangements`,
-        `${masterPrompt} — More whitespace, simplified hierarchy`,
-        `${masterPrompt} — Bold typography, strong visual hierarchy`,
-        `${masterPrompt} — Minimal approach, focus on content`
-      ];
-      return fallbackVariations.slice(0, n);
+      console.warn('No design system available, using fallback variations');
+      return Array.from(
+        { length: n },
+        (_, i) => `${masterPrompt} — Variation ${i + 1}`
+      );
     }
 
     try {
-      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-variation-prompts', {
+      const response = await fetch('https://crafter-worker.nabilhasan24.workers.dev/api/generate-variation-prompts', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: masterPrompt,
           numVariations: n,
@@ -191,173 +258,59 @@ const App = () => {
       }
 
       const data = await response.json();
-      return data.variationPrompts;
+      return data.variationPrompts || [];
     } catch (error) {
-      console.error('Error generating variation prompts, using fallbacks:', error);
-      // Fallback to hardcoded prompts if API fails
-      const fallbackVariations = [
-        `${masterPrompt} — Tighter layout, emphasize primary actions`,
-        `${masterPrompt} — Balanced composition, alternate arrangements`,
-        `${masterPrompt} — More whitespace, simplified hierarchy`,
-        `${masterPrompt} — Bold typography, strong visual hierarchy`,
-        `${masterPrompt} — Minimal approach, focus on content`
-      ];
-      return fallbackVariations.slice(0, n);
+      console.error('Error generating variation prompts:', error);
+      return Array.from(
+        { length: n },
+        (_, i) => `${masterPrompt} — Variation ${i + 1}`
+      );
     }
-  };
-
-  // Handle generate variations - renders each as soon as it's ready
-  const handleGenerateVariations = async () => {
-    if (!prompt.trim()) {
-      setPromptError('Provide a prompt to generate designs.');
-      return;
-    }
-
-    if (!designSystem) {
-      setError('Design system not loaded. Please scan first.');
-      return;
-    }
-
-    setIsGeneratingVariations(true);
-    setIsLoading(true);
-    setError('');
-    setResult('');
-    setPromptError('');
-
-    try {
-      const apiKey = 'USE_PROXY';
-
-      // Generate variation prompts using LLM
-      const variationPrompts = await generateVariationPrompts(prompt, numberOfVariations);
-
-      console.log('Generated variation prompts:', variationPrompts);
-
-      // Start all variations in parallel, but render each as soon as it's ready
-      variationPrompts.forEach(async (varPrompt, index) => {
-        try {
-          const variationResult = await generateLayout(varPrompt, designSystem, apiKey, selectedModel);
-
-          // Send this variation to the plugin immediately for rendering
-          parent.postMessage(
-            {
-              pluginMessage: {
-                type: 'generate-single-variation',
-                payload: {
-                  variation: variationResult,
-                  variationIndex: index,
-                  totalVariations: numberOfVariations,
-                },
-              },
-            },
-            '*'
-          );
-        } catch (err) {
-          console.error(`Error generating variation ${index + 1}:`, err);
-          parent.postMessage(
-            {
-              pluginMessage: {
-                type: 'generation-error',
-                payload: { error: `Variation ${index + 1} failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
-              },
-            },
-            '*'
-          );
-        }
-      });
-
-      // The plugin will send back generation-complete or generation-error for each
-    } catch (err) {
-      setIsGeneratingVariations(false);
-      setIsLoading(false);
-      setError(err instanceof Error ? err.message : 'Failed to generate variations');
-      console.error('Generation error:', err);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && e.metaKey) {
-      if (mode === 'iterate') {
-        handleIterate();
-      } else {
-        handleGenerateVariations();
-      }
-    }
-  };
-
-  // Handle iterate button click - triggers PNG export first
-  const handleIterate = () => {
-    if (!iterationPrompt.trim()) {
-      setError('Please enter an iteration request');
-      return;
-    }
-
-    if (!frameId) {
-      setError('No frame selected');
-      return;
-    }
-
-    if (!designSystem) {
-      setError('Design system not loaded. Please scan your design system first.');
-      return;
-    }
-
-    console.log('Design system check:', {
-      hasDesignSystem: !!designSystem,
-      components: designSystem?.components?.length || 0,
-      colors: designSystem?.colors?.length || 0,
-    });
-
-    setIsIterating(true);
-    setError('');
-    setResult('');
-
-    console.log('Requesting PNG export for iteration...');
-
-    // Store the iteration request WITH design system, frameId, and model
-    pendingIterationRef.current = {
-      prompt: iterationPrompt,
-      variations: numberOfIterationVariations,
-      designSystem: designSystem, // Store design system in ref
-      frameId: frameId, // Store frameId in ref
-      model: selectedModel, // Store selected model in ref
-    };
-
-    // Request PNG export from plugin
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: 'export-frame-png',
-          payload: { frameId },
-        },
-      },
-      '*'
-    );
   };
 
   // Start iteration after PNG is exported
-  const startIterationWithPNG = async (imageData: string, iterPrompt: string, variations: number, ds: DesignSystemData, fid: string, model: 'claude' | 'gemini') => {
+  const startIterationWithPNG = async (
+    imageData: string,
+    iterPrompt: string,
+    variations: number,
+    ds: DesignSystemData,
+    fid: string,
+    model: 'claude' | 'gemini'
+  ) => {
     try {
       console.log('Starting iteration with exported PNG...');
 
-      // Generate variation prompts for iterations using LLM
+      // Update status: generating variation prompts
+      updateIterationStatus('in-progress');
+
+      // Generate variation prompts
       const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds);
+      console.log('Generated variation prompts:', variationPrompts);
 
-      console.log('Generated iteration variation prompts:', variationPrompts);
+      // Update variations with sub-prompts
+      updateVariationsWithPrompts(variationPrompts);
 
-      // Start all iteration variations in parallel, but render each as soon as it's ready
+      // Start all iteration variations in parallel
       variationPrompts.forEach(async (varPrompt, index) => {
         try {
-          const iterationResult = await iterateLayout(imageData, varPrompt, ds, model);
-          console.log(`Iteration variation ${index + 1} result received from worker:`, iterationResult);
+          // Update status: designing
+          updateVariationStatus(index, 'designing', 'AI is designing');
 
-          // Send this iteration variation to the plugin immediately for rendering
+          const iterationResult = await iterateLayout(imageData, varPrompt, ds, model);
+          console.log(`Iteration variation ${index + 1} result received:`, iterationResult);
+
+          // Update status: rendering
+          updateVariationStatus(index, 'rendering', 'Creating in Figma');
+
+          // Send to plugin for rendering
           parent.postMessage(
             {
               pluginMessage: {
                 type: 'iterate-design-variation',
                 payload: {
                   svg: iterationResult.svg,
-                  frameId: fid, // Use frameId from parameter
+                  reasoning: iterationResult.reasoning,
+                  frameId: fid,
                   variationIndex: index,
                   totalVariations: variations,
                 },
@@ -365,46 +318,227 @@ const App = () => {
             },
             '*'
           );
+
+          // Update status: complete
+          updateVariationStatus(index, 'complete', 'Iteration Complete', iterationResult.reasoning);
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
-          parent.postMessage(
-            {
-              pluginMessage: {
-                type: 'iteration-error',
-                payload: { error: `Variation ${index + 1} failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
-              },
-            },
-            '*'
+          updateVariationStatus(
+            index,
+            'error',
+            'Error when trying to create the design',
+            undefined,
+            err instanceof Error ? err.message : 'Unknown error'
           );
         }
       });
+
+      // Check completion after all start
+      setTimeout(() => checkAllVariationsComplete(variations), 1000);
     } catch (err) {
-      setIsIterating(false);
-      setError(err instanceof Error ? err.message : 'Failed to iterate design');
+      setIsGenerating(false);
       console.error('Iteration error:', err);
     }
   };
 
-  // Handle export button click
-  const handleExport = () => {
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: 'export-frame-json',
-        },
-      },
-      '*'
-    );
+  // Update iteration data status
+  const updateIterationStatus = (status: IterationData['status']) => {
+    const messageId = currentMessageRef.current;
+    if (!messageId) return;
+
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                status,
+              },
+            }
+          : msg
+      ),
+    }));
   };
 
-  return (
-    <div className="container">
-      {/* Step 1: Centered initial screen */}
-      {!designSystem && (
+  // Update variations with generated sub-prompts
+  const updateVariationsWithPrompts = (prompts: string[]) => {
+    const messageId = currentMessageRef.current;
+    if (!messageId) return;
+
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                variations: msg.iterationData.variations.map((v, i) => ({
+                  ...v,
+                  subPrompt: prompts[i] || '',
+                })),
+              },
+            }
+          : msg
+      ),
+    }));
+  };
+
+  // Update individual variation status
+  const updateVariationStatus = (
+    index: number,
+    status: VariationStatus['status'],
+    statusText: string,
+    reasoning?: string,
+    error?: string
+  ) => {
+    const messageId = currentMessageRef.current;
+    if (!messageId) return;
+
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                variations: msg.iterationData.variations.map((v) =>
+                  v.index === index
+                    ? {
+                        ...v,
+                        status,
+                        statusText,
+                        reasoning: reasoning || v.reasoning,
+                        error: error || v.error,
+                      }
+                    : v
+                ),
+              },
+            }
+          : msg
+      ),
+    }));
+  };
+
+  // Handle variation error
+  const handleVariationError = (errorMessage: string) => {
+    // Extract variation index if possible (format: "Variation N failed: ...")
+    const match = errorMessage.match(/Variation (\d+) failed/);
+    if (match) {
+      const index = parseInt(match[1]) - 1;
+      updateVariationStatus(index, 'error', 'Error when trying to create the design', undefined, errorMessage);
+    }
+  };
+
+  // Check if all variations are complete
+  const checkAllVariationsComplete = (totalVariations: number) => {
+    const messageId = currentMessageRef.current;
+    if (!messageId) return;
+
+    setChat((prev) => {
+      const message = prev.messages.find((m) => m.id === messageId);
+      if (!message || !message.iterationData) return prev;
+
+      const allComplete = message.iterationData.variations.every(
+        (v) => v.status === 'complete' || v.status === 'error'
+      );
+
+      if (!allComplete) {
+        // Check again in 1 second
+        setTimeout(() => checkAllVariationsComplete(totalVariations), 1000);
+        return prev;
+      }
+
+      // All complete - generate summary and finalize
+      finalizeIteration(messageId);
+      return prev;
+    });
+  };
+
+  // Finalize iteration (generate summary)
+  const finalizeIteration = async (messageId: string) => {
+    console.log('Finalizing iteration...');
+
+    // TODO: Generate summary using LLM
+    // For now, use a simple summary
+    const message = chat.messages.find((m) => m.id === messageId);
+    if (!message || !message.iterationData) return;
+
+    const completedCount = message.iterationData.variations.filter(
+      (v) => v.status === 'complete'
+    ).length;
+
+    const summary = `I've designed ${completedCount} out of ${message.iterationData.numVariations} variations for your design. ${
+      completedCount < message.iterationData.numVariations
+        ? 'Some variations encountered errors during generation.'
+        : 'Here are the differences in the variations:'
+    }`;
+
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                status: 'complete',
+                endTime: Date.now(),
+                summary,
+              },
+            }
+          : msg
+      ),
+    }));
+
+    setIsGenerating(false);
+    currentMessageRef.current = null;
+  };
+
+  // Handle stop
+  const handleStop = () => {
+    console.log('Stopping iteration...');
+    // TODO: Cancel pending jobs
+    setIsGenerating(false);
+
+    if (currentMessageRef.current) {
+      finalizeIteration(currentMessageRef.current);
+    }
+  };
+
+  // Handle expand variation
+  const handleExpandVariation = (messageId: string, variationIndex: number) => {
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                variations: msg.iterationData.variations.map((v) =>
+                  v.index === variationIndex
+                    ? { ...v, isExpanded: !v.isExpanded }
+                    : v
+                ),
+              },
+            }
+          : msg
+      ),
+    }));
+  };
+
+  // Initial screen (before design system scanned)
+  if (!designSystem) {
+    return (
+      <div className="container">
         <div className="initial-screen">
           <div className="header">
-            <h1 className="title">The AI Twin For Designers</h1>
-            <p className="subtitle">Ideate with your design system</p>
+            <h1 className="title">Crafter: Ideate With Your Design System</h1>
+            <p className="subtitle">Chat-based AI iteration powered by your design system</p>
           </div>
           <div className="initial-buttons">
             <button
@@ -415,257 +549,29 @@ const App = () => {
               {isScanning && <div className="spinner" />}
               {isScanning ? 'Scanning...' : 'Scan Design System'}
             </button>
-            <button
-              className="button button-secondary"
-              onClick={handleExport}
-            >
-              Export Frame to JSON
-            </button>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Step 2: Show design tools after scanning (header hidden) */}
-      {designSystem && (
-        <>
-          {/* Iteration Mode */}
-          {mode === 'iterate' && frameId && (
-            <div className="iteration-mode">
-              <div className="mode-indicator">
-                <p className="mode-label">Iterating on:</p>
-                <p className="frame-name">{frameName || 'Selected Frame'}</p>
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="model-iterate" className="label">
-                  AI Model
-                </label>
-                <select
-                  id="model-iterate"
-                  className="select"
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value as 'claude' | 'gemini')}
-                  disabled={isIterating}
-                >
-                  <option value="claude">Claude 4.5 Sonnet</option>
-                  <option value="gemini">Google Gemini 3 Pro</option>
-                </select>
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="iteration-prompt" className="label">
-                  Iteration Request
-                </label>
-                <textarea
-                  id="iteration-prompt"
-                  className="textarea"
-                  value={iterationPrompt}
-                  onChange={(e) => setIterationPrompt(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="e.g., Make it more compact and minimal"
-                  rows={3}
-                  disabled={isIterating}
-                />
-              </div>
-
-              {/* Number of Iteration Variations Selector */}
-              <div className="input-group">
-                <label htmlFor="iteration-variations" className="label">
-                  Number of Variations
-                </label>
-                <div className="variations-selector">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                      key={num}
-                      className={`variation-button ${numberOfIterationVariations === num ? 'active' : ''}`}
-                      onClick={() => setNumberOfIterationVariations(num)}
-                      disabled={isIterating}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-                <p className="hint-text">
-                  {numberOfIterationVariations === 1
-                    ? 'Generate 1 iteration variation'
-                    : `Generate ${numberOfIterationVariations} iteration variations side-by-side`
-                  }
-                </p>
-              </div>
-
-              <button
-                className="button button-generate"
-                onClick={handleIterate}
-                disabled={isIterating}
-              >
-                {isIterating && <div className="spinner" />}
-                {isIterating
-                  ? `Iterating ${numberOfIterationVariations} variation${numberOfIterationVariations > 1 ? 's' : ''}...`
-                  : `Iterate ${numberOfIterationVariations} Variation${numberOfIterationVariations > 1 ? 's' : ''}`
-                }
-              </button>
-            </div>
-          )}
-
-          {/* Ideation Mode */}
-          {mode === 'ideation' && (
-            <>
-              {/* Model Selector */}
-              <div className="input-group">
-                <label htmlFor="model" className="label">
-                  AI Model
-                </label>
-                <select
-                  id="model"
-                  className="select"
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value as 'claude' | 'gemini')}
-                  disabled={isGeneratingVariations || isLoading}
-                >
-                  <option value="claude">Claude 4.5 Sonnet</option>
-                  <option value="gemini">Google Gemini 3 Pro</option>
-                </select>
-              </div>
-
-              {/* Prompt Input */}
-              <div className="input-group">
-                <label htmlFor="prompt" className="label">
-                  Design Prompt
-                </label>
-                <textarea
-                  id="prompt"
-                  className="textarea"
-                  value={prompt}
-                  onChange={(e) => {
-                    setPrompt(e.target.value);
-                    setPromptError('');
-                  }}
-                  onKeyDown={handleKeyPress}
-                  placeholder="e.g., Create a banking dashboard with account overview and transactions"
-                  rows={4}
-                  disabled={isGeneratingVariations || isLoading}
-                />
-                {promptError && <p className="error-text">{promptError}</p>}
-              </div>
-
-              {/* Number of Variations Selector */}
-              <div className="input-group">
-                <label htmlFor="variations" className="label">
-                  Number of Variations
-                </label>
-                <div className="variations-selector">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                      key={num}
-                      className={`variation-button ${numberOfVariations === num ? 'active' : ''}`}
-                      onClick={() => setNumberOfVariations(num)}
-                      disabled={isGeneratingVariations || isLoading}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-                <p className="hint-text">
-                  {numberOfVariations === 1
-                    ? 'Generate 1 design variation'
-                    : `Generate ${numberOfVariations} design variations side-by-side`
-                  }
-                </p>
-              </div>
-
-              {/* Generate Variations Button */}
-              <button
-                className="button button-generate"
-                onClick={handleGenerateVariations}
-                disabled={isGeneratingVariations || isLoading}
-              >
-                {isGeneratingVariations && <div className="spinner" />}
-                {isGeneratingVariations
-                  ? `Generating ${numberOfVariations} variation${numberOfVariations > 1 ? 's' : ''}...`
-                  : `Generate ${numberOfVariations} Variation${numberOfVariations > 1 ? 's' : ''}`
-                }
-              </button>
-            </>
-          )}
-
-          {/* Results */}
-          {result && <div className="result success">{result}</div>}
-          {error && <div className="result error">{error}</div>}
-
-          {/* Design System Info */}
-          <div className="design-system-info">
-            <div className="info-badge">
-              <span className="badge-label">Components</span>
-              <span className="badge-value">{designSystem.components.length}</span>
-            </div>
-            <div className="info-badge">
-              <span className="badge-label">Colors</span>
-              <span className="badge-value">{designSystem.colors.length}</span>
-            </div>
-            <div className="info-badge">
-              <span className="badge-label">Text Styles</span>
-              <span className="badge-value">{designSystem.textStyles.length}</span>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="button-group">
-            <button
-              className="button button-secondary"
-              onClick={handleExport}
-              disabled={isScanning || isLoading}
-            >
-              Export Frame to JSON
-            </button>
-
-            <button
-              className="button button-secondary"
-              onClick={handleScanDesignSystem}
-              disabled={isScanning || isLoading}
-            >
-              {isScanning && <div className="spinner" />}
-              {isScanning ? 'Scanning...' : 'Re-scan Design System'}
-            </button>
-          </div>
-        </>
-      )}
+  // Main chat interface (after design system scanned)
+  return (
+    <div className="container">
+      <ChatInterface
+        chat={chat}
+        designSystem={designSystem}
+        selectedFrameInfo={selectedFrameInfo}
+        isGenerating={isGenerating}
+        onSendMessage={handleSendMessage}
+        onStop={handleStop}
+        onNewChat={handleNewChat}
+        onExpandVariation={handleExpandVariation}
+      />
     </div>
   );
 };
 
-// Render the app
-function initApp() {
-  console.log('Initializing Crafter UI...');
-  console.log('React version:', React.version);
-  console.log('ReactDOM:', ReactDOM);
-
-  const rootElement = document.getElementById('root');
-
-  if (!rootElement) {
-    console.error('Root element not found!');
-    document.body.innerHTML = '<div style="padding: 20px; color: red;">ERROR: Root element not found!</div>';
-    return;
-  }
-
-  try {
-    console.log('Root element found, rendering React app...');
-    // Clear the loading message
-    rootElement.innerHTML = '';
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(<App />);
-    console.log('React app rendered successfully');
-  } catch (error) {
-    console.error('Error rendering React app:', error);
-    rootElement.innerHTML = `<div style="padding: 20px; color: red;">ERROR: ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
-  }
-}
-
-// Wait for DOM to be ready
-console.log('UI script loaded');
-if (document.readyState === 'loading') {
-  console.log('Waiting for DOMContentLoaded...');
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  console.log('DOM already ready, initializing...');
-  initApp();
-}
+// Mount the app
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(<App />);
