@@ -1117,55 +1117,34 @@ function createPlaceholderForComponent(layoutNode: LayoutNode): RectangleNode {
  * Exports the frame as PNG for visual reference
  */
 async function handleGetSelectedFrame() {
-  console.log('Getting selected frame for PNG iteration...');
+  console.log('Getting current selection state...');
 
   const selection = figma.currentPage.selection;
 
-  if (selection.length === 0) {
-    figma.ui.postMessage({
-      type: 'selected-frame-data',
-      payload: { imageData: null, message: 'No frame selected' },
-    });
-    return;
-  }
+  // Just send the current frame info (if any) to sync UI state
+  if (selection.length === 1 && selection[0].type === 'FRAME') {
+    const frame = selection[0] as FrameNode;
 
-  const selectedNode = selection[0];
-
-  // Check if it's a frame
-  if (selectedNode.type !== 'FRAME') {
-    figma.ui.postMessage({
-      type: 'selected-frame-data',
-      payload: { imageData: null, message: 'Selected node is not a frame' },
-    });
-    return;
-  }
-
-  // Export frame as PNG
-  try {
-    const pngData = await selectedNode.exportAsync({
-      format: 'PNG',
-      constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
-    });
-
-    // Convert Uint8Array to base64
-    const base64 = figma.base64Encode(pngData);
+    // Update tracking variable
+    lastSelectedFrameId = frame.id;
 
     figma.ui.postMessage({
       type: 'selected-frame-data',
       payload: {
-        imageData: base64,
-        frameId: selectedNode.id,
-        frameName: selectedNode.name,
+        frameId: frame.id,
+        frameName: frame.name,
       },
     });
+    console.log('Current selection:', frame.name);
+  } else {
+    // No frame selected
+    lastSelectedFrameId = null;
 
-    console.log('PNG exported successfully for iteration');
-  } catch (error) {
-    console.error('Error exporting PNG:', error);
     figma.ui.postMessage({
       type: 'selected-frame-data',
-      payload: { imageData: null, message: 'Failed to export frame as PNG' },
+      payload: { frameId: null, frameName: null },
     });
+    console.log('No frame currently selected');
   }
 }
 
