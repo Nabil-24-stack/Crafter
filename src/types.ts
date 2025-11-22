@@ -20,7 +20,10 @@ export type MessageType =
   | 'iteration-complete'
   | 'generation-error'
   | 'iteration-error'
-  | 'set-api-key';
+  | 'set-api-key'
+  | 'variation-status-update' // Progress update for individual variation
+  | 'variation-job-started' // When worker job starts for a variation
+  | 'all-variations-complete'; // When all variations are done
 
 export interface Message {
   type: MessageType;
@@ -213,4 +216,56 @@ export interface IterationRequest {
 export interface IterationResult {
   svg: string; // Updated SVG markup
   reasoning?: string;
+}
+
+// Chat interface structures
+export type VariationStatusType = 'thinking' | 'designing' | 'rendering' | 'complete' | 'error';
+
+export interface VariationStatus {
+  index: number; // 0-based
+  status: VariationStatusType;
+  statusText: string;
+  error?: string;
+
+  // Details (shown when expanded)
+  subPrompt?: string; // The variation prompt generated
+  reasoning?: string; // From LLM response
+  createdNodeId?: string; // Figma node ID if successfully created
+  isExpanded?: boolean; // UI state for expand/collapse
+}
+
+export type IterationDataStatus = 'generating-prompts' | 'in-progress' | 'complete' | 'stopped' | 'error';
+
+export interface IterationData {
+  frameId: string;
+  frameName: string;
+  model: 'claude' | 'gemini';
+  numVariations: number;
+
+  status: IterationDataStatus;
+  startTime: number;
+  endTime?: number;
+
+  variations: VariationStatus[];
+  summary?: string; // LLM-generated summary after completion
+  wasStopped?: boolean; // True if user clicked Stop
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+
+  // Only for assistant messages
+  iterationData?: IterationData;
+}
+
+export interface Chat {
+  id: string;
+  name: string; // "Blank Chat" or "Iterating on <frame>"
+  messages: ChatMessage[];
+  currentFrameId?: string; // Frame locked for current iteration
+  lockedFrameName?: string; // Frame name locked on first send
+  createdAt: number;
 }
