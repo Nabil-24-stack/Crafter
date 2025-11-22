@@ -1239,33 +1239,54 @@ function extractSVG(responseText) {
  */
 function sanitizeSVG(svg) {
   let sanitized = svg;
+  const changes = [];
 
   // Remove <style> tags with @import (Google Fonts, external CSS)
-  sanitized = sanitized.replace(/<style[^>]*>[\s\S]*?@import[^;]*;[\s\S]*?<\/style>/gi, '');
+  if (svg.includes('@import')) {
+    sanitized = sanitized.replace(/<style[^>]*>[\s\S]*?@import[^;]*;[\s\S]*?<\/style>/gi, '');
+    changes.push('Removed @import CSS');
+  }
 
   // Remove entire <defs> containing complex filters (feDropShadow, feGaussianBlur, etc.)
   // Keep simple defs (gradients, clipPath) but remove filter defs
-  sanitized = sanitized.replace(/<defs>[\s\S]*?<filter[\s\S]*?<\/filter>[\s\S]*?<\/defs>/gi, function(match) {
-    // If the <defs> ONLY contains filters, remove it entirely
-    const hasNonFilterContent = /<(?!filter|\/filter|\/defs)/.test(match);
-    return hasNonFilterContent ? match.replace(/<filter[\s\S]*?<\/filter>/gi, '') : '';
-  });
+  if (svg.includes('<filter')) {
+    sanitized = sanitized.replace(/<defs>[\s\S]*?<filter[\s\S]*?<\/filter>[\s\S]*?<\/defs>/gi, function(match) {
+      // If the <defs> ONLY contains filters, remove it entirely
+      const hasNonFilterContent = /<(?!filter|\/filter|\/defs)/.test(match);
+      return hasNonFilterContent ? match.replace(/<filter[\s\S]*?<\/filter>/gi, '') : '';
+    });
 
-  // Remove standalone <filter> tags (outside defs)
-  sanitized = sanitized.replace(/<filter[\s\S]*?<\/filter>/gi, '');
+    // Remove standalone <filter> tags (outside defs)
+    sanitized = sanitized.replace(/<filter[\s\S]*?<\/filter>/gi, '');
+    changes.push('Removed SVG filters');
+  }
 
   // Remove filter attribute references (filter="url(#shadow-sm)")
-  sanitized = sanitized.replace(/\s+filter="[^"]*"/gi, '');
+  if (svg.includes('filter="')) {
+    sanitized = sanitized.replace(/\s+filter="[^"]*"/gi, '');
+    changes.push('Removed filter attributes');
+  }
 
   // Remove foreignObject (Figma doesn't support)
-  sanitized = sanitized.replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '');
+  if (svg.includes('foreignObject')) {
+    sanitized = sanitized.replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '');
+    changes.push('Removed foreignObject');
+  }
+
+  // Fix invalid stroke attributes (stroke-right, stroke-left, etc.)
+  if (/stroke-(right|left|top|bottom)=/.test(svg)) {
+    sanitized = sanitized.replace(/\s+stroke-(right|left|top|bottom)="[^"]*"/gi, '');
+    changes.push('Removed invalid stroke-* attributes');
+  }
+
+  // Remove invalid CSS-like attributes in SVG
+  sanitized = sanitized.replace(/\s+stroke-width-right="[^"]*"/gi, '');
+  sanitized = sanitized.replace(/\s+border-[^=]*="[^"]*"/gi, '');
 
   // Log if sanitization made changes
-  if (sanitized !== svg) {
+  if (changes.length > 0) {
     console.log('⚠️ SVG sanitized - removed Figma-unsupported features:');
-    if (svg.includes('@import')) console.log('  - Removed @import CSS');
-    if (svg.includes('<filter')) console.log('  - Removed SVG filters');
-    if (svg.includes('foreignObject')) console.log('  - Removed foreignObject');
+    changes.forEach(change => console.log(`  - ${change}`));
   }
 
   return sanitized;
