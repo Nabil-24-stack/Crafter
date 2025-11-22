@@ -517,8 +517,22 @@ const App = () => {
   const finalizeIteration = async (messageId: string) => {
     console.log('Finalizing iteration...');
 
-    const message = chat.messages.find((m) => m.id === messageId);
-    if (!message || !message.iterationData) return;
+    // Get the latest message state using functional update
+    let message: ChatMessage | undefined;
+    let userPrompt = '';
+
+    setChat((prev) => {
+      message = prev.messages.find((m) => m.id === messageId);
+      userPrompt = prev.messages.find(m => m.role === 'user')?.content || '';
+      return prev;
+    });
+
+    if (!message || !message.iterationData) {
+      console.error('Message not found for finalization');
+      return;
+    }
+
+    console.log('Message found, generating summary...');
 
     // Prepare variation results for summary generation
     const variationResults = message.iterationData.variations.map((v) => ({
@@ -533,11 +547,12 @@ const App = () => {
 
     try {
       // Generate summary using LLM
+      console.log('Calling summary API...');
       const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-iteration-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          masterPrompt: chat.messages.find(m => m.role === 'user')?.content || '',
+          masterPrompt: userPrompt,
           variations: variationResults,
         }),
       });
@@ -545,8 +560,9 @@ const App = () => {
       if (response.ok) {
         const data = await response.json();
         summary = data.summary || '';
+        console.log('Summary generated:', summary);
       } else {
-        console.error('Failed to generate summary:', response.status);
+        console.error('Failed to generate summary:', response.status, await response.text());
       }
     } catch (error) {
       console.error('Error generating summary:', error);
@@ -554,6 +570,7 @@ const App = () => {
 
     // Fallback summary if LLM fails
     if (!summary) {
+      console.log('Using fallback summary');
       const completedCount = message.iterationData.variations.filter(
         (v) => v.status === 'complete'
       ).length;
@@ -565,6 +582,7 @@ const App = () => {
       }`;
     }
 
+    console.log('Setting summary in state...');
     setChat((prev) => ({
       ...prev,
       messages: prev.messages.map((msg) =>
@@ -584,6 +602,7 @@ const App = () => {
 
     setIsGenerating(false);
     currentMessageRef.current = null;
+    console.log('Finalization complete');
   };
 
   // Handle stop
