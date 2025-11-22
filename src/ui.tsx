@@ -108,8 +108,11 @@ const App = () => {
 
         case 'all-variations-complete':
           console.log('All variations complete:', msg.payload);
+          console.log('Current message ref:', currentMessageRef.current);
           if (currentMessageRef.current) {
             finalizeIteration(currentMessageRef.current);
+          } else {
+            console.error('No current message ref found');
           }
           break;
 
@@ -514,28 +517,41 @@ const App = () => {
   };
 
   // Finalize iteration (generate summary)
-  const finalizeIteration = async (messageId: string) => {
-    console.log('Finalizing iteration...');
+  const finalizeIteration = React.useCallback(async (messageId: string) => {
+    console.log('Finalizing iteration...', 'Looking for message ID:', messageId);
 
-    // Get the latest message state using functional update
-    let message: ChatMessage | undefined;
-    let userPrompt = '';
+    // Get the current chat state synchronously
+    let currentMessage: ChatMessage | undefined;
+    let currentUserPrompt = '';
 
-    setChat((prev) => {
-      message = prev.messages.find((m) => m.id === messageId);
-      userPrompt = prev.messages.find(m => m.role === 'user')?.content || '';
-      return prev;
+    // Use a promise to ensure we get the updated state
+    await new Promise<void>((resolve) => {
+      setChat((prev) => {
+        const messageIds = prev.messages.map(m => ({ id: m.id, role: m.role, hasIterationData: !!m.iterationData }));
+        console.log('All messages in chat:', JSON.stringify(messageIds, null, 2));
+        console.log('Looking for message ID:', messageId);
+        currentMessage = prev.messages.find((m) => m.id === messageId);
+        console.log('Found message:', !!currentMessage, 'Message ID matches:', currentMessage?.id === messageId);
+        currentUserPrompt = prev.messages.find(m => m.role === 'user')?.content || '';
+        resolve();
+        return prev;
+      });
     });
 
-    if (!message || !message.iterationData) {
-      console.error('Message not found for finalization');
+    if (!currentMessage || !currentMessage.iterationData) {
+      console.error('Message not found for finalization. MessageId:', messageId);
+      console.error('Message found:', !!currentMessage, 'Has iterationData:', !!currentMessage?.iterationData);
       return;
     }
+
+    const message = currentMessage;
+    const userPrompt = currentUserPrompt;
 
     console.log('Message found, generating summary...');
 
     // Prepare variation results for summary generation
-    const variationResults = message.iterationData.variations.map((v) => ({
+    const iterationData = message.iterationData!; // We already checked it exists
+    const variationResults = iterationData.variations.map((v) => ({
       index: v.index,
       status: v.status,
       subPrompt: v.subPrompt,
@@ -571,12 +587,12 @@ const App = () => {
     // Fallback summary if LLM fails
     if (!summary) {
       console.log('Using fallback summary');
-      const completedCount = message.iterationData.variations.filter(
+      const completedCount = iterationData.variations.filter(
         (v) => v.status === 'complete'
       ).length;
 
-      summary = `I've designed ${completedCount} out of ${message.iterationData.numVariations} variations for your design. ${
-        completedCount < message.iterationData.numVariations
+      summary = `I've designed ${completedCount} out of ${iterationData.numVariations} variations for your design. ${
+        completedCount < iterationData.numVariations
           ? 'Some variations encountered errors during generation.'
           : 'Here are the differences in the variations:'
       }`;
@@ -603,7 +619,7 @@ const App = () => {
     setIsGenerating(false);
     currentMessageRef.current = null;
     console.log('Finalization complete');
-  };
+  }, []);
 
   // Handle stop
   const handleStop = () => {
