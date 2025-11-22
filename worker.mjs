@@ -1172,7 +1172,7 @@ CRITICAL RULES FOR TEXT:
 🚫 FIGMA SVG LIMITATIONS (CRITICAL):
 
 Figma's SVG importer does NOT support:
-• ❌ <style> tags with @import (Google Fonts, external CSS) - Use inline font-family instead
+• ❌ <style> tags - NEVER USE <style> AT ALL (not even for @font-face or CSS)
 • ❌ SVG filters (<filter>, <feDropShadow>, <feGaussianBlur>) - Use simple shadows with opacity
 • ❌ <foreignObject> or embedded HTML - Use native SVG elements only
 • ❌ <image> tags - NEVER USE <image> AT ALL (not even with empty href="")
@@ -1264,10 +1264,11 @@ function sanitizeSVG(svg) {
   let sanitized = svg;
   const changes = [];
 
-  // Remove <style> tags with @import (Google Fonts, external CSS)
-  if (svg.includes('@import')) {
-    sanitized = sanitized.replace(/<style[^>]*>[\s\S]*?@import[^;]*;[\s\S]*?<\/style>/gi, '');
-    changes.push('Removed @import CSS');
+  // Remove ALL <style> tags (Figma doesn't support CSS in SVG)
+  // This includes @import, @font-face, and any other CSS rules
+  if (svg.includes('<style')) {
+    sanitized = sanitized.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    changes.push('Removed <style> tags (use inline attributes instead)');
   }
 
   // Remove entire <defs> containing complex filters (feDropShadow, feGaussianBlur, etc.)
