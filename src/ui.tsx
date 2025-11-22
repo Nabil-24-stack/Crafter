@@ -126,8 +126,8 @@ const App = () => {
       }
     };
 
-    // Request design system on mount
-    parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
+    // Request selected frame info on mount (but don't auto-scan design system)
+    parent.postMessage({ pluginMessage: { type: 'get-selected-frame' } }, '*');
   }, []);
 
   // Ref to store pending iteration request (waiting for PNG export)

@@ -52,6 +52,9 @@ async function initPlugin() {
 // Initialize
 initPlugin();
 
+// Track last selected frame to avoid duplicate messages
+let lastSelectedFrameId: string | null = null;
+
 // Listen for selection changes to detect frame selection for iteration
 figma.on('selectionchange', () => {
   // Ignore selection changes that we're making programmatically
@@ -64,20 +67,30 @@ figma.on('selectionchange', () => {
   // If exactly one frame is selected, send frame info to UI (but don't export PNG yet)
   if (selection.length === 1 && selection[0].type === 'FRAME') {
     const frame = selection[0] as FrameNode;
-    figma.ui.postMessage({
-      type: 'selected-frame-data',
-      payload: {
-        frameId: frame.id,
-        frameName: frame.name,
-        // No imageData yet - will be exported when user clicks Iterate
-      },
-    });
-  } else if (selection.length === 0 || selection[0].type !== 'FRAME') {
-    // No frame selected or not a frame - return to ideation mode
-    figma.ui.postMessage({
-      type: 'selected-frame-data',
-      payload: { frameId: null, frameName: null, message: 'No frame selected' },
-    });
+
+    // Only send message if frame selection actually changed
+    if (frame.id !== lastSelectedFrameId) {
+      lastSelectedFrameId = frame.id;
+      console.log('Frame selected:', frame.name, frame.id);
+      figma.ui.postMessage({
+        type: 'selected-frame-data',
+        payload: {
+          frameId: frame.id,
+          frameName: frame.name,
+          // No imageData yet - will be exported when user clicks Iterate
+        },
+      });
+    }
+  } else {
+    // No frame selected or not a frame - clear selection
+    if (lastSelectedFrameId !== null) {
+      lastSelectedFrameId = null;
+      console.log('Frame deselected');
+      figma.ui.postMessage({
+        type: 'selected-frame-data',
+        payload: { frameId: null, frameName: null },
+      });
+    }
   }
 });
 
