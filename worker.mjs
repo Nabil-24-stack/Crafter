@@ -1181,6 +1181,11 @@ Figma's SVG importer does NOT support:
 
 INSTEAD, use Figma-compatible alternatives:
 • ✅ Inline styles: <text font-family="Inter" font-size="16" fill="#000">
+• ✅ Font families: Use SINGLE font names only - NO commas or fallbacks
+  - ✅ CORRECT: font-family="Inter"
+  - ❌ WRONG: font-family="Inter, sans-serif" (comma-separated fallbacks not supported)
+  - ✅ CORRECT: font-family="Menlo"
+  - ❌ WRONG: font-family="Menlo, monospace"
 • ✅ Simple shadows: Overlapping shapes with reduced opacity
 • ✅ Native SVG shapes: <rect>, <circle>, <path>, <text>, <g>
 • ✅ Solid fills and strokes: fill="#0066cc" stroke="#dddddd"
@@ -1302,6 +1307,14 @@ function sanitizeSVG(svg) {
   if (svg.includes('<image')) {
     sanitized = sanitized.replace(/<image[^>]*\/?>/gi, '');
     changes.push('Removed <image> tags (use <circle> or <rect> instead)');
+  }
+
+  // Fix font-family with comma-separated fallbacks (Figma has issues with these)
+  // Convert "Inter, sans-serif" to just "Inter"
+  // Convert "Menlo, monospace" to just "Menlo"
+  if (svg.includes('font-family="') && svg.includes(',')) {
+    sanitized = sanitized.replace(/font-family="([^",]+),[^"]*"/gi, 'font-family="$1"');
+    changes.push('Simplified font-family (removed fallbacks)');
   }
 
   // Fix invalid stroke attributes (stroke-right, stroke-left, etc.)
