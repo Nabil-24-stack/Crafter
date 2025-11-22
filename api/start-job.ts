@@ -27,7 +27,7 @@ export default async function handler(
   }
 
   try {
-    const { mode, prompt, designSystem, imageData, model } = req.body;
+    const { mode, prompt, designSystem, imageData, model, chatHistory } = req.body;
 
     // Validate input
     if (!mode || !designSystem) {
@@ -67,6 +67,7 @@ export default async function handler(
       designSystem,
       imageData,
       model: model || 'claude', // Default to Claude if not specified
+      chatHistory: chatHistory || '', // Optional chat history for multi-iteration chats
     };
 
     const jobId = await createJob(mode, input);

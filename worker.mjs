@@ -1610,14 +1610,20 @@ IMPORTANT:
  * Uses PNG screenshot + design system to generate modified SVG
  */
 async function processIterateJob(job) {
-  const { prompt, imageData, designSystem, model } = job.input;
+  const { prompt, imageData, designSystem, model, chatHistory } = job.input;
 
   const selectedModel = model || 'claude';
   console.log(`🎨 Vision Iteration Mode: Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image`);
 
   const systemPrompt = buildSVGSystemPrompt(designSystem);
 
-  const userPrompt = `You are looking at an existing design (see image). The user wants to make the following change:
+  // Build user prompt with optional chat history
+  let contextSection = '';
+  if (chatHistory && chatHistory.trim()) {
+    contextSection = `\n${chatHistory}\n\nNow, using this context from previous iterations, `;
+  }
+
+  const userPrompt = `You are looking at an existing design (see image).${contextSection}The user wants to make the following change:
 
 "${prompt}"
 

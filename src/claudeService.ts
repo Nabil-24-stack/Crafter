@@ -128,7 +128,8 @@ export async function iterateLayout(
   imageData: string,
   userPrompt: string,
   designSystem: DesignSystemData,
-  model: 'claude' | 'gemini' = 'claude'
+  model: 'claude' | 'gemini' = 'claude',
+  chatHistory?: string
 ): Promise<IterationResult> {
   try {
     console.log('iterateLayout called with:', {
@@ -136,6 +137,7 @@ export async function iterateLayout(
       promptLength: userPrompt?.length,
       hasDesignSystem: !!designSystem,
       model,
+      hasChatHistory: !!chatHistory,
     });
 
     // Start the job
@@ -150,6 +152,7 @@ export async function iterateLayout(
         imageData,
         designSystem,
         model,
+        chatHistory,
       }),
     });
 

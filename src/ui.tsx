@@ -287,6 +287,38 @@ const App = () => {
     }
   };
 
+  // Build chat history context for multi-iteration chats
+  const buildChatHistory = (): string => {
+    if (chat.messages.length <= 2) {
+      // First iteration, no history
+      return '';
+    }
+
+    // Build context from previous iterations (excluding current message)
+    let context = 'Previous iterations in this conversation:\n\n';
+
+    // Get all messages except the last two (current user message and assistant response)
+    const previousMessages = chat.messages.slice(0, -2);
+
+    for (let i = 0; i < previousMessages.length; i += 2) {
+      const userMsg = previousMessages[i];
+      const assistantMsg = previousMessages[i + 1];
+
+      if (!userMsg || !assistantMsg) continue;
+
+      context += `Iteration ${Math.floor(i / 2) + 1}:\n`;
+      context += `User request: "${userMsg.content}"\n`;
+
+      if (assistantMsg.iterationData?.summary) {
+        context += `Result: ${assistantMsg.iterationData.summary}\n`;
+      }
+
+      context += '\n';
+    }
+
+    return context;
+  };
+
   // Start iteration after PNG is exported
   const startIterationWithPNG = async (
     imageData: string,
@@ -309,13 +341,16 @@ const App = () => {
       // Update variations with sub-prompts
       updateVariationsWithPrompts(variationPrompts);
 
+      // Build chat history for context
+      const chatHistory = buildChatHistory();
+
       // Start all iteration variations in parallel
       variationPrompts.forEach(async (varPrompt, index) => {
         try {
           // Update status: designing
           updateVariationStatus(index, 'designing', 'AI is designing');
 
-          const iterationResult = await iterateLayout(imageData, varPrompt, ds, model);
+          const iterationResult = await iterateLayout(imageData, varPrompt, ds, model, chatHistory);
           console.log(`Iteration variation ${index + 1} result received:`, iterationResult);
 
           // Update status: rendering
