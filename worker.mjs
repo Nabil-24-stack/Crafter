@@ -1169,6 +1169,21 @@ CRITICAL RULES FOR TEXT:
 • ALWAYS set font-style="normal" on ALL <text> elements (never use italic unless explicitly requested)
 • Calculate text y-position using formulas above for perfect vertical centering
 
+🚫 FIGMA SVG LIMITATIONS (CRITICAL):
+
+Figma's SVG importer does NOT support:
+• ❌ <style> tags with @import (Google Fonts, external CSS) - Use inline font-family instead
+• ❌ SVG filters (<filter>, <feDropShadow>, <feGaussianBlur>) - Use simple shadows with opacity
+• ❌ <foreignObject> or embedded HTML - Use native SVG elements only
+• ❌ External references (xlink:href to external files)
+• ❌ <script> tags or JavaScript
+
+INSTEAD, use Figma-compatible alternatives:
+• ✅ Inline styles: <text font-family="Inter" font-size="16" fill="#000">
+• ✅ Simple shadows: Overlapping shapes with reduced opacity
+• ✅ Native SVG shapes: <rect>, <circle>, <path>, <text>, <g>
+• ✅ Solid fills and strokes: fill="#0066cc" stroke="#dddddd"
+
 VISUAL DESIGN RULES:
 • Use exact colors from design system PRIMARY COLORS
 • Match border-radius values using rx/ry attributes on <rect>
@@ -1220,6 +1235,43 @@ function extractSVG(responseText) {
 }
 
 /**
+ * Sanitize SVG to remove Figma-unsupported features
+ */
+function sanitizeSVG(svg) {
+  let sanitized = svg;
+
+  // Remove <style> tags with @import (Google Fonts, external CSS)
+  sanitized = sanitized.replace(/<style[^>]*>[\s\S]*?@import[^;]*;[\s\S]*?<\/style>/gi, '');
+
+  // Remove entire <defs> containing complex filters (feDropShadow, feGaussianBlur, etc.)
+  // Keep simple defs (gradients, clipPath) but remove filter defs
+  sanitized = sanitized.replace(/<defs>[\s\S]*?<filter[\s\S]*?<\/filter>[\s\S]*?<\/defs>/gi, function(match) {
+    // If the <defs> ONLY contains filters, remove it entirely
+    const hasNonFilterContent = /<(?!filter|\/filter|\/defs)/.test(match);
+    return hasNonFilterContent ? match.replace(/<filter[\s\S]*?<\/filter>/gi, '') : '';
+  });
+
+  // Remove standalone <filter> tags (outside defs)
+  sanitized = sanitized.replace(/<filter[\s\S]*?<\/filter>/gi, '');
+
+  // Remove filter attribute references (filter="url(#shadow-sm)")
+  sanitized = sanitized.replace(/\s+filter="[^"]*"/gi, '');
+
+  // Remove foreignObject (Figma doesn't support)
+  sanitized = sanitized.replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '');
+
+  // Log if sanitization made changes
+  if (sanitized !== svg) {
+    console.log('⚠️ SVG sanitized - removed Figma-unsupported features:');
+    if (svg.includes('@import')) console.log('  - Removed @import CSS');
+    if (svg.includes('<filter')) console.log('  - Removed SVG filters');
+    if (svg.includes('foreignObject')) console.log('  - Removed foreignObject');
+  }
+
+  return sanitized;
+}
+
+/**
  * Process a generate job - SVG MODE
  */
 async function processGenerateJob(job) {
@@ -1255,11 +1307,14 @@ Remember: Every button, card, header, and UI element MUST have visible text labe
   }
 
   // Extract SVG from response
-  const svg = extractSVG(responseText);
+  let svg = extractSVG(responseText);
 
   if (!svg || !svg.includes('<svg')) {
     throw new Error('Failed to extract valid SVG from AI response');
   }
+
+  // Sanitize SVG to remove Figma-unsupported features
+  svg = sanitizeSVG(svg);
 
   console.log('✅ SVG generated successfully');
 
@@ -1534,11 +1589,14 @@ This is an ITERATION - you're making a surgical change to an existing design whi
   }
 
   // Extract SVG from response
-  const updatedSVG = extractSVG(responseText);
+  let updatedSVG = extractSVG(responseText);
 
   if (!updatedSVG || !updatedSVG.includes('<svg')) {
     throw new Error('Failed to extract valid SVG from Claude response');
   }
+
+  // Sanitize SVG to remove Figma-unsupported features
+  updatedSVG = sanitizeSVG(updatedSVG);
 
   console.log('✅ Vision iteration complete');
 
