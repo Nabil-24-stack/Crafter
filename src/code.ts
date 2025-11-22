@@ -1786,23 +1786,3 @@ async function applyIterationToChild(parent: FrameNode, updatedChild: any, child
     await setComponentText(child as InstanceNode, updatedChild.text);
   }
 }
-
-// Listen for selection changes to update iteration mode
-figma.on('selectionchange', async () => {
-  const selection = figma.currentPage.selection;
-
-  if (selection.length === 1 && selection[0].type === 'FRAME') {
-    const frame = selection[0] as FrameNode;
-    const serialized = await serializeFrame(frame);
-
-    figma.ui.postMessage({
-      type: 'selected-frame-data',
-      payload: { frame: serialized, frameId: frame.id },
-    });
-  } else {
-    figma.ui.postMessage({
-      type: 'selected-frame-data',
-      payload: { frame: null, message: selection.length === 0 ? 'No frame selected' : 'Selected node is not a frame' },
-    });
-  }
-});
