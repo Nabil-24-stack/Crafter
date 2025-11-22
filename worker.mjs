@@ -1185,6 +1185,26 @@ INSTEAD, use Figma-compatible alternatives:
 • ✅ Native SVG shapes: <rect>, <circle>, <path>, <text>, <g>
 • ✅ Solid fills and strokes: fill="#0066cc" stroke="#dddddd"
 • ✅ For avatars/images: Use <circle> with solid fill color instead of <image> tags
+• ✅ Gradients ARE supported - but you MUST define them in <defs> before using them!
+
+CORRECT GRADIENT USAGE:
+<defs>
+  <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#7F56D9"/>
+    <stop offset="100%" stop-color="#6941C6"/>
+  </linearGradient>
+  <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#F9FAFB"/>
+    <stop offset="100%" stop-color="#FFFFFF"/>
+  </linearGradient>
+</defs>
+
+<!-- THEN use them: -->
+<rect fill="url(#gradient1)" x="0" y="0" width="200" height="100"/>
+<circle fill="url(#gradient2)" cx="50" cy="50" r="40"/>
+
+IMPORTANT: Every gradient MUST be defined in <defs> BEFORE you reference it with url(#...)
+NEVER reference url(#paint0_linear) or url(#someGradient) without defining it first!
 
 VISUAL DESIGN RULES:
 • Use exact colors from design system PRIMARY COLORS
@@ -1298,13 +1318,37 @@ function sanitizeSVG(svg) {
   sanitized = sanitized.replace(/\s+border-[^=]*="[^"]*"/gi, '');
 
   // Remove url() references to undefined gradients/patterns
-  // Check if <defs> is empty or missing, then remove all url(#...) references
-  const hasEmptyDefs = /<defs>\s*<\/defs>/.test(sanitized) || !sanitized.includes('<defs>');
-  const hasUrlReferences = /(?:fill|stroke)="url\(#[^)]+\)"/.test(sanitized);
+  // Extract all defined IDs from <defs>
+  const defsMatch = sanitized.match(/<defs>[\s\S]*?<\/defs>/);
+  const definedIds = new Set();
 
-  if (hasEmptyDefs && hasUrlReferences) {
-    sanitized = sanitized.replace(/\s*(?:fill|stroke)="url\(#[^)]+\)"/gi, '');
-    changes.push('Removed undefined gradient/pattern references');
+  if (defsMatch) {
+    const defsContent = defsMatch[0];
+    // Extract all id="..." from gradient/pattern definitions
+    const idMatches = defsContent.matchAll(/id="([^"]+)"/g);
+    for (const match of idMatches) {
+      definedIds.add(match[1]);
+    }
+  }
+
+  // Find all url(#...) references
+  const urlMatches = sanitized.matchAll(/(?:fill|stroke)="url\(#([^)]+)\)"/g);
+  const undefinedRefs = [];
+
+  for (const match of urlMatches) {
+    const refId = match[1];
+    if (!definedIds.has(refId)) {
+      undefinedRefs.push(refId);
+    }
+  }
+
+  // Remove only undefined url() references
+  if (undefinedRefs.length > 0) {
+    undefinedRefs.forEach(refId => {
+      const regex = new RegExp(`\\s*(?:fill|stroke)="url\\(#${refId}\\)"`, 'gi');
+      sanitized = sanitized.replace(regex, '');
+    });
+    changes.push(`Removed ${undefinedRefs.length} undefined gradient references`);
   }
 
   // Remove empty <defs> tags
