@@ -426,14 +426,14 @@ const App = () => {
           // This gives users time to see the complete reasoning
           setTimeout(() => {
             if (iterationResult.job_id) {
-              updateStreamingReasoning(index, '', false); // Mark streaming as complete
+              updateStreamingReasoning(index, '', false); // Turn off live indicator (keeps text)
               const channel = realtimeChannelsRef.current.get(iterationResult.job_id);
               if (channel) {
                 unsubscribeFromReasoningChunks(channel);
                 realtimeChannelsRef.current.delete(iterationResult.job_id);
               }
             }
-          }, 1000); // 1 second delay before cleaning up
+          }, 2000); // 2 second delay to show complete streaming
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
           updateVariationStatus(
@@ -553,7 +553,8 @@ const App = () => {
                   v.index === index
                     ? {
                         ...v,
-                        streamingReasoning: (v.streamingReasoning || '') + chunk,
+                        // Keep accumulated text, just update live indicator
+                        streamingReasoning: chunk ? (v.streamingReasoning || '') + chunk : v.streamingReasoning,
                         isStreamingLive: isLive,
                       }
                     : v
