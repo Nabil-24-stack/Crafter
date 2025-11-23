@@ -719,6 +719,115 @@ async function callClaudeWithVision(systemPrompt, userPrompt, imageDataBase64) {
 }
 
 /**
+ * Call Claude with vision in STREAMING mode (for live reasoning)
+ * Processes tokens in real-time and calls onToken callback with each chunk
+ */
+async function callClaudeWithVisionStreaming(systemPrompt, userPrompt, imageDataBase64, onToken) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 16384,
+      system: systemPrompt,
+      stream: true, // ← Enable streaming
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/png',
+                data: imageDataBase64,
+              },
+            },
+            {
+              type: 'text',
+              text: userPrompt,
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Claude API error ${response.status}: ${errorText}`);
+  }
+
+  // Process Server-Sent Events (SSE) stream
+  const reader = response.body;
+  let fullText = '';
+  let buffer = '';
+
+  // Helper to parse SSE events
+  const processLine = (line) => {
+    if (line.startsWith('data: ')) {
+      const data = line.slice(6);
+
+      if (data === '[DONE]') {
+        return null; // Stream complete
+      }
+
+      try {
+        const parsed = JSON.parse(data);
+
+        // Claude SSE event types:
+        // - message_start: metadata about the message
+        // - content_block_start: start of a content block
+        // - content_block_delta: incremental content (this is what we want!)
+        // - content_block_stop: end of content block
+        // - message_delta: metadata updates
+        // - message_stop: stream complete
+
+        if (parsed.type === 'content_block_delta') {
+          const delta = parsed.delta;
+          if (delta.type === 'text_delta' && delta.text) {
+            return delta.text;
+          }
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+    return null;
+  };
+
+  // Read the stream
+  for await (const chunk of reader) {
+    const text = new TextDecoder().decode(chunk);
+    buffer += text;
+
+    // Process complete lines
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+    for (const line of lines) {
+      const token = processLine(line.trim());
+      if (token) {
+        fullText += token;
+        // Call the callback with the new token and accumulated text
+        if (onToken) {
+          await onToken(token, fullText);
+        }
+      }
+    }
+  }
+
+  return {
+    content: [{ type: 'text', text: fullText }],
+    stop_reason: 'stop',
+  };
+}
+
+/**
  * Call Gemini with vision (image + text)
  */
 async function callGeminiWithVision(systemPrompt, userPrompt, imageDataBase64) {
@@ -776,6 +885,103 @@ async function callGeminiWithVision(systemPrompt, userPrompt, imageDataBase64) {
       input_tokens: data.usageMetadata?.promptTokenCount || 0,
       output_tokens: data.usageMetadata?.candidatesTokenCount || 0,
     },
+  };
+}
+
+/**
+ * Call Gemini with vision in STREAMING mode (for live reasoning)
+ * Processes tokens in real-time and calls onToken callback with each chunk
+ */
+async function callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageDataBase64, onToken) {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
+  if (!geminiApiKey) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiApiKey,
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `${systemPrompt}\n\n${userPrompt}`,
+              },
+              {
+                inlineData: {
+                  mimeType: 'image/png',
+                  data: imageDataBase64,
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${errorText}`);
+  }
+
+  // Process Server-Sent Events (SSE) stream
+  const reader = response.body;
+  let fullText = '';
+  let buffer = '';
+
+  // Helper to parse SSE events
+  const processLine = (line) => {
+    if (line.startsWith('data: ')) {
+      const data = line.slice(6);
+
+      try {
+        const parsed = JSON.parse(data);
+
+        // Gemini streaming response structure:
+        // candidates[0].content.parts[0].text
+        const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          return text;
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+    return null;
+  };
+
+  // Read the stream
+  for await (const chunk of reader) {
+    const text = new TextDecoder().decode(chunk);
+    buffer += text;
+
+    // Process complete lines
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+    for (const line of lines) {
+      const token = processLine(line.trim());
+      if (token) {
+        fullText += token;
+        // Call the callback with the new token and accumulated text
+        if (onToken) {
+          await onToken(token, fullText);
+        }
+      }
+    }
+  }
+
+  return {
+    content: [{ type: 'text', text: fullText }],
+    stop_reason: 'stop',
   };
 }
 
@@ -1626,14 +1832,15 @@ IMPORTANT:
 }
 
 /**
- * Process an iterate job - VISION MODE
+ * Process an iterate job - VISION MODE with STREAMING
  * Uses PNG screenshot + design system to generate modified SVG
+ * Streams reasoning tokens in real-time to the database
  */
 async function processIterateJob(job) {
   const { prompt, imageData, designSystem, model, chatHistory } = job.input;
 
   const selectedModel = model || 'claude';
-  console.log(`🎨 Vision Iteration Mode: Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image`);
+  console.log(`🎨 Vision Iteration Mode (STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image`);
 
   const systemPrompt = buildSVGSystemPrompt(designSystem);
 
@@ -1706,20 +1913,56 @@ EXAMPLE - If user says "add a button below the card":
 
 This is an ITERATION - you're making a surgical change to an existing design while maintaining pixel-perfect grid alignment.`;
 
-  // Call the selected AI model with vision (image + text)
+  // Track streaming state
+  let reasoningBuffer = '';
+  let chunkIndex = 0;
+  let svgStarted = false;
+  const CHUNK_SIZE = 120; // Insert chunks every ~120 characters for good balance
+
+  // Callback for processing streaming tokens
+  const onToken = async (token, fullText) => {
+    // Check if we've reached the SVG content (stop streaming reasoning)
+    if (fullText.includes('```svg') || fullText.includes('```xml') || fullText.includes('<svg')) {
+      svgStarted = true;
+
+      // Send any remaining reasoning buffer
+      if (reasoningBuffer.trim() && job.id) {
+        await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
+        reasoningBuffer = '';
+      }
+
+      return; // Stop processing reasoning tokens
+    }
+
+    // Only accumulate reasoning (before SVG starts)
+    if (!svgStarted) {
+      reasoningBuffer += token;
+
+      // Insert chunk when buffer reaches threshold
+      if (reasoningBuffer.length >= CHUNK_SIZE && job.id) {
+        await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
+        console.log(`📝 Streamed reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
+        reasoningBuffer = ''; // Reset buffer
+      }
+    }
+  };
+
+  // Call the selected AI model with STREAMING
   const aiResponse = selectedModel === 'gemini'
-    ? await callGeminiWithVision(systemPrompt, userPrompt, imageData)
-    : await callClaudeWithVision(systemPrompt, userPrompt, imageData);
+    ? await callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken)
+    : await callClaudeWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken);
 
   const responseText = aiResponse.content[0]?.text || '';
 
-  // Check if we hit the token limit
-  if (aiResponse.stop_reason === 'max_tokens' || aiResponse.stop_reason === 'length') {
-    console.warn('⚠️ Warning: Model hit max_tokens limit. Response may be truncated.');
-    console.warn('Usage:', JSON.stringify(aiResponse.usage));
+  // Send any remaining reasoning buffer (final chunk)
+  if (reasoningBuffer.trim() && job.id) {
+    await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
+    console.log(`📝 Streamed final reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
   }
 
-  // Extract reasoning (text before the SVG code block)
+  console.log(`✅ Streaming complete: ${chunkIndex} reasoning chunks sent in real-time`);
+
+  // Extract reasoning (text before the SVG code block) for final output
   let reasoning = '';
   const svgCodeBlockMatch = responseText.match(/```(?:svg|xml)?\s*\n/);
   if (svgCodeBlockMatch) {
@@ -1735,30 +1978,13 @@ This is an ITERATION - you're making a surgical change to an existing design whi
   // Clean up reasoning - remove any trailing markdown or extra whitespace
   reasoning = reasoning.replace(/```.*$/s, '').trim();
 
-  console.log('📝 Extracted reasoning length:', reasoning.length, 'characters');
-  console.log('📝 Reasoning preview:', reasoning.substring(0, 100) + '...');
-
-  // Send reasoning in 3-4 larger chunks for live streaming
-  if (reasoning && job.id) {
-    const NUM_CHUNKS = 4;
-    const chunkSize = Math.ceil(reasoning.length / NUM_CHUNKS);
-
-    for (let i = 0; i < NUM_CHUNKS; i++) {
-      const start = i * chunkSize;
-      const end = Math.min((i + 1) * chunkSize, reasoning.length);
-      const chunk = reasoning.substring(start, end);
-
-      if (chunk.trim()) {
-        await insertReasoningChunk(job.id, chunk, i);
-      }
-    }
-  }
+  console.log('📝 Final reasoning length:', reasoning.length, 'characters');
 
   // Extract SVG from response
   let updatedSVG = extractSVG(responseText);
 
   if (!updatedSVG || !updatedSVG.includes('<svg')) {
-    throw new Error('Failed to extract valid SVG from Claude response');
+    throw new Error('Failed to extract valid SVG from AI response');
   }
 
   // Sanitize SVG to remove Figma-unsupported features
