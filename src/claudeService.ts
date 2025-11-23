@@ -168,7 +168,11 @@ export async function iterateLayout(
     // Poll for results
     const output = await pollJobStatus(job_id);
 
-    return output as IterationResult;
+    // Include job_id in the result for realtime subscriptions
+    return {
+      ...output,
+      job_id,
+    } as IterationResult;
   } catch (error) {
     console.error('Error iterating layout:', error);
 

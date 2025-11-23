@@ -216,6 +216,7 @@ export interface IterationRequest {
 export interface IterationResult {
   svg: string; // Updated SVG markup
   reasoning?: string;
+  job_id?: string; // Job ID for subscribing to realtime reasoning updates
 }
 
 // Chat interface structures
@@ -230,8 +231,11 @@ export interface VariationStatus {
   // Details (shown when expanded)
   subPrompt?: string; // The variation prompt generated
   reasoning?: string; // From LLM response
+  streamingReasoning?: string; // Live streaming reasoning (accumulated chunks)
+  isStreamingLive?: boolean; // Whether reasoning is currently streaming
   createdNodeId?: string; // Figma node ID if successfully created
   isExpanded?: boolean; // UI state for expand/collapse
+  jobId?: string; // Job ID for realtime subscription
 }
 
 export type IterationDataStatus = 'generating-prompts' | 'in-progress' | 'complete' | 'stopped' | 'error';

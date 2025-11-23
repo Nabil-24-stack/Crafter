@@ -80,6 +80,26 @@ async function updateJob(id, status, output = null, errorMessage = null) {
 }
 
 /**
+ * Insert a reasoning chunk into the database for live streaming
+ */
+async function insertReasoningChunk(jobId, chunkText, chunkIndex) {
+  const { error } = await supabase
+    .from('reasoning_chunks')
+    .insert({
+      job_id: jobId,
+      chunk_text: chunkText,
+      chunk_index: chunkIndex,
+    });
+
+  if (error) {
+    console.error('Error inserting reasoning chunk:', error);
+    // Don't throw - we don't want to fail the whole job if chunk insertion fails
+  } else {
+    console.log(`📝 Inserted reasoning chunk ${chunkIndex} for job ${jobId}`);
+  }
+}
+
+/**
  * Build system prompt for generation
  */
 function buildSystemPrompt(designSystem) {
@@ -1713,6 +1733,22 @@ This is an ITERATION - you're making a surgical change to an existing design whi
 
   // Clean up reasoning - remove any trailing markdown or extra whitespace
   reasoning = reasoning.replace(/```.*$/s, '').trim();
+
+  // Send reasoning in 3-4 larger chunks for live streaming
+  if (reasoning && job.id) {
+    const NUM_CHUNKS = 4;
+    const chunkSize = Math.ceil(reasoning.length / NUM_CHUNKS);
+
+    for (let i = 0; i < NUM_CHUNKS; i++) {
+      const start = i * chunkSize;
+      const end = Math.min((i + 1) * chunkSize, reasoning.length);
+      const chunk = reasoning.substring(start, end);
+
+      if (chunk.trim()) {
+        await insertReasoningChunk(job.id, chunk, i);
+      }
+    }
+  }
 
   // Extract SVG from response
   let updatedSVG = extractSVG(responseText);

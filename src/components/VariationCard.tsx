@@ -53,10 +53,20 @@ export const VariationCard: React.FC<VariationCardProps> = ({
             </div>
           )}
 
-          {variation.reasoning && (
+          {(variation.streamingReasoning || variation.reasoning) && (
             <div className="detail-section">
-              <div className="detail-label">AI Reasoning:</div>
-              <div className="detail-value">{variation.reasoning}</div>
+              <div className="detail-label">
+                AI Reasoning:
+                {variation.isStreamingLive && (
+                  <span className="live-badge">● LIVE</span>
+                )}
+              </div>
+              <div className="detail-value reasoning-text">
+                {variation.streamingReasoning || variation.reasoning}
+                {variation.isStreamingLive && (
+                  <span className="typing-cursor">▌</span>
+                )}
+              </div>
             </div>
           )}
 

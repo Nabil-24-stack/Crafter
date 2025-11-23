@@ -18,4 +18,10 @@ export const config = {
   // BACKEND_URL: 'http://localhost:3000/api/generate',
   // BACKEND_URL_MULTI_PHASE: 'http://localhost:3000/api/generate-multi-phase',
   // USE_MULTI_PHASE: true,
+
+  // Supabase configuration for realtime reasoning updates
+  // Note: Using anon key is safe for read-only realtime subscriptions
+  // RLS policies ensure data is only accessible to authorized users
+  SUPABASE_URL: 'https://tsqfwommnuhtbeupuwwm.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcWZ3b21tbnVodGJldXB1d3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1MjA1NTcsImV4cCI6MjA1ODA5NjU1N30.2566JJwlN717YvNAr0lnzj6XlUu29Zj5alfSx2Nesyo',
 };

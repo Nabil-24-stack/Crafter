@@ -13,6 +13,8 @@ import {
   VariationStatus,
 } from './types';
 import { ChatInterface } from './components/ChatInterface';
+import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks } from './supabaseClient';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import './ui.css';
 
 const App = () => {
@@ -37,6 +39,9 @@ const App = () => {
   // Generation state
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [activeJobIds, setActiveJobIds] = React.useState<string[]>([]);
+
+  // Realtime subscription channels (keyed by job_id)
+  const realtimeChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
 
   // Generate unique ID
   function generateId(): string {
@@ -132,6 +137,18 @@ const App = () => {
 
     // Request selected frame info on mount (but don't auto-scan design system)
     parent.postMessage({ pluginMessage: { type: 'get-selected-frame' } }, '*');
+  }, []);
+
+  // Cleanup realtime subscriptions on unmount
+  React.useEffect(() => {
+    return () => {
+      console.log('Cleaning up all realtime subscriptions...');
+      realtimeChannelsRef.current.forEach(async (channel, jobId) => {
+        await unsubscribeFromReasoningChunks(channel);
+        console.log(`Unsubscribed from job ${jobId}`);
+      });
+      realtimeChannelsRef.current.clear();
+    };
   }, []);
 
   // Ref to store pending iteration request (waiting for PNG export)
@@ -357,6 +374,25 @@ const App = () => {
           const iterationResult = await iterateLayout(imageData, varPrompt, ds, model, chatHistory);
           console.log(`Iteration variation ${index + 1} result received:`, iterationResult);
 
+          // Subscribe to realtime reasoning updates if job_id is available
+          if (iterationResult.job_id) {
+            console.log(`Subscribing to reasoning chunks for job ${iterationResult.job_id}`);
+
+            const channel = subscribeToReasoningChunks(
+              iterationResult.job_id,
+              (chunk) => {
+                console.log(`Received chunk ${chunk.chunk_index} for variation ${index + 1}`);
+                updateStreamingReasoning(index, chunk.chunk_text, true);
+              },
+              (error) => {
+                console.error(`Realtime subscription error for variation ${index + 1}:`, error);
+              }
+            );
+
+            // Store channel for cleanup
+            realtimeChannelsRef.current.set(iterationResult.job_id, channel);
+          }
+
           // Update status: rendering
           updateVariationStatus(index, 'rendering', 'Creating in Figma');
 
@@ -376,6 +412,16 @@ const App = () => {
             },
             '*'
           );
+
+          // Stop streaming indicator and cleanup subscription
+          if (iterationResult.job_id) {
+            updateStreamingReasoning(index, '', false); // Mark streaming as complete
+            const channel = realtimeChannelsRef.current.get(iterationResult.job_id);
+            if (channel) {
+              await unsubscribeFromReasoningChunks(channel);
+              realtimeChannelsRef.current.delete(iterationResult.job_id);
+            }
+          }
 
           // Update status: complete
           updateVariationStatus(index, 'complete', 'Iteration Complete', iterationResult.reasoning);
@@ -471,6 +517,35 @@ const App = () => {
                         statusText,
                         reasoning: reasoning || v.reasoning,
                         error: error || v.error,
+                      }
+                    : v
+                ),
+              },
+            }
+          : msg
+      ),
+    }));
+  };
+
+  // Update streaming reasoning for a variation
+  const updateStreamingReasoning = (index: number, chunk: string, isLive: boolean) => {
+    const messageId = currentMessageRef.current;
+    if (!messageId) return;
+
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                variations: msg.iterationData.variations.map((v) =>
+                  v.index === index
+                    ? {
+                        ...v,
+                        streamingReasoning: (v.streamingReasoning || '') + chunk,
+                        isStreamingLive: isLive,
                       }
                     : v
                 ),
