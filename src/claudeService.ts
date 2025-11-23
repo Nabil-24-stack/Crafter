@@ -123,13 +123,16 @@ function generateMockLayout(prompt: string, designSystem: DesignSystemData): Gen
 /**
  * Iterates on an existing design using Claude API with vision
  * Uses async job queue to avoid timeouts
+ *
+ * @param onJobStarted - Optional callback called immediately when job_id is available (before polling)
  */
 export async function iterateLayout(
   imageData: string,
   userPrompt: string,
   designSystem: DesignSystemData,
   model: 'claude' | 'gemini' = 'claude',
-  chatHistory?: string
+  chatHistory?: string,
+  onJobStarted?: (jobId: string) => void
 ): Promise<IterationResult> {
   try {
     console.log('iterateLayout called with:', {
@@ -164,6 +167,11 @@ export async function iterateLayout(
     const { job_id } = await startResponse.json();
 
     console.log('Iteration job started:', job_id);
+
+    // Call the callback immediately with job_id (for early subscription)
+    if (onJobStarted) {
+      onJobStarted(job_id);
+    }
 
     // Poll for results
     const output = await pollJobStatus(job_id);

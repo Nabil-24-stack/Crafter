@@ -371,27 +371,33 @@ const App = () => {
           // Update status: designing
           updateVariationStatus(index, 'designing', 'AI is designing');
 
-          const iterationResult = await iterateLayout(imageData, varPrompt, ds, model, chatHistory);
+          const iterationResult = await iterateLayout(
+            imageData,
+            varPrompt,
+            ds,
+            model,
+            chatHistory,
+            // Subscribe immediately when job starts (before polling completes)
+            (jobId) => {
+              console.log(`Job started for variation ${index + 1}: ${jobId}`);
+              console.log(`Subscribing to reasoning chunks for job ${jobId}`);
+
+              const channel = subscribeToReasoningChunks(
+                jobId,
+                (chunk) => {
+                  console.log(`Received chunk ${chunk.chunk_index} for variation ${index + 1}`);
+                  updateStreamingReasoning(index, chunk.chunk_text, true);
+                },
+                (error) => {
+                  console.error(`Realtime subscription error for variation ${index + 1}:`, error);
+                }
+              );
+
+              // Store channel for cleanup
+              realtimeChannelsRef.current.set(jobId, channel);
+            }
+          );
           console.log(`Iteration variation ${index + 1} result received:`, iterationResult);
-
-          // Subscribe to realtime reasoning updates if job_id is available
-          if (iterationResult.job_id) {
-            console.log(`Subscribing to reasoning chunks for job ${iterationResult.job_id}`);
-
-            const channel = subscribeToReasoningChunks(
-              iterationResult.job_id,
-              (chunk) => {
-                console.log(`Received chunk ${chunk.chunk_index} for variation ${index + 1}`);
-                updateStreamingReasoning(index, chunk.chunk_text, true);
-              },
-              (error) => {
-                console.error(`Realtime subscription error for variation ${index + 1}:`, error);
-              }
-            );
-
-            // Store channel for cleanup
-            realtimeChannelsRef.current.set(iterationResult.job_id, channel);
-          }
 
           // Update status: rendering
           updateVariationStatus(index, 'rendering', 'Creating in Figma');
