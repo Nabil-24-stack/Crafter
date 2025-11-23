@@ -1918,6 +1918,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
   let chunkIndex = 0;
   let svgStarted = false;
   const CHUNK_SIZE = 120; // Insert chunks every ~120 characters for good balance
+  const CHUNK_DELAY_MS = 2000; // 2 second delay between chunks for natural streaming feel
 
   // Callback for processing streaming tokens
   const onToken = async (token, fullText) => {
@@ -1943,6 +1944,10 @@ This is an ITERATION - you're making a surgical change to an existing design whi
         await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
         console.log(`📝 Streamed reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
         reasoningBuffer = ''; // Reset buffer
+
+        // Add delay to spread chunks out over time for better UX
+        // This makes the streaming feel more natural and gives continuous feedback
+        await new Promise(resolve => setTimeout(resolve, CHUNK_DELAY_MS));
       }
     }
   };
