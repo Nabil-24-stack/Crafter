@@ -1698,6 +1698,22 @@ This is an ITERATION - you're making a surgical change to an existing design whi
     console.warn('Usage:', JSON.stringify(aiResponse.usage));
   }
 
+  // Extract reasoning (text before the SVG code block)
+  let reasoning = '';
+  const svgCodeBlockMatch = responseText.match(/```(?:svg|xml)?\s*\n/);
+  if (svgCodeBlockMatch) {
+    reasoning = responseText.substring(0, svgCodeBlockMatch.index).trim();
+  } else {
+    // If no code block found, try to find where SVG starts
+    const svgStartMatch = responseText.match(/<svg/);
+    if (svgStartMatch) {
+      reasoning = responseText.substring(0, svgStartMatch.index).trim();
+    }
+  }
+
+  // Clean up reasoning - remove any trailing markdown or extra whitespace
+  reasoning = reasoning.replace(/```.*$/s, '').trim();
+
   // Extract SVG from response
   let updatedSVG = extractSVG(responseText);
 
@@ -1712,7 +1728,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
 
   return {
     svg: updatedSVG,
-    reasoning: `SVG modified with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} Vision`
+    reasoning: reasoning || `SVG modified with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} Vision`
   };
 }
 
