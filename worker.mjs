@@ -1917,13 +1917,16 @@ This is an ITERATION - you're making a surgical change to an existing design whi
   let reasoningBuffer = '';
   let chunkIndex = 0;
   let svgStarted = false;
+  let svgContent = '';
+  let lastSvgProgressUpdate = 0;
   const CHUNK_SIZE = 120; // Insert chunks every ~120 characters for good balance
   const CHUNK_DELAY_MS = 3000; // 3 second delay between chunks for natural streaming feel
+  const SVG_PROGRESS_INTERVAL = 2000; // Send SVG progress every 2 seconds
 
   // Callback for processing streaming tokens
   const onToken = async (token, fullText) => {
     // Check if we've reached the SVG content (stop streaming reasoning)
-    if (fullText.includes('```svg') || fullText.includes('```xml') || fullText.includes('<svg')) {
+    if (!svgStarted && (fullText.includes('```svg') || fullText.includes('```xml') || fullText.includes('<svg'))) {
       svgStarted = true;
 
       // Send any remaining reasoning buffer
@@ -1932,7 +1935,11 @@ This is an ITERATION - you're making a surgical change to an existing design whi
         reasoningBuffer = '';
       }
 
-      return; // Stop processing reasoning tokens
+      // Initial SVG progress indicator
+      if (job.id) {
+        await insertReasoningChunk(job.id, '● LIVE Generating SVG markup...', chunkIndex++);
+        lastSvgProgressUpdate = Date.now();
+      }
     }
 
     // Only accumulate reasoning (before SVG starts)
@@ -1948,6 +1955,22 @@ This is an ITERATION - you're making a surgical change to an existing design whi
         // Add delay to spread chunks out over time for better UX
         // This makes the streaming feel more natural and gives continuous feedback
         await new Promise(resolve => setTimeout(resolve, CHUNK_DELAY_MS));
+      }
+    } else {
+      // Track SVG content as it's generated
+      svgContent += token;
+
+      // Send periodic progress updates while SVG is being generated
+      const now = Date.now();
+      if (job.id && now - lastSvgProgressUpdate >= SVG_PROGRESS_INTERVAL) {
+        const svgLines = svgContent.split('\n').length;
+        const progressMessage = `● LIVE Generating SVG... (${svgLines} lines so far)`;
+        await insertReasoningChunk(job.id, progressMessage, chunkIndex++);
+        console.log(`🎨 SVG progress: ${svgLines} lines`);
+        lastSvgProgressUpdate = now;
+
+        // Small delay for progress updates
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
   };
@@ -1965,7 +1988,15 @@ This is an ITERATION - you're making a surgical change to an existing design whi
     console.log(`📝 Streamed final reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
   }
 
-  console.log(`✅ Streaming complete: ${chunkIndex} reasoning chunks sent in real-time`);
+  // Send final SVG completion message
+  if (svgStarted && job.id) {
+    const finalSvgLines = svgContent.split('\n').length;
+    const completionMessage = `✅ SVG complete (${finalSvgLines} lines)`;
+    await insertReasoningChunk(job.id, completionMessage, chunkIndex++);
+    console.log(`🎨 SVG generation complete: ${finalSvgLines} lines`);
+  }
+
+  console.log(`✅ Streaming complete: ${chunkIndex} chunks sent in real-time (reasoning + SVG progress)`);
 
   // Extract reasoning (text before the SVG code block) for final output
   let reasoning = '';
