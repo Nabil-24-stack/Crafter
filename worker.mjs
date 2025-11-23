@@ -1968,9 +1968,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
         await insertReasoningChunk(job.id, progressMessage, chunkIndex++);
         console.log(`🎨 SVG progress: ${svgLines} lines`);
         lastSvgProgressUpdate = now;
-
-        // Small delay for progress updates
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // No delay here - let the LLM stream continue at full speed
       }
     }
   };
