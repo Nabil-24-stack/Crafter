@@ -1937,7 +1937,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
 
       // Initial SVG progress indicator
       if (job.id) {
-        await insertReasoningChunk(job.id, '● LIVE Generating SVG markup...', chunkIndex++);
+        await insertReasoningChunk(job.id, 'Generating vector markup...', chunkIndex++);
         lastSvgProgressUpdate = Date.now();
       }
     }
@@ -1964,7 +1964,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
       const now = Date.now();
       if (job.id && now - lastSvgProgressUpdate >= SVG_PROGRESS_INTERVAL) {
         const svgLines = svgContent.split('\n').length;
-        const progressMessage = `● LIVE Generating SVG... (${svgLines} lines so far)`;
+        const progressMessage = `Generating vector... (${svgLines} lines so far)`;
         await insertReasoningChunk(job.id, progressMessage, chunkIndex++);
         console.log(`🎨 SVG progress: ${svgLines} lines`);
         lastSvgProgressUpdate = now;
@@ -1989,7 +1989,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
   // Send final SVG completion message
   if (svgStarted && job.id) {
     const finalSvgLines = svgContent.split('\n').length;
-    const completionMessage = `✅ SVG complete (${finalSvgLines} lines)`;
+    const completionMessage = `Vector complete (${finalSvgLines} lines)`;
     await insertReasoningChunk(job.id, completionMessage, chunkIndex++);
     console.log(`🎨 SVG generation complete: ${finalSvgLines} lines`);
   }
