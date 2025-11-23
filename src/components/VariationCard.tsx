@@ -46,13 +46,7 @@ export const VariationCard: React.FC<VariationCardProps> = ({
 
       {variation.isExpanded && (
         <div className="variation-details">
-          {variation.subPrompt && (
-            <div className="detail-section">
-              <div className="detail-label">Sub-prompt:</div>
-              <div className="detail-value">{variation.subPrompt}</div>
-            </div>
-          )}
-
+          {/* Show live streaming reasoning or final reasoning (prioritize over sub-prompt) */}
           {(variation.streamingReasoning || variation.reasoning) && (
             <div className="detail-section">
               <div className="detail-label">
@@ -67,6 +61,14 @@ export const VariationCard: React.FC<VariationCardProps> = ({
                   <span className="typing-cursor">▌</span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Only show sub-prompt if no reasoning is available */}
+          {!variation.streamingReasoning && !variation.reasoning && variation.subPrompt && (
+            <div className="detail-section">
+              <div className="detail-label">Sub-prompt:</div>
+              <div className="detail-value">{variation.subPrompt}</div>
             </div>
           )}
 
