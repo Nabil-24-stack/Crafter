@@ -359,8 +359,8 @@ const App = () => {
       const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds);
       console.log('Generated variation prompts:', variationPrompts);
 
-      // Update variations with sub-prompts
-      updateVariationsWithPrompts(variationPrompts);
+      // Update variations with sub-prompts (commented out - we show reasoning instead)
+      // updateVariationsWithPrompts(variationPrompts);
 
       // Build chat history for context
       const chatHistory = buildChatHistory();
@@ -419,18 +419,21 @@ const App = () => {
             '*'
           );
 
-          // Stop streaming indicator and cleanup subscription
-          if (iterationResult.job_id) {
-            updateStreamingReasoning(index, '', false); // Mark streaming as complete
-            const channel = realtimeChannelsRef.current.get(iterationResult.job_id);
-            if (channel) {
-              await unsubscribeFromReasoningChunks(channel);
-              realtimeChannelsRef.current.delete(iterationResult.job_id);
-            }
-          }
-
-          // Update status: complete
+          // Update status: complete (with final reasoning, keeping streaming content)
           updateVariationStatus(index, 'complete', 'Iteration Complete', iterationResult.reasoning);
+
+          // Stop streaming indicator and cleanup subscription after a brief delay
+          // This gives users time to see the complete reasoning
+          setTimeout(() => {
+            if (iterationResult.job_id) {
+              updateStreamingReasoning(index, '', false); // Mark streaming as complete
+              const channel = realtimeChannelsRef.current.get(iterationResult.job_id);
+              if (channel) {
+                unsubscribeFromReasoningChunks(channel);
+                realtimeChannelsRef.current.delete(iterationResult.job_id);
+              }
+            }
+          }, 1000); // 1 second delay before cleaning up
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
           updateVariationStatus(
