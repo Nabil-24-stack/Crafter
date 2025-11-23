@@ -1918,7 +1918,7 @@ This is an ITERATION - you're making a surgical change to an existing design whi
   let chunkIndex = 0;
   let svgStarted = false;
   const CHUNK_SIZE = 120; // Insert chunks every ~120 characters for good balance
-  const CHUNK_DELAY_MS = 2000; // 2 second delay between chunks for natural streaming feel
+  const CHUNK_DELAY_MS = 3000; // 3 second delay between chunks for natural streaming feel
 
   // Callback for processing streaming tokens
   const onToken = async (token, fullText) => {

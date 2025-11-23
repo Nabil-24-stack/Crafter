@@ -206,13 +206,24 @@ const App = () => {
       }));
     }
 
-    // Add user message
+    // Add user message immediately
     const userMessage: ChatMessage = {
       id: generateId(),
       role: 'user',
       content: prompt,
       timestamp: Date.now(),
     };
+
+    setChat((prev) => ({
+      ...prev,
+      messages: [...prev.messages, userMessage],
+      currentFrameId: lockedFrameId,
+    }));
+
+    setIsGenerating(true);
+
+    // Wait 1 second before showing AI response
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Add assistant message with iteration data
     const assistantMessageId = generateId();
@@ -228,23 +239,45 @@ const App = () => {
         numVariations,
         status: 'generating-prompts',
         startTime: Date.now(),
-        variations: Array.from({ length: numVariations }, (_, i) => ({
-          index: i,
-          status: 'thinking',
-          statusText: 'Thinking of approach',
-          isExpanded: false,
-        })),
+        variations: [], // Start with empty variations, we'll add them with stagger
       },
     };
 
     setChat((prev) => ({
       ...prev,
-      messages: [...prev.messages, userMessage, assistantMessage],
-      currentFrameId: lockedFrameId,
+      messages: [...prev.messages, assistantMessage],
     }));
 
     currentMessageRef.current = assistantMessageId;
-    setIsGenerating(true);
+
+    // Add variation cards with staggered animation
+    // Wait 1 second after AI message, then show cards 1 second apart
+    for (let i = 0; i < numVariations; i++) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setChat((prev) => ({
+        ...prev,
+        messages: prev.messages.map((msg) =>
+          msg.id === assistantMessageId && msg.iterationData
+            ? {
+                ...msg,
+                iterationData: {
+                  ...msg.iterationData,
+                  variations: [
+                    ...msg.iterationData.variations,
+                    {
+                      index: i,
+                      status: 'thinking',
+                      statusText: 'Thinking of approach',
+                      isExpanded: false,
+                    },
+                  ],
+                },
+              }
+            : msg
+        ),
+      }));
+    }
 
     // Store pending iteration and request PNG export
     pendingIterationRef.current = {

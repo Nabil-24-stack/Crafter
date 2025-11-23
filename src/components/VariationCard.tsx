@@ -64,6 +64,16 @@ export const VariationCard: React.FC<VariationCardProps> = ({
             </div>
           )}
 
+          {/* Show placeholder while waiting for reasoning to start */}
+          {!variation.streamingReasoning && !variation.reasoning && !variation.subPrompt && !variation.error && (variation.status === 'designing' || variation.status === 'thinking') && (
+            <div className="detail-section">
+              <div className="detail-label">AI Reasoning:</div>
+              <div className="detail-value placeholder-text">
+                Showing AI reasoning in a moment...
+              </div>
+            </div>
+          )}
+
           {/* Only show sub-prompt if no reasoning is available */}
           {!variation.streamingReasoning && !variation.reasoning && variation.subPrompt && (
             <div className="detail-section">
