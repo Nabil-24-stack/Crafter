@@ -15,7 +15,7 @@ import { expandSimplifiedLayout } from './schemaExpander';
 import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
 
 // Show the plugin UI
-figma.showUI(__html__, { width: 400, height: 600 });
+figma.showUI(__html__, { width: 480, height: 700 });
 
 console.log('Crafter plugin loaded');
 

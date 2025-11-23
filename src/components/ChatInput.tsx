@@ -70,17 +70,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       </div>
 
-      <div className="input-row">
-        <textarea
-          className="chat-textarea"
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyPress={onKeyPress}
-          disabled={disabled}
-          rows={1}
-        />
+      <textarea
+        className="chat-textarea"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyPress={onKeyPress}
+        disabled={disabled}
+        rows={2}
+      />
 
+      <div className="input-controls">
         <select
           className="model-selector"
           value={model}

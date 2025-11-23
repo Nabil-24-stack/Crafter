@@ -1336,24 +1336,25 @@ body {
   text-align: center;
 }
 
-.input-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-}
-
 .chat-textarea {
-  flex: 1;
-  padding: 10px 12px;
+  width: 100%;
+  padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 13px;
   font-family: inherit;
   line-height: 1.4;
-  resize: none;
-  min-height: 38px;
-  max-height: 120px;
+  resize: vertical;
+  min-height: 60px;
+  max-height: 150px;
   transition: border-color 0.15s ease;
+}
+
+.input-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .chat-textarea:focus {
