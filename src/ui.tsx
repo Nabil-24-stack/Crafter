@@ -365,8 +365,9 @@ const App = () => {
       // Build chat history for context
       const chatHistory = buildChatHistory();
 
-      // Start all iteration variations in parallel
-      variationPrompts.forEach(async (varPrompt, index) => {
+      // Start all iteration variations in TRUE PARALLEL
+      // Use Promise.all() to ensure all jobs start simultaneously
+      const variationPromises = variationPrompts.map(async (varPrompt, index) => {
         try {
           // Update status: designing
           updateVariationStatus(index, 'designing', 'AI is designing');
@@ -446,8 +447,13 @@ const App = () => {
         }
       });
 
-      // Check completion after all start
-      setTimeout(() => checkAllVariationsComplete(variations), 1000);
+      // Wait for all variations to complete (or fail)
+      // This ensures true parallel execution
+      await Promise.allSettled(variationPromises);
+      console.log('✅ All variation jobs completed');
+
+      // Check completion after all finish
+      checkAllVariationsComplete(variations);
     } catch (err) {
       setIsGenerating(false);
       console.error('Iteration error:', err);
