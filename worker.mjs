@@ -1687,7 +1687,8 @@ CRITICAL ITERATION RULES:
    • Preserve the grid-aligned positioning system
 
 6. OUTPUT REQUIREMENTS:
-   • Generate a complete, pixel-perfect SVG
+   • FIRST: Write 2-3 sentences explaining your design approach and what changes you're making
+   • THEN: Generate a complete, pixel-perfect SVG in a code block
    • Include ALL text labels from the original (unless user changed them)
    • Match fonts, sizes, weights, colors from the design system
    • Maintain design system consistency
@@ -1733,6 +1734,9 @@ This is an ITERATION - you're making a surgical change to an existing design whi
 
   // Clean up reasoning - remove any trailing markdown or extra whitespace
   reasoning = reasoning.replace(/```.*$/s, '').trim();
+
+  console.log('📝 Extracted reasoning length:', reasoning.length, 'characters');
+  console.log('📝 Reasoning preview:', reasoning.substring(0, 100) + '...');
 
   // Send reasoning in 3-4 larger chunks for live streaming
   if (reasoning && job.id) {
