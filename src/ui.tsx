@@ -43,6 +43,7 @@ const App = () => {
   // Generation state
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [activeJobIds, setActiveJobIds] = React.useState<string[]>([]);
+  const activeJobIdsRef = React.useRef<Set<string>>(new Set());
 
   // Realtime subscription channels (keyed by job_id)
   const realtimeChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
@@ -429,6 +430,9 @@ const App = () => {
               console.log(`Job started for variation ${index + 1}: ${jobId}`);
               console.log(`Subscribing to reasoning chunks for job ${jobId}`);
 
+              // Track this job ID for potential cancellation
+              activeJobIdsRef.current.add(jobId);
+
               const channel = subscribeToReasoningChunks(
                 jobId,
                 (chunk) => {
@@ -638,7 +642,7 @@ const App = () => {
       if (!message || !message.iterationData) return prev;
 
       const allComplete = message.iterationData.variations.every(
-        (v) => v.status === 'complete' || v.status === 'error'
+        (v) => v.status === 'complete' || v.status === 'error' || v.status === 'stopped'
       );
 
       if (!allComplete) {
@@ -764,13 +768,66 @@ const App = () => {
   }, []);
 
   // Handle stop
-  const handleStop = () => {
+  const handleStop = async () => {
     console.log('Stopping iteration...');
-    // TODO: Cancel pending jobs
     setIsGenerating(false);
 
+    // Cancel all active jobs in Supabase
+    const jobsToCancel = Array.from(activeJobIdsRef.current);
+    console.log(`Cancelling ${jobsToCancel.length} active jobs:`, jobsToCancel);
+
+    for (const jobId of jobsToCancel) {
+      try {
+        await fetch('https://crafter-ai-kappa.vercel.app/api/cancel-job', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ job_id: jobId }),
+        });
+        console.log(`Cancelled job ${jobId}`);
+      } catch (error) {
+        console.error(`Failed to cancel job ${jobId}:`, error);
+      }
+    }
+    activeJobIdsRef.current.clear();
+
+    // Unsubscribe from all active realtime channels
+    realtimeChannelsRef.current.forEach((channel) => {
+      unsubscribeFromReasoningChunks(channel);
+    });
+    realtimeChannelsRef.current.clear();
+
+    // Update all in-progress variations to 'stopped' status
     if (currentMessageRef.current) {
-      finalizeIteration(currentMessageRef.current);
+      const messageId = currentMessageRef.current;
+      setChat((prev) => ({
+        ...prev,
+        messages: prev.messages.map((msg) =>
+          msg.id === messageId && msg.iterationData
+            ? {
+                ...msg,
+                iterationData: {
+                  ...msg.iterationData,
+                  status: 'stopped',
+                  endTime: Date.now(),
+                  wasStopped: true,
+                  variations: msg.iterationData.variations.map((v) =>
+                    v.status === 'thinking' || v.status === 'designing' || v.status === 'rendering'
+                      ? {
+                          ...v,
+                          status: 'stopped' as const,
+                          statusText: 'Stopped',
+                          isStreamingLive: false,
+                        }
+                      : v
+                  ),
+                },
+              }
+            : msg
+        ),
+      }));
+
+      // Generate summary for stopped iteration
+      finalizeIteration(messageId);
     }
   };
 

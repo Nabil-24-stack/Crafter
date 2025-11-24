@@ -2039,6 +2039,18 @@ async function processSingleJob(job) {
   try {
     console.log(`\n📦 Processing job: ${job.id} (${job.mode})`);
 
+    // Check if job was cancelled before starting
+    const { data: currentJob } = await supabase
+      .from('jobs')
+      .select('status')
+      .eq('id', job.id)
+      .single();
+
+    if (currentJob?.status === 'cancelled') {
+      console.log(`⏹️  Job ${job.id} was cancelled, skipping...`);
+      return;
+    }
+
     // Mark as processing
     await updateJob(job.id, 'processing');
 
@@ -2050,6 +2062,18 @@ async function processSingleJob(job) {
       output = await processIterateJob(job);
     } else {
       throw new Error(`Unknown job mode: ${job.mode}`);
+    }
+
+    // Check again if job was cancelled during processing
+    const { data: finalCheck } = await supabase
+      .from('jobs')
+      .select('status')
+      .eq('id', job.id)
+      .single();
+
+    if (finalCheck?.status === 'cancelled') {
+      console.log(`⏹️  Job ${job.id} was cancelled during processing, discarding results...`);
+      return;
     }
 
     // Mark as done

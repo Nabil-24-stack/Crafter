@@ -1286,6 +1286,10 @@ body {
   color: var(--error-red);
 }
 
+.variation-card.stopped .variation-status-text {
+  color: var(--error-red);
+}
+
 .expand-button {
   flex-shrink: 0;
   width: 24px;

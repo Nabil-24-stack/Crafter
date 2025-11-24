@@ -39,8 +39,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onExpandVariation,
 }) => {
   const [inputValue, setInputValue] = React.useState('');
-  const [numVariations, setNumVariations] = React.useState(1);
+  const [numVariations, setNumVariations] = React.useState(3);
   const [selectedModel, setSelectedModel] = React.useState<'claude' | 'gemini'>('gemini');
+  const prevIsGeneratingRef = React.useRef(isGenerating);
+
+  // Clear input field when generation completes (goes from generating to not generating)
+  React.useEffect(() => {
+    if (prevIsGeneratingRef.current === true && isGenerating === false) {
+      setInputValue('');
+    }
+    prevIsGeneratingRef.current = isGenerating;
+  }, [isGenerating]);
 
   // Check if chat is too long
   const showWarning = shouldShowChatWarning(chat.messages);
@@ -75,8 +84,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const handlePromptClick = (prompt: string) => {
-    setInputValue(prompt);
-    // Automatically send the prompt
+    // Automatically send the prompt (input will be cleared by useEffect when generation completes)
     if (selectedFrameInfo && !isGenerating) {
       onSendMessage(prompt, numVariations, selectedModel);
     }

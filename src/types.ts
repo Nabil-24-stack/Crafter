@@ -221,7 +221,7 @@ export interface IterationResult {
 }
 
 // Chat interface structures
-export type VariationStatusType = 'thinking' | 'designing' | 'rendering' | 'complete' | 'error';
+export type VariationStatusType = 'thinking' | 'designing' | 'rendering' | 'complete' | 'error' | 'stopped';
 
 export interface VariationStatus {
   index: number; // 0-based
