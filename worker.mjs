@@ -36,7 +36,7 @@ async function getNextQueuedJob() {
 /**
  * Get multiple queued jobs for parallel processing
  */
-async function getQueuedJobs(limit = 3) {
+async function getQueuedJobs(limit = 5) {
   const { data, error } = await supabase
     .from('jobs')
     .select('*')
@@ -2075,10 +2075,10 @@ async function processSingleJob(job) {
  */
 async function main() {
   console.log('🚀 Crafter Background Worker Started');
-  console.log('⚡ Parallel processing enabled (max 3 concurrent jobs)');
+  console.log('⚡ Parallel processing enabled (max 5 concurrent jobs)');
   console.log('Listening for jobs in Supabase queue...\n');
 
-  const MAX_CONCURRENT_JOBS = 3;
+  const MAX_CONCURRENT_JOBS = 5;
 
   while (true) {
     try {
