@@ -28,10 +28,66 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   flex: 1;
-  gap: 24px;
+  gap: 32px;
   min-height: 300px;
+  padding: 40px 32px;
+}
+
+.welcome-logo {
+  margin-bottom: 8px;
+}
+
+.logo-image {
+  width: 64px;
+  height: auto;
+}
+
+.welcome-content {
+  text-align: left;
+  max-width: 400px;
+}
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #161616;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.welcome-subtitle {
+  font-size: 16px;
+  color: #7B7B7B;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.loading-spinner {
+  margin-bottom: 8px;
+}
+
+.spinner-circle {
+  animation: rotate 1.5s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.scanning-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #161616;
+  margin: 0;
+  text-align: left;
+}
+
+.success-icon {
+  margin-bottom: 8px;
 }
 
 .initial-buttons {
@@ -927,7 +983,6 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-height: 600px;
 }
 
 /* Chat Header */
@@ -1030,11 +1085,52 @@ body {
 .empty-state {
   text-align: center;
   color: var(--text-secondary);
+  width: 100%;
+  max-width: 500px;
+  padding: 0 20px;
 }
 
 .empty-state-text {
   font-size: 14px;
   margin: 0;
+}
+
+.empty-state-heading {
+  font-size: 14px;
+  color: #7B7B7B;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.example-prompts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.example-prompt-button {
+  background: #FFFFFF;
+  border: 1.5px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #161616;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.example-prompt-button:hover {
+  border-color: #36E4D8;
+  background: #F9FFFE;
+  box-shadow: 0 2px 8px rgba(54, 228, 216, 0.1);
+}
+
+.example-prompt-button:active {
+  transform: scale(0.98);
 }
 
 /* Message Bubbles */

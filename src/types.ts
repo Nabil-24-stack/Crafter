@@ -9,6 +9,7 @@ export type MessageType =
   | 'iterate-design'
   | 'iterate-design-variation'
   | 'get-design-system'
+  | 'design-system-scan-progress' // Progress updates during scanning
   | 'get-selected-frame'
   | 'export-frame-png'
   | 'frame-png-exported'

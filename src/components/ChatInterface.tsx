@@ -74,6 +74,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
+  const handlePromptClick = (prompt: string) => {
+    setInputValue(prompt);
+    // Automatically send the prompt
+    if (selectedFrameInfo && !isGenerating) {
+      onSendMessage(prompt, numVariations, selectedModel);
+    }
+  };
+
   return (
     <div className="chat-interface">
       <ChatHeader chatName={chat.name} onNewChat={onNewChat} />
@@ -88,6 +96,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <MessageList
         messages={chat.messages}
         onExpandVariation={onExpandVariation}
+        hasSelectedFrame={!!selectedFrameInfo}
+        onPromptClick={handlePromptClick}
       />
 
       <ChatInput

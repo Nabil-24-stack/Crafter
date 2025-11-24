@@ -9,24 +9,44 @@ import { MessageBubble } from './MessageBubble';
 interface MessageListProps {
   messages: ChatMessage[];
   onExpandVariation: (messageId: string, variationIndex: number) => void;
+  hasSelectedFrame: boolean;
+  onPromptClick?: (prompt: string) => void;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
   messages,
   onExpandVariation,
+  hasSelectedFrame,
+  onPromptClick,
 }) => {
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to bottom when new messages arrive
-  React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  const examplePrompts = [
+    'Design what the empty state should look like.',
+    'Rethink this whole page to improve the visual hierarchy.',
+    'Make the important information stand out more clearly.',
+  ];
 
   if (messages.length === 0) {
     return (
       <div className="message-list empty">
         <div className="empty-state">
-          <p className="empty-state-text">Select a Frame to iterate on</p>
+          {hasSelectedFrame ? (
+            <>
+              <p className="empty-state-heading">Here's some prompts for you to start:</p>
+              <div className="example-prompts">
+                {examplePrompts.map((prompt, index) => (
+                  <button
+                    key={index}
+                    className="example-prompt-button"
+                    onClick={() => onPromptClick?.(prompt)}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="empty-state-text">Select a Frame to iterate on</p>
+          )}
         </div>
       </div>
     );
@@ -41,7 +61,6 @@ export const MessageList: React.FC<MessageListProps> = ({
           onExpandVariation={onExpandVariation}
         />
       ))}
-      <div ref={messagesEndRef} />
     </div>
   );
 };

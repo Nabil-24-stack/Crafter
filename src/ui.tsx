@@ -16,11 +16,15 @@ import { ChatInterface } from './components/ChatInterface';
 import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks } from './supabaseClient';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import './ui.css';
+// @ts-ignore
+import crafterLogo from '../Logo/crafter_logo.png';
 
 const App = () => {
   // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
+  const [scanningStatus, setScanningStatus] = React.useState<string>('');
+  const [showSuccess, setShowSuccess] = React.useState(false);
 
   // Chat state
   const [chat, setChat] = React.useState<Chat>({
@@ -57,9 +61,18 @@ const App = () => {
       console.log('UI received message:', msg.type);
 
       switch (msg.type) {
+        case 'design-system-scan-progress':
+          setScanningStatus(msg.payload.status);
+          break;
+
         case 'design-system-data':
-          setDesignSystem(msg.payload);
-          setIsScanning(false);
+          // Show success screen for 1 second before showing chat
+          setShowSuccess(true);
+          setTimeout(() => {
+            setDesignSystem(msg.payload);
+            setIsScanning(false);
+            setShowSuccess(false);
+          }, 1000);
           console.log('Design system received:', {
             components: msg.payload?.components?.length,
             colors: msg.payload?.colors?.length,
@@ -734,6 +747,11 @@ const App = () => {
                 status: 'complete',
                 endTime: Date.now(),
                 summary,
+                // Auto-collapse all variation cards when complete
+                variations: msg.iterationData.variations.map((v) => ({
+                  ...v,
+                  isExpanded: false,
+                })),
               },
             }
           : msg
@@ -780,21 +798,57 @@ const App = () => {
 
   // Initial screen (before design system scanned)
   if (!designSystem) {
+    // Success screen - show for 1 second after scanning completes
+    if (showSuccess) {
+      return (
+        <div className="container">
+          <div className="initial-screen">
+            <div className="success-icon">
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <circle cx="40" cy="40" r="40" fill="#22C55E"/>
+                <path d="M25 40L35 50L55 30" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h2 className="scanning-title">Scanning complete!</h2>
+          </div>
+        </div>
+      );
+    }
+
+    // Scanning screen - show progress messages
+    if (isScanning) {
+      return (
+        <div className="container">
+          <div className="initial-screen">
+            <div className="loading-spinner">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="28" stroke="#E5E7EB" strokeWidth="8"/>
+                <circle cx="32" cy="32" r="28" stroke="#36E4D8" strokeWidth="8" strokeLinecap="round" strokeDasharray="175.93" strokeDashoffset="44" className="spinner-circle"/>
+              </svg>
+            </div>
+            <h2 className="scanning-title">{scanningStatus || 'Extracting design system from current file...'}</h2>
+          </div>
+        </div>
+      );
+    }
+
+    // Initial welcome screen
     return (
       <div className="container">
         <div className="initial-screen">
-          <div className="header">
-            <h1 className="title">Crafter: Ideate With Your Design System</h1>
-            <p className="subtitle">Chat-based AI iteration powered by your design system</p>
+          <div className="welcome-logo">
+            <img src={crafterLogo} alt="Crafter" className="logo-image" />
+          </div>
+          <div className="welcome-content">
+            <h1 className="welcome-title">Ideate UI concepts at speed - all using your design system</h1>
+            <p className="welcome-subtitle">Let's scan your design system so I can use it to generate on-brand designs.</p>
           </div>
           <div className="initial-buttons">
             <button
               className="button scan-button"
               onClick={handleScanDesignSystem}
-              disabled={isScanning}
             >
-              {isScanning && <div className="spinner" />}
-              {isScanning ? 'Scanning...' : 'Scan Design System'}
+              Start Scan
             </button>
           </div>
         </div>

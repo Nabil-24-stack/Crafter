@@ -26,6 +26,11 @@ module.exports = (env, argv) => ({
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      // Image loader - convert to base64 data URL
+      {
+        test: /\.(png|jpg|jpeg|gif|svg)$/,
+        type: 'asset/inline',
+      },
     ],
   },
 
