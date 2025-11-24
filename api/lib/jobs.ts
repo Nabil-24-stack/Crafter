@@ -40,6 +40,10 @@ export interface Job {
 export async function createJob(mode: 'generate' | 'iterate', input: any): Promise<string> {
   const supabase = getSupabaseClient();
 
+  // Log payload size for debugging
+  const payloadSize = JSON.stringify(input).length;
+  console.log(`Creating job with payload size: ${payloadSize} bytes`);
+
   const { data, error } = await supabase
     .from('jobs')
     .insert({
@@ -52,6 +56,7 @@ export async function createJob(mode: 'generate' | 'iterate', input: any): Promi
 
   if (error) {
     console.error('Error creating job:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     throw new Error(`Failed to create job: ${error.message}`);
   }
 
