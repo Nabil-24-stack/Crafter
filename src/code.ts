@@ -1194,10 +1194,10 @@ async function handleExportFramePNG(payload: any) {
       return;
     }
 
-    // Export frame as PNG
+    // Export frame as PNG at 1x scale to keep file size manageable
     const pngData = await frameNode.exportAsync({
       format: 'PNG',
-      constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
+      constraint: { type: 'SCALE', value: 1 },
     });
 
     // Convert Uint8Array to base64

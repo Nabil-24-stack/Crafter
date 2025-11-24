@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "api/start-job.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",
