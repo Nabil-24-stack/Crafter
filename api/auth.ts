@@ -8,7 +8,7 @@ const supabase = createClient(
 
 const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
 const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
-const REDIRECT_URI = `https://${process.env.VERCEL_URL || 'crafter-ai-kappa.vercel.app'}/api/auth?action=callback`;
+const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { action } = req.query;
