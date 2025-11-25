@@ -1,18 +1,20 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
-// Use service role key for admin operations (user creation)
+// Use service role key for admin operations
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
-const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
-const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
-const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
-
 // In-memory storage for pending auth sessions (state -> token)
-const pendingAuthSessions = new Map<string, string>();
+const pendingAuthSessions = new Map<string, { access_token: string; refresh_token: string; user: any }>();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { action } = req.query;
@@ -25,11 +27,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).send(getErrorPage('Invalid authentication request. Please try again from the Figma plugin.'));
     }
 
-    // Build Figma OAuth URL manually
-    const figmaAuthUrl = `https://www.figma.com/oauth?client_id=${FIGMA_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=file_content:read,library_assets:read,library_content:read,current_user:read&state=${state}&response_type=code`;
+    // Redirect to Supabase Auth with Figma provider
+    const callbackUrl = `https://crafter-ai-kappa.vercel.app/api/auth-supabase?action=callback&state=${state}`;
+    const supabaseAuthUrl = `${process.env.SUPABASE_URL}/auth/v1/authorize?provider=figma&redirect_to=${encodeURIComponent(callbackUrl)}`;
 
-    // Redirect to Figma OAuth
-    return res.redirect(figmaAuthUrl);
+    return res.redirect(supabaseAuthUrl);
   }
 
   // Handle polling for auth completion
@@ -40,89 +42,66 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing state parameter' });
     }
 
-    const token = pendingAuthSessions.get(state as string);
+    const sessionData = pendingAuthSessions.get(state as string);
 
-    if (token) {
+    if (sessionData) {
       // Clear the session after retrieving
       pendingAuthSessions.delete(state as string);
-      return res.json({ token });
+      return res.json({
+        access_token: sessionData.access_token,
+        refresh_token: sessionData.refresh_token,
+        user: sessionData.user
+      });
     }
 
-    return res.json({ token: null });
+    return res.json({ access_token: null });
   }
 
-  // Handle OAuth callback
+  // Handle OAuth callback from Supabase
+  // Supabase returns tokens in URL hash, so we need to render a page that reads them
   if (action === 'callback') {
-    const { code, state } = req.query;
+    const { state } = req.query;
 
-    if (!code || !state) {
+    if (!state) {
       return res.status(400).send(getErrorPage('Invalid callback parameters. Please try signing in again from the Figma plugin.'));
     }
 
+    // Return a page that extracts tokens from URL hash and sends them to our endpoint
+    return res.send(getCallbackPage(state as string));
+  }
+
+  // Handle token storage from callback page
+  if (action === 'store-tokens') {
+    const { access_token, refresh_token, state } = req.body || {};
+
+    if (!access_token || !state) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
     try {
-      // Exchange code for access token with Figma
-      const tokenResponse = await fetch('https://api.figma.com/v1/oauth/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${Buffer.from(`${FIGMA_CLIENT_ID}:${FIGMA_CLIENT_SECRET}`).toString('base64')}`,
-        },
-        body: new URLSearchParams({
-          code: code as string,
-          grant_type: 'authorization_code',
-          redirect_uri: REDIRECT_URI,
-        }),
-      });
+      // Get user info from Supabase Auth
+      const { data: { user }, error: userError } = await supabase.auth.getUser(access_token);
 
-      if (!tokenResponse.ok) {
-        const errorText = await tokenResponse.text();
-        console.error('Token exchange failed:', errorText);
-        throw new Error(`Failed to exchange code for token: ${errorText}`);
+      if (userError || !user) {
+        console.error('Failed to get user:', userError);
+        throw new Error('Failed to get user information');
       }
 
-      const tokenData = await tokenResponse.json() as { access_token: string; refresh_token: string };
-      const accessToken = tokenData.access_token;
-      const refreshToken = tokenData.refresh_token;
+      console.log('Supabase Auth user:', user);
 
-      console.log('Token exchange successful, access_token length:', accessToken?.length);
+      // Extract user metadata
+      const email = user.email || '';
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
+      const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
 
-      // Get user info from Figma
-      const userResponse = await fetch('https://api.figma.com/v1/me', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!userResponse.ok) {
-        const errorText = await userResponse.text();
-        console.error('User info fetch failed:', errorText);
-        throw new Error(`Failed to fetch user info from Figma: ${errorText}`);
-      }
-
-      const figmaUser = await userResponse.json() as {
-        id: string;
-        email: string;
-        handle: string;
-        img_url: string
-      };
-
-      // Create a deterministic user ID from Figma user ID
-      const userId = `figma_${figmaUser.id}`;
-
-      console.log('Attempting to upsert user:', {
-        userId,
-        email: figmaUser.email,
-        full_name: figmaUser.handle || figmaUser.email?.split('@')[0]
-      });
-
-      // Store or update user in database
+      // Upsert user in our custom users table for app-specific data
       const { data: upsertData, error: upsertError } = await supabase
         .from('users')
         .upsert({
-          id: userId,
-          email: figmaUser.email,
-          full_name: figmaUser.handle || figmaUser.email?.split('@')[0],
-          avatar_url: figmaUser.img_url,
+          id: user.id, // Use Supabase auth.uid as primary key
+          email: email,
+          full_name: fullName,
+          avatar_url: avatarUrl,
           auth_provider: 'figma',
           tier: 'free',
           iterations_used: 0,
@@ -133,42 +112,140 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select();
 
       if (upsertError) {
-        console.error('Error upserting user:', JSON.stringify(upsertError, null, 2));
-        console.error('Error details:', {
-          message: upsertError.message,
-          details: upsertError.details,
-          hint: upsertError.hint,
-          code: upsertError.code
-        });
+        console.error('Error upserting user to custom table:', JSON.stringify(upsertError, null, 2));
       } else {
         console.log('User upserted successfully:', upsertData);
       }
 
-      // Create a session token (combining user ID and Figma access token)
-      const sessionToken = Buffer.from(JSON.stringify({
-        userId,
-        figmaAccessToken: accessToken,
-        figmaRefreshToken: refreshToken,
-        email: figmaUser.email,
-      })).toString('base64');
+      // Store session data temporarily for polling (expires in 5 minutes)
+      pendingAuthSessions.set(state, {
+        access_token,
+        refresh_token,
+        user
+      });
 
-      // Store token temporarily for polling (expires in 5 minutes)
-      pendingAuthSessions.set(state as string, sessionToken);
       setTimeout(() => {
-        pendingAuthSessions.delete(state as string);
+        pendingAuthSessions.delete(state);
       }, 5 * 60 * 1000);
 
-      const figmaUrl = `figma://auth-callback?token=${sessionToken}&state=${state}`;
-      return res.send(getSuccessPage(sessionToken, figmaUrl));
+      return res.json({ success: true });
 
     } catch (error) {
-      console.error('Callback error:', error);
-      return res.status(500).send(getErrorPage(`Failed to complete sign in. Please try again from the Figma plugin.`, error instanceof Error ? error.message : 'Unknown error'));
+      console.error('Token storage error:', error);
+      return res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   }
 
   // Invalid action
   return res.status(404).send(getErrorPage('Invalid request'));
+}
+
+// Helper function for callback page that extracts tokens from URL hash
+function getCallbackPage(state: string) {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Authenticating - Crafter</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #F9FAFB;
+          }
+          .container {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+          }
+          .spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 24px;
+            border: 4px solid #E5E7EB;
+            border-top-color: #36E4D8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          h1 { color: #374151; margin-bottom: 8px; }
+          p { color: #6B7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="spinner"></div>
+          <h1>Completing sign in...</h1>
+          <p>Please wait while we complete your authentication.</p>
+        </div>
+        <script>
+          // Extract tokens from URL hash
+          const hash = window.location.hash.substring(1);
+          const params = new URLSearchParams(hash);
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+
+          if (accessToken) {
+            // Send tokens to server
+            fetch('/api/auth-supabase?action=store-tokens', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                state: '${state}'
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Show success and auto-close
+                document.body.innerHTML = \`
+                  <div class="container">
+                    <div style="width: 64px; height: 64px; margin: 0 auto 24px; background: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white;">✓</div>
+                    <h1 style="color: #10B981;">Successfully signed in!</h1>
+                    <p>You can now close this window.</p>
+                  </div>
+                \`;
+                setTimeout(() => {
+                  window.close();
+                }, 2000);
+              } else {
+                throw new Error('Failed to store tokens');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              document.body.innerHTML = \`
+                <div class="container">
+                  <h1 style="color: #DC2626;">Authentication Error</h1>
+                  <p>Failed to complete sign in. Please try again.</p>
+                </div>
+              \`;
+            });
+          } else {
+            document.body.innerHTML = \`
+              <div class="container">
+                <h1 style="color: #DC2626;">Authentication Error</h1>
+                <p>No access token found. Please try signing in again.</p>
+              </div>
+            \`;
+          }
+        </script>
+      </body>
+    </html>
+  `;
 }
 
 // Helper function for error pages
@@ -213,7 +290,7 @@ function getErrorPage(message: string, details?: string) {
 }
 
 // Helper function for success pages
-function getSuccessPage(token: string, figmaUrl?: string) {
+function getSuccessPage() {
   return `
     <!DOCTYPE html>
     <html>
@@ -251,32 +328,6 @@ function getSuccessPage(token: string, figmaUrl?: string) {
           }
           h1 { color: #10B981; margin-bottom: 16px; font-size: 24px; }
           p { color: #6B7280; line-height: 1.6; margin-bottom: 12px; }
-          .token-box {
-            background: #F3F4F6;
-            padding: 16px;
-            border-radius: 8px;
-            margin: 24px 0;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: #374151;
-            display: ${figmaUrl ? 'block' : 'none'};
-          }
-          .button {
-            background: #36E4D8;
-            color: #161616;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 16px;
-            display: ${figmaUrl ? 'inline-block' : 'none'};
-          }
-          .button:hover {
-            background: #2DD4C7;
-          }
           .small-text {
             font-size: 13px;
             color: #9CA3AF;
@@ -293,7 +344,6 @@ function getSuccessPage(token: string, figmaUrl?: string) {
         </div>
         <script>
           // Auto-close after 2 seconds
-          // Plugin will poll server to get the token
           setTimeout(() => {
             window.close();
           }, 2000);
