@@ -23,6 +23,8 @@ const App = () => {
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [authToken, setAuthToken] = React.useState<string | null>(null);
+  const [userEmail, setUserEmail] = React.useState<string>('');
+  const [showProfileMenu, setShowProfileMenu] = React.useState(false);
 
   // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
@@ -75,12 +77,26 @@ const App = () => {
           if (msg.payload.token) {
             setAuthToken(msg.payload.token);
             setIsAuthenticated(true);
+            // Decode token to get user email
+            try {
+              const decoded = JSON.parse(atob(msg.payload.token));
+              setUserEmail(decoded.email || '');
+            } catch (e) {
+              console.error('Failed to decode token:', e);
+            }
           }
           break;
 
         case 'auth-complete':
           setAuthToken(msg.payload.token);
           setIsAuthenticated(true);
+          // Decode token to get user email
+          try {
+            const decoded = JSON.parse(atob(msg.payload.token));
+            setUserEmail(decoded.email || '');
+          } catch (e) {
+            console.error('Failed to decode token:', e);
+          }
           break;
 
         case 'design-system-scan-progress':
@@ -220,6 +236,14 @@ const App = () => {
     setIsGenerating(false);
     setActiveJobIds([]);
     currentMessageRef.current = null;
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    parent.postMessage({ pluginMessage: { type: 'logout' } }, '*');
+    setIsAuthenticated(false);
+    setAuthToken(null);
+    setUserEmail('');
   };
 
   // Handle send message
@@ -981,6 +1005,8 @@ const App = () => {
         onStop={handleStop}
         onNewChat={handleNewChat}
         onExpandVariation={handleExpandVariation}
+        userEmail={userEmail}
+        onLogout={handleLogout}
       />
     </div>
   );

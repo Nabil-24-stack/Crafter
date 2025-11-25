@@ -26,6 +26,8 @@ interface ChatInterfaceProps {
   onStop: () => void;
   onNewChat: () => void;
   onExpandVariation: (messageId: string, variationIndex: number) => void;
+  userEmail?: string;
+  onLogout?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -37,6 +39,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onStop,
   onNewChat,
   onExpandVariation,
+  userEmail,
+  onLogout,
 }) => {
   const [inputValue, setInputValue] = React.useState('');
   const [numVariations, setNumVariations] = React.useState(3);
@@ -92,7 +96,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className="chat-interface">
-      <ChatHeader chatName={chat.name} onNewChat={onNewChat} />
+      <ChatHeader chatName={chat.name} onNewChat={onNewChat} userEmail={userEmail} onLogout={onLogout} />
 
       {showWarning && (
         <ChatWarningBanner

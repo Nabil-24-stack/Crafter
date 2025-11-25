@@ -28,7 +28,8 @@ export type MessageType =
   | 'check-auth' // Check if user has auth token
   | 'auth-status' // Response with auth status
   | 'start-oauth' // Start OAuth flow
-  | 'auth-complete'; // OAuth complete with token
+  | 'auth-complete' // OAuth complete with token
+  | 'logout'; // Log out user
 
 export interface Message {
   type: MessageType;

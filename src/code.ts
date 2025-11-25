@@ -215,6 +215,15 @@ figma.ui.onmessage = async (msg: Message) => {
         );
         break;
 
+      case 'logout':
+        // Clear stored auth token
+        await figma.clientStorage.deleteAsync('auth_token');
+        figma.ui.postMessage({
+          type: 'auth-status',
+          payload: { token: null }
+        });
+        break;
+
       case 'get-design-system':
         await handleGetDesignSystem();
         break;
