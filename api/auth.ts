@@ -1,9 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
+// Use service role key for admin operations (user creation)
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!
 );
 
 const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
@@ -108,8 +109,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Create a deterministic user ID from Figma user ID
       const userId = `figma_${figmaUser.id}`;
 
+      console.log('Attempting to upsert user:', {
+        userId,
+        email: figmaUser.email,
+        full_name: figmaUser.handle || figmaUser.email?.split('@')[0]
+      });
+
       // Store or update user in database
-      const { error: upsertError } = await supabase
+      const { data: upsertData, error: upsertError } = await supabase
         .from('users')
         .upsert({
           id: userId,
@@ -122,10 +129,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           last_login: new Date().toISOString(),
         }, {
           onConflict: 'id',
-        });
+        })
+        .select();
 
       if (upsertError) {
-        console.error('Error upserting user:', upsertError);
+        console.error('Error upserting user:', JSON.stringify(upsertError, null, 2));
+        console.error('Error details:', {
+          message: upsertError.message,
+          details: upsertError.details,
+          hint: upsertError.hint,
+          code: upsertError.code
+        });
+      } else {
+        console.log('User upserted successfully:', upsertData);
       }
 
       // Create a session token (combining user ID and Figma access token)
