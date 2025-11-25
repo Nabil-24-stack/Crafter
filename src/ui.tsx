@@ -222,7 +222,7 @@ const App = () => {
     const state = Math.random().toString(36).substring(7);
 
     // Open OAuth popup with Supabase Auth
-    const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth-supabase?action=figma&state=${state}`;
+    const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=figma&state=${state}`;
     window.open(authUrl, '_blank', 'width=600,height=700');
 
     // Start polling for auth completion
@@ -240,7 +240,7 @@ const App = () => {
 
       try {
         const response = await fetch(
-          `https://crafter-ai-kappa.vercel.app/api/auth-supabase?action=poll&state=${state}`
+          `https://crafter-ai-kappa.vercel.app/api/auth?action=poll&state=${state}`
         );
 
         if (response.ok) {

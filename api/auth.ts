@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Redirect to Supabase Auth with Figma provider
-    const callbackUrl = `https://crafter-ai-kappa.vercel.app/api/auth-supabase?action=callback&state=${state}`;
+    const callbackUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=callback&state=${state}`;
     const supabaseAuthUrl = `${process.env.SUPABASE_URL}/auth/v1/authorize?provider=figma&redirect_to=${encodeURIComponent(callbackUrl)}`;
 
     return res.redirect(supabaseAuthUrl);
@@ -196,7 +196,7 @@ function getCallbackPage(state: string) {
 
           if (accessToken) {
             // Send tokens to server
-            fetch('/api/auth-supabase?action=store-tokens', {
+            fetch('/api/auth?action=store-tokens', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
