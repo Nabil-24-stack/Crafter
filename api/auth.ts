@@ -6,6 +6,10 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY!
 );
 
+const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
+const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
+const REDIRECT_URI = `${process.env.VERCEL_URL || 'https://crafter-ai-kappa.vercel.app'}/api/auth?action=callback`;
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { action } = req.query;
 
@@ -17,50 +21,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).send(getErrorPage('Invalid authentication request. Please try again from the Figma plugin.'));
     }
 
-    // Get the OAuth URL from Supabase
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'figma',
-      options: {
-        redirectTo: `${process.env.VERCEL_URL || 'https://crafter-ai-kappa.vercel.app'}/api/auth?action=callback&state=${state}&redirect=figma`,
-      },
-    });
-
-    if (error || !data.url) {
-      console.error('OAuth error:', error);
-      return res.status(500).send(getErrorPage('Failed to initialize Figma authentication. Please try again.'));
-    }
+    // Build Figma OAuth URL manually
+    const figmaAuthUrl = `https://www.figma.com/oauth?client_id=${FIGMA_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=file_content:read,library_assets:read,library_content:read&state=${state}&response_type=code`;
 
     // Redirect to Figma OAuth
-    return res.redirect(data.url);
+    return res.redirect(figmaAuthUrl);
   }
 
   // Handle OAuth callback
   if (action === 'callback') {
-    const { code, state, redirect } = req.query;
+    const { code, state } = req.query;
 
     if (!code || !state) {
       return res.status(400).send(getErrorPage('Invalid callback parameters. Please try signing in again from the Figma plugin.'));
     }
 
     try {
-      // Exchange code for session
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code as string);
+      // Exchange code for access token with Figma
+      const tokenResponse = await fetch('https://www.figma.com/api/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: FIGMA_CLIENT_ID,
+          client_secret: FIGMA_CLIENT_SECRET,
+          redirect_uri: REDIRECT_URI,
+          code: code as string,
+          grant_type: 'authorization_code',
+        }),
+      });
 
-      if (error || !data.user) {
-        throw error || new Error('No user returned');
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error('Token exchange failed:', errorText);
+        throw new Error(`Failed to exchange code for token: ${errorText}`);
       }
 
-      const user = data.user;
-      const accessToken = data.session?.access_token;
+      const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+      const refreshToken = tokenData.refresh_token;
+
+      // Get user info from Figma
+      const userResponse = await fetch('https://api.figma.com/v1/me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user info from Figma');
+      }
+
+      const figmaUser = await userResponse.json();
+
+      // Create a deterministic user ID from Figma user ID
+      const userId = `figma_${figmaUser.id}`;
 
       // Store or update user in database
       const { error: upsertError } = await supabase
         .from('users')
         .upsert({
-          id: user.id,
-          email: user.email,
-          full_name: user.user_metadata.full_name || user.email?.split('@')[0],
-          avatar_url: user.user_metadata.avatar_url,
+          id: userId,
+          email: figmaUser.email,
+          full_name: figmaUser.handle || figmaUser.email?.split('@')[0],
+          avatar_url: figmaUser.img_url,
           auth_provider: 'figma',
           tier: 'free',
           iterations_used: 0,
@@ -73,15 +98,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('Error upserting user:', upsertError);
       }
 
-      // If redirecting to Figma, try figma:// protocol first
-      if (redirect === 'figma') {
-        const figmaUrl = `figma://auth-callback?token=${accessToken}&state=${state}`;
+      // Create a session token (combining user ID and Figma access token)
+      const sessionToken = Buffer.from(JSON.stringify({
+        userId,
+        figmaAccessToken: accessToken,
+        figmaRefreshToken: refreshToken,
+        email: figmaUser.email,
+      })).toString('base64');
 
-        return res.send(getSuccessPage(accessToken!, figmaUrl));
-      }
-
-      // Default success page
-      return res.send(getSuccessPage(accessToken!));
+      const figmaUrl = `figma://auth-callback?token=${sessionToken}&state=${state}`;
+      return res.send(getSuccessPage(sessionToken, figmaUrl));
 
     } catch (error) {
       console.error('Callback error:', error);
