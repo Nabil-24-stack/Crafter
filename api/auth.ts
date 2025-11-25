@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       provider: 'figma',
       options: {
         redirectTo: `${process.env.VERCEL_URL || 'https://crafter-ai-kappa.vercel.app'}/api/auth?action=callback&state=${state}&redirect=figma`,
-        scopes: 'file_read',
+        scopes: 'file_content:read library_assets:read library_content:read',
       },
     });
 
