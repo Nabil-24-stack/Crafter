@@ -232,7 +232,12 @@ const App = () => {
 
   // Handle Google login
   const handleGoogleLogin = () => {
-    parent.postMessage({ pluginMessage: { type: 'start-oauth' } }, '*');
+    // Generate random state for security
+    const state = Math.random().toString(36).substring(7);
+
+    // Open OAuth popup directly from UI to maintain window.opener relationship
+    const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=figma&state=${state}&redirect=figma`;
+    window.open(authUrl, '_blank', 'width=600,height=700');
   };
 
   // Scan design system
