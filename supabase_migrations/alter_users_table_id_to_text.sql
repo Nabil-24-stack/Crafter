@@ -1,7 +1,16 @@
--- Create users table for authentication and subscription management
+-- Migration to change id column from UUID to TEXT
 -- Run this in Supabase SQL Editor
 
-CREATE TABLE IF NOT EXISTS public.users (
+-- Step 1: Drop existing policies that reference the id column
+DROP POLICY IF EXISTS "Users can view own data" ON public.users;
+DROP POLICY IF EXISTS "Users can update own data" ON public.users;
+
+-- Step 2: Drop the existing table and recreate with TEXT id
+-- (Safe since table should be empty or you can backup data first)
+DROP TABLE IF EXISTS public.users CASCADE;
+
+-- Step 3: Recreate the table with TEXT id
+CREATE TABLE public.users (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
@@ -27,18 +36,13 @@ CREATE INDEX IF NOT EXISTS users_id_idx ON public.users(id);
 -- Enable Row Level Security
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Users can view own data" ON public.users;
-DROP POLICY IF EXISTS "Users can update own data" ON public.users;
-DROP POLICY IF EXISTS "Service role has full access" ON public.users;
-
--- Policy: Allow reading all user data (for now, can be restricted later)
+-- Policy: Allow reading all user data
 CREATE POLICY "Users can view own data"
   ON public.users
   FOR SELECT
   USING (true);
 
--- Policy: Allow updating (will be restricted by app logic)
+-- Policy: Allow updating
 CREATE POLICY "Users can update own data"
   ON public.users
   FOR UPDATE
@@ -58,9 +62,6 @@ BEGIN
   RETURN NEW;
 END;
 $$ language 'plpgsql';
-
--- Drop trigger if exists
-DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
 
 -- Trigger to automatically update updated_at
 CREATE TRIGGER update_users_updated_at
