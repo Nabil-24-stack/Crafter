@@ -195,6 +195,26 @@ figma.ui.onmessage = async (msg: Message) => {
 
   try {
     switch (msg.type) {
+      case 'check-auth':
+        // Check if user has stored auth token
+        const storedToken = await figma.clientStorage.getAsync('auth_token');
+        figma.ui.postMessage({
+          type: 'auth-status',
+          payload: { token: storedToken || null }
+        });
+        break;
+
+      case 'start-oauth':
+        // Generate random state for security
+        const state = Math.random().toString(36).substring(7);
+        await figma.clientStorage.setAsync('oauth_state', state);
+
+        // Open browser to auth page - UPDATE THIS URL WITH YOUR ACTUAL AUTH URL
+        figma.openExternal(
+          `https://crafter-ai-kappa.vercel.app/auth/google?state=${state}&redirect=figma`
+        );
+        break;
+
       case 'get-design-system':
         await handleGetDesignSystem();
         break;
@@ -1194,10 +1214,10 @@ async function handleExportFramePNG(payload: any) {
       return;
     }
 
-    // Export frame as PNG at 1x scale to keep file size manageable
+    // Export frame as PNG
     const pngData = await frameNode.exportAsync({
       format: 'PNG',
-      constraint: { type: 'SCALE', value: 1 },
+      constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
     });
 
     // Convert Uint8Array to base64

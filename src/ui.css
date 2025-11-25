@@ -23,6 +23,79 @@ body {
   min-height: 100vh;
 }
 
+/* Login Screen */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.login-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E5E5E5;
+  background: #FFFFFF;
+}
+
+.login-heading {
+  font-size: 14px;
+  font-weight: 500;
+  color: #161616;
+  margin: 0;
+}
+
+.google-login-button {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #161616;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.google-login-button:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+.google-login-button:active {
+  transform: scale(0.98);
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  gap: 32px;
+  padding: 40px 32px;
+}
+
+.welcome-text {
+  text-align: left;
+  max-width: 400px;
+}
+
+.login-action {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.scan-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Initial centered screen */
 .initial-screen {
   display: flex;

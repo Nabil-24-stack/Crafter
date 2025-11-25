@@ -3,6 +3,12 @@
     "api/start-job.ts": {
       "maxDuration": 60,
       "memory": 1024
+    },
+    "api/auth/google.ts": {
+      "maxDuration": 30
+    },
+    "api/auth/callback.ts": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -32,6 +38,10 @@
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "/api/auth/:path*"
     }
   ]
 }

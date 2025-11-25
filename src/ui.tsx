@@ -20,6 +20,10 @@ import './ui.css';
 import crafterLogo from '../Logo/crafter_logo.png';
 
 const App = () => {
+  // Auth state
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [authToken, setAuthToken] = React.useState<string | null>(null);
+
   // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
@@ -53,6 +57,11 @@ const App = () => {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  // Check for stored auth token on mount
+  React.useEffect(() => {
+    parent.postMessage({ pluginMessage: { type: 'check-auth' } }, '*');
+  }, []);
+
   // Set up message listener on mount
   React.useEffect(() => {
     window.onmessage = (event) => {
@@ -62,6 +71,18 @@ const App = () => {
       console.log('UI received message:', msg.type);
 
       switch (msg.type) {
+        case 'auth-status':
+          if (msg.payload.token) {
+            setAuthToken(msg.payload.token);
+            setIsAuthenticated(true);
+          }
+          break;
+
+        case 'auth-complete':
+          setAuthToken(msg.payload.token);
+          setIsAuthenticated(true);
+          break;
+
         case 'design-system-scan-progress':
           setScanningStatus(msg.payload.status);
           break;
@@ -176,6 +197,11 @@ const App = () => {
 
   // Ref to track current message being generated
   const currentMessageRef = React.useRef<string | null>(null);
+
+  // Handle Google login
+  const handleGoogleLogin = () => {
+    parent.postMessage({ pluginMessage: { type: 'start-oauth' } }, '*');
+  };
 
   // Scan design system
   const handleScanDesignSystem = () => {
@@ -852,6 +878,36 @@ const App = () => {
       ),
     }));
   };
+
+  // Login screen (before authentication)
+  if (!isAuthenticated) {
+    return (
+      <div className="container">
+        <div className="login-container">
+          <div className="login-header">
+            <h2 className="login-heading">Log in/Create account</h2>
+            <button className="google-login-button" onClick={handleGoogleLogin}>
+              Continue with Google
+            </button>
+          </div>
+          <div className="login-content">
+            <div className="welcome-logo">
+              <img src={crafterLogo} alt="Crafter" className="logo-image" />
+            </div>
+            <div className="welcome-text">
+              <h1 className="welcome-title">Ideate UI concepts at speed - all using your design system</h1>
+              <p className="welcome-subtitle">Let's scan your design system so I can use it to generate on-brand designs.</p>
+            </div>
+            <div className="login-action">
+              <button className="button scan-button-disabled" disabled>
+                Start Scan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Initial screen (before design system scanned)
   if (!designSystem) {

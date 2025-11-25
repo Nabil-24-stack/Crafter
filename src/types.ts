@@ -24,7 +24,11 @@ export type MessageType =
   | 'set-api-key'
   | 'variation-status-update' // Progress update for individual variation
   | 'variation-job-started' // When worker job starts for a variation
-  | 'all-variations-complete'; // When all variations are done
+  | 'all-variations-complete' // When all variations are done
+  | 'check-auth' // Check if user has auth token
+  | 'auth-status' // Response with auth status
+  | 'start-oauth' // Start OAuth flow
+  | 'auth-complete'; // OAuth complete with token
 
 export interface Message {
   type: MessageType;
