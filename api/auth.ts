@@ -27,11 +27,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).send(getErrorPage('Invalid authentication request. Please try again from the Figma plugin.'));
     }
 
-    // Redirect to Supabase Auth with Figma provider
-    const callbackUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=callback&state=${state}`;
-    const supabaseAuthUrl = `${process.env.SUPABASE_URL}/auth/v1/authorize?provider=figma&redirect_to=${encodeURIComponent(callbackUrl)}`;
+    // Use direct Figma OAuth (not Supabase's generic provider)
+    const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
+    const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
+    const figmaAuthUrl = `https://www.figma.com/oauth?client_id=${FIGMA_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=file_content:read,library_assets:read,library_content:read,current_user:read&state=${state}&response_type=code`;
 
-    return res.redirect(supabaseAuthUrl);
+    return res.redirect(figmaAuthUrl);
   }
 
   // Handle polling for auth completion
@@ -57,195 +58,124 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json({ access_token: null });
   }
 
-  // Handle OAuth callback from Supabase
-  // Supabase returns tokens in URL hash, so we need to render a page that reads them
+  // Handle OAuth callback from Figma
   if (action === 'callback') {
-    const { state } = req.query;
+    const { code, state } = req.query;
 
-    if (!state) {
+    if (!code || !state) {
       return res.status(400).send(getErrorPage('Invalid callback parameters. Please try signing in again from the Figma plugin.'));
     }
 
-    // Return a page that extracts tokens from URL hash and sends them to our endpoint
-    return res.send(getCallbackPage(state as string));
-  }
-
-  // Handle token storage from callback page
-  if (action === 'store-tokens') {
-    const { access_token, refresh_token, state } = req.body || {};
-
-    if (!access_token || !state) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
-
     try {
-      // Get user info from Supabase Auth
-      const { data: { user }, error: userError } = await supabase.auth.getUser(access_token);
+      const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
+      const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
+      const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
 
-      if (userError || !user) {
-        console.error('Failed to get user:', userError);
-        throw new Error('Failed to get user information');
+      // Exchange code for access token with Figma
+      const tokenResponse = await fetch('https://api.figma.com/v1/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${Buffer.from(`${FIGMA_CLIENT_ID}:${FIGMA_CLIENT_SECRET}`).toString('base64')}`,
+        },
+        body: new URLSearchParams({
+          code: code as string,
+          grant_type: 'authorization_code',
+          redirect_uri: REDIRECT_URI,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error('Token exchange failed:', errorText);
+        throw new Error(`Failed to exchange code for token: ${errorText}`);
       }
 
-      console.log('Supabase Auth user:', user);
+      const tokenData = await tokenResponse.json() as { access_token: string; refresh_token: string };
+      const accessToken = tokenData.access_token;
+      const refreshToken = tokenData.refresh_token;
 
-      // Extract user metadata
-      const email = user.email || '';
-      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
-      const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+      // Get user info from Figma
+      const userResponse = await fetch('https://api.figma.com/v1/me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
 
-      // Upsert user in our custom users table for app-specific data
-      const { data: upsertData, error: upsertError } = await supabase
-        .from('users')
-        .upsert({
-          id: user.id, // Use Supabase auth.uid as primary key
-          email: email,
-          full_name: fullName,
-          avatar_url: avatarUrl,
-          auth_provider: 'figma',
-          tier: 'free',
-          iterations_used: 0,
-          last_login: new Date().toISOString(),
-        }, {
-          onConflict: 'id',
-        })
-        .select();
-
-      if (upsertError) {
-        console.error('Error upserting user to custom table:', JSON.stringify(upsertError, null, 2));
-      } else {
-        console.log('User upserted successfully:', upsertData);
+      if (!userResponse.ok) {
+        const errorText = await userResponse.text();
+        console.error('User info fetch failed:', errorText);
+        throw new Error(`Failed to fetch user info from Figma: ${errorText}`);
       }
+
+      const figmaUser = await userResponse.json() as {
+        id: string;
+        email: string;
+        handle: string;
+        img_url: string
+      };
+
+      console.log('Figma user:', figmaUser.email);
+
+      // Create or update user in Supabase Auth using Admin API
+      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+        email: figmaUser.email,
+        email_confirm: true, // Skip email verification
+        user_metadata: {
+          figma_id: figmaUser.id,
+          full_name: figmaUser.handle || figmaUser.email.split('@')[0],
+          avatar_url: figmaUser.img_url,
+          provider: 'figma'
+        }
+      });
+
+      if (authError && !authError.message.includes('already registered')) {
+        console.error('Error creating Supabase auth user:', authError);
+        throw new Error('Failed to create user in authentication system');
+      }
+
+      // If user already exists, get their ID
+      let userId = authUser?.user?.id;
+      if (!userId) {
+        const { data: existingUser } = await supabase.auth.admin.listUsers();
+        const user = existingUser?.users?.find(u => u.email === figmaUser.email);
+        userId = user?.id;
+      }
+
+      if (!userId) {
+        throw new Error('Failed to get user ID');
+      }
+
+      console.log('Supabase Auth user ID:', userId);
 
       // Store session data temporarily for polling (expires in 5 minutes)
-      pendingAuthSessions.set(state, {
-        access_token,
-        refresh_token,
-        user
+      pendingAuthSessions.set(state as string, {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        user: {
+          id: userId,
+          email: figmaUser.email,
+          user_metadata: {
+            full_name: figmaUser.handle || figmaUser.email.split('@')[0],
+            avatar_url: figmaUser.img_url
+          }
+        }
       });
 
       setTimeout(() => {
-        pendingAuthSessions.delete(state);
+        pendingAuthSessions.delete(state as string);
       }, 5 * 60 * 1000);
 
-      return res.json({ success: true });
+      return res.send(getSuccessPage());
 
     } catch (error) {
-      console.error('Token storage error:', error);
-      return res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+      console.error('Callback error:', error);
+      return res.status(500).send(getErrorPage(`Failed to complete sign in. Please try again from the Figma plugin.`, error instanceof Error ? error.message : 'Unknown error'));
     }
   }
 
   // Invalid action
   return res.status(404).send(getErrorPage('Invalid request'));
-}
-
-// Helper function for callback page that extracts tokens from URL hash
-function getCallbackPage(state: string) {
-  return `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Authenticating - Crafter</title>
-        <style>
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background: #F9FAFB;
-          }
-          .container {
-            text-align: center;
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-          }
-          .spinner {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 24px;
-            border: 4px solid #E5E7EB;
-            border-top-color: #36E4D8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          h1 { color: #374151; margin-bottom: 8px; }
-          p { color: #6B7280; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="spinner"></div>
-          <h1>Completing sign in...</h1>
-          <p>Please wait while we complete your authentication.</p>
-        </div>
-        <script>
-          // Extract tokens from URL hash
-          const hash = window.location.hash.substring(1);
-          const params = new URLSearchParams(hash);
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
-
-          if (accessToken) {
-            // Send tokens to server
-            fetch('/api/auth?action=store-tokens', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-                state: '${state}'
-              })
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                // Show success and auto-close
-                document.body.innerHTML = \`
-                  <div class="container">
-                    <div style="width: 64px; height: 64px; margin: 0 auto 24px; background: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white;">✓</div>
-                    <h1 style="color: #10B981;">Successfully signed in!</h1>
-                    <p>You can now close this window.</p>
-                  </div>
-                \`;
-                setTimeout(() => {
-                  window.close();
-                }, 2000);
-              } else {
-                throw new Error('Failed to store tokens');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              document.body.innerHTML = \`
-                <div class="container">
-                  <h1 style="color: #DC2626;">Authentication Error</h1>
-                  <p>Failed to complete sign in. Please try again.</p>
-                </div>
-              \`;
-            });
-          } else {
-            document.body.innerHTML = \`
-              <div class="container">
-                <h1 style="color: #DC2626;">Authentication Error</h1>
-                <p>No access token found. Please try signing in again.</p>
-              </div>
-            \`;
-          }
-        </script>
-      </body>
-    </html>
-  `;
 }
 
 // Helper function for error pages
