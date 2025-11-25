@@ -4,10 +4,7 @@
       "maxDuration": 60,
       "memory": 1024
     },
-    "api/auth/google.ts": {
-      "maxDuration": 30
-    },
-    "api/auth/callback.ts": {
+    "api/auth.ts": {
       "maxDuration": 30
     }
   },
@@ -38,10 +35,6 @@
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
-    },
-    {
-      "source": "/auth/:path*",
-      "destination": "/api/auth/:path*"
     }
   ]
 }

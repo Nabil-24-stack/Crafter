@@ -209,9 +209,9 @@ figma.ui.onmessage = async (msg: Message) => {
         const state = Math.random().toString(36).substring(7);
         await figma.clientStorage.setAsync('oauth_state', state);
 
-        // Open browser to auth page - UPDATE THIS URL WITH YOUR ACTUAL AUTH URL
+        // Open browser to auth page
         figma.openExternal(
-          `https://crafter-ai-kappa.vercel.app/auth/google?state=${state}&redirect=figma`
+          `https://crafter-ai-kappa.vercel.app/api/auth?action=google&state=${state}&redirect=figma`
         );
         break;
 
