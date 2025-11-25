@@ -10,6 +10,9 @@ const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
 const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
 const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
 
+// In-memory storage for pending auth sessions (state -> token)
+const pendingAuthSessions = new Map<string, string>();
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { action } = req.query;
 
@@ -26,6 +29,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Redirect to Figma OAuth
     return res.redirect(figmaAuthUrl);
+  }
+
+  // Handle polling for auth completion
+  if (action === 'poll') {
+    const { state } = req.query;
+
+    if (!state) {
+      return res.status(400).json({ error: 'Missing state parameter' });
+    }
+
+    const token = pendingAuthSessions.get(state as string);
+
+    if (token) {
+      // Clear the session after retrieving
+      pendingAuthSessions.delete(state as string);
+      return res.json({ token });
+    }
+
+    return res.json({ token: null });
   }
 
   // Handle OAuth callback
@@ -113,6 +135,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         figmaRefreshToken: refreshToken,
         email: figmaUser.email,
       })).toString('base64');
+
+      // Store token temporarily for polling (expires in 5 minutes)
+      pendingAuthSessions.set(state as string, sessionToken);
+      setTimeout(() => {
+        pendingAuthSessions.delete(state as string);
+      }, 5 * 60 * 1000);
 
       const figmaUrl = `figma://auth-callback?token=${sessionToken}&state=${state}`;
       return res.send(getSuccessPage(sessionToken, figmaUrl));
@@ -248,19 +276,8 @@ function getSuccessPage(token: string, figmaUrl?: string) {
           <p class="small-text">Return to Figma and the plugin will automatically detect your authentication.</p>
         </div>
         <script>
-          // Try to communicate with opener
-          if (window.opener && !window.opener.closed) {
-            try {
-              window.opener.postMessage({
-                type: 'figma-auth-success',
-                token: '${token}'
-              }, '*');
-            } catch (e) {
-              console.log('Could not post to opener:', e);
-            }
-          }
-
           // Auto-close after 2 seconds
+          // Plugin will poll server to get the token
           setTimeout(() => {
             window.close();
           }, 2000);

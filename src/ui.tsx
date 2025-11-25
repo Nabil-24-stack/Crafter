@@ -67,18 +67,6 @@ const App = () => {
   // Set up message listener on mount
   React.useEffect(() => {
     window.onmessage = (event) => {
-      // Handle OAuth success message from popup window
-      if (event.data && event.data.type === 'figma-auth-success' && event.data.token) {
-        console.log('Received OAuth success message with token');
-        parent.postMessage({
-          pluginMessage: {
-            type: 'store-auth-token',
-            payload: { token: event.data.token }
-          }
-        }, '*');
-        return;
-      }
-
       const msg: Message = event.data.pluginMessage;
       if (!msg) return;
 
@@ -231,9 +219,48 @@ const App = () => {
     // Generate random state for security
     const state = Math.random().toString(36).substring(7);
 
-    // Open OAuth popup directly from UI to maintain window.opener relationship
+    // Open OAuth popup
     const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=figma&state=${state}&redirect=figma`;
     window.open(authUrl, '_blank', 'width=600,height=700');
+
+    // Start polling for auth completion
+    let pollCount = 0;
+    const maxPolls = 60; // Poll for max 2 minutes (60 * 2 seconds)
+
+    const pollInterval = setInterval(async () => {
+      pollCount++;
+
+      if (pollCount > maxPolls) {
+        console.log('Polling timeout - authentication may have failed');
+        clearInterval(pollInterval);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://crafter-ai-kappa.vercel.app/api/auth?action=poll&state=${state}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data.token) {
+            console.log('Token received from polling, storing in plugin');
+            clearInterval(pollInterval);
+
+            // Store token in plugin
+            parent.postMessage({
+              pluginMessage: {
+                type: 'store-auth-token',
+                payload: { token: data.token }
+              }
+            }, '*');
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 2000); // Poll every 2 seconds
   };
 
   // Scan design system
