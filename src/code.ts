@@ -211,7 +211,7 @@ figma.ui.onmessage = async (msg: Message) => {
 
         // Open browser to auth page
         figma.openExternal(
-          `https://crafter-ai-kappa.vercel.app/api/auth?action=google&state=${state}&redirect=figma`
+          `https://crafter-ai-kappa.vercel.app/api/auth?action=figma&state=${state}&redirect=figma`
         );
         break;
 

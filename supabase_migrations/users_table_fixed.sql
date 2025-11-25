@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
   avatar_url TEXT,
-  auth_provider TEXT DEFAULT 'google',
+  auth_provider TEXT DEFAULT 'figma',
 
   -- Subscription info
   tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'team', 'enterprise')),

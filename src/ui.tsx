@@ -887,7 +887,7 @@ const App = () => {
           <div className="login-header">
             <h2 className="login-heading">Log in/Create account</h2>
             <button className="google-login-button" onClick={handleGoogleLogin}>
-              Continue with Google
+              Continue with Figma
             </button>
           </div>
           <div className="login-content">

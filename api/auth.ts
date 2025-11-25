@@ -9,8 +9,8 @@ const supabase = createClient(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { action } = req.query;
 
-  // Handle Google OAuth initiation
-  if (action === 'google') {
+  // Handle Figma OAuth initiation
+  if (action === 'figma') {
     const { state } = req.query;
 
     if (!state) {
@@ -19,22 +19,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Get the OAuth URL from Supabase
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: 'figma',
       options: {
         redirectTo: `${process.env.VERCEL_URL || 'https://crafter-ai-kappa.vercel.app'}/api/auth?action=callback&state=${state}&redirect=figma`,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
+        scopes: 'file_read',
       },
     });
 
     if (error || !data.url) {
       console.error('OAuth error:', error);
-      return res.status(500).send(getErrorPage('Failed to initialize Google authentication. Please try again.'));
+      return res.status(500).send(getErrorPage('Failed to initialize Figma authentication. Please try again.'));
     }
 
-    // Redirect to Google OAuth
+    // Redirect to Figma OAuth
     return res.redirect(data.url);
   }
 
@@ -65,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           email: user.email,
           full_name: user.user_metadata.full_name || user.email?.split('@')[0],
           avatar_url: user.user_metadata.avatar_url,
-          auth_provider: 'google',
+          auth_provider: 'figma',
           tier: 'free',
           iterations_used: 0,
           last_login: new Date().toISOString(),
