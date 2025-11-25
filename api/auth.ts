@@ -253,7 +253,7 @@ function getSuccessPage(token: string, figmaUrl?: string) {
             try {
               window.opener.postMessage({
                 type: 'figma-auth-success',
-                token: '${sessionToken}'
+                token: '${token}'
               }, '*');
             } catch (e) {
               console.log('Could not post to opener:', e);
