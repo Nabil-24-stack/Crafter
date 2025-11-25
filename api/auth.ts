@@ -42,13 +42,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${Buffer.from(`${FIGMA_CLIENT_ID}:${FIGMA_CLIENT_SECRET}`).toString('base64')}`,
         },
         body: new URLSearchParams({
-          client_id: FIGMA_CLIENT_ID,
-          client_secret: FIGMA_CLIENT_SECRET,
-          redirect_uri: REDIRECT_URI,
           code: code as string,
           grant_type: 'authorization_code',
+          redirect_uri: REDIRECT_URI,
         }),
       });
 
