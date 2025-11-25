@@ -8,7 +8,7 @@ const supabase = createClient(
 
 const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
 const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
-const REDIRECT_URI = `${process.env.VERCEL_URL || 'https://crafter-ai-kappa.vercel.app'}/api/auth?action=callback`;
+const REDIRECT_URI = `https://${process.env.VERCEL_URL || 'crafter-ai-kappa.vercel.app'}/api/auth?action=callback`;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { action } = req.query;
@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         throw new Error(`Failed to exchange code for token: ${errorText}`);
       }
 
-      const tokenData = await tokenResponse.json();
+      const tokenData = await tokenResponse.json() as { access_token: string; refresh_token: string };
       const accessToken = tokenData.access_token;
       const refreshToken = tokenData.refresh_token;
 
@@ -73,7 +73,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         throw new Error('Failed to fetch user info from Figma');
       }
 
-      const figmaUser = await userResponse.json();
+      const figmaUser = await userResponse.json() as {
+        id: string;
+        email: string;
+        handle: string;
+        img_url: string
+      };
 
       // Create a deterministic user ID from Figma user ID
       const userId = `figma_${figmaUser.id}`;
