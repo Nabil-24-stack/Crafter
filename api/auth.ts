@@ -61,6 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const accessToken = tokenData.access_token;
       const refreshToken = tokenData.refresh_token;
 
+      console.log('Token exchange successful, access_token length:', accessToken?.length);
+
       // Get user info from Figma
       const userResponse = await fetch('https://api.figma.com/v1/me', {
         headers: {
@@ -69,7 +71,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!userResponse.ok) {
-        throw new Error('Failed to fetch user info from Figma');
+        const errorText = await userResponse.text();
+        console.error('User info fetch failed:', errorText);
+        throw new Error(`Failed to fetch user info from Figma: ${errorText}`);
       }
 
       const figmaUser = await userResponse.json() as {
