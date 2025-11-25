@@ -1,5 +1,5 @@
 {
-  "name": "Crafter",
+  "name": "crafter",
   "version": "1.0.0",
   "description": "The AI Twin for Designers - Generate Figma layouts with Claude AI",
   "main": "code.js",
