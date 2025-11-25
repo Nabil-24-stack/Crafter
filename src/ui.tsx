@@ -80,7 +80,8 @@ const App = () => {
             // Decode token to get user email
             try {
               const decoded = JSON.parse(atob(msg.payload.token));
-              setUserEmail(decoded.email || '');
+              // Handle both old format (email) and new format (user.email)
+              setUserEmail(decoded.user?.email || decoded.email || '');
             } catch (e) {
               console.error('Failed to decode token:', e);
             }
@@ -93,7 +94,8 @@ const App = () => {
           // Decode token to get user email
           try {
             const decoded = JSON.parse(atob(msg.payload.token));
-            setUserEmail(decoded.email || '');
+            // Handle both old format (email) and new format (user.email)
+            setUserEmail(decoded.user?.email || decoded.email || '');
           } catch (e) {
             console.error('Failed to decode token:', e);
           }
@@ -214,13 +216,13 @@ const App = () => {
   // Ref to track current message being generated
   const currentMessageRef = React.useRef<string | null>(null);
 
-  // Handle Google login
+  // Handle Figma login with Supabase Auth
   const handleGoogleLogin = () => {
     // Generate random state for security
     const state = Math.random().toString(36).substring(7);
 
-    // Open OAuth popup
-    const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=figma&state=${state}&redirect=figma`;
+    // Open OAuth popup with Supabase Auth
+    const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth-supabase?action=figma&state=${state}`;
     window.open(authUrl, '_blank', 'width=600,height=700');
 
     // Start polling for auth completion
@@ -238,21 +240,28 @@ const App = () => {
 
       try {
         const response = await fetch(
-          `https://crafter-ai-kappa.vercel.app/api/auth?action=poll&state=${state}`
+          `https://crafter-ai-kappa.vercel.app/api/auth-supabase?action=poll&state=${state}`
         );
 
         if (response.ok) {
           const data = await response.json();
 
-          if (data.token) {
-            console.log('Token received from polling, storing in plugin');
+          if (data.access_token) {
+            console.log('Tokens received from polling, storing in plugin');
             clearInterval(pollInterval);
+
+            // Create session token with Supabase tokens
+            const sessionToken = btoa(JSON.stringify({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token,
+              user: data.user
+            }));
 
             // Store token in plugin
             parent.postMessage({
               pluginMessage: {
                 type: 'store-auth-token',
-                payload: { token: data.token }
+                payload: { token: sessionToken }
               }
             }, '*');
           }
