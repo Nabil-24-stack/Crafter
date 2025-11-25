@@ -215,6 +215,15 @@ figma.ui.onmessage = async (msg: Message) => {
         );
         break;
 
+      case 'store-auth-token':
+        // Store the auth token from OAuth callback
+        await figma.clientStorage.setAsync('auth_token', msg.payload.token);
+        figma.ui.postMessage({
+          type: 'auth-complete',
+          payload: { token: msg.payload.token }
+        });
+        break;
+
       case 'logout':
         // Clear stored auth token
         await figma.clientStorage.deleteAsync('auth_token');

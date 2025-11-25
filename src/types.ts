@@ -29,6 +29,7 @@ export type MessageType =
   | 'auth-status' // Response with auth status
   | 'start-oauth' // Start OAuth flow
   | 'auth-complete' // OAuth complete with token
+  | 'store-auth-token' // Store token from OAuth callback
   | 'logout'; // Log out user
 
 export interface Message {

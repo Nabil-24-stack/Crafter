@@ -62,6 +62,22 @@ const App = () => {
   // Check for stored auth token on mount
   React.useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'check-auth' } }, '*');
+
+    // Listen for OAuth success message from popup window
+    const handleOAuthMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'figma-auth-success' && event.data.token) {
+        // Store token and update UI
+        parent.postMessage({
+          pluginMessage: {
+            type: 'store-auth-token',
+            payload: { token: event.data.token }
+          }
+        }, '*');
+      }
+    };
+
+    window.addEventListener('message', handleOAuthMessage);
+    return () => window.removeEventListener('message', handleOAuthMessage);
   }, []);
 
   // Set up message listener on mount

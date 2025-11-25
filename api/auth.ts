@@ -244,31 +244,27 @@ function getSuccessPage(token: string, figmaUrl?: string) {
         <div class="container">
           <div class="success-icon">✓</div>
           <h1>Successfully signed in!</h1>
-          ${figmaUrl ? `
-            <p>Attempting to redirect back to Figma...</p>
-            <p class="small-text">If the redirect doesn't work automatically, copy the token below and paste it into the Figma plugin:</p>
-            <div class="token-box">${token}</div>
-            <button class="button" onclick="copyToken()">Copy Token</button>
-            <p class="small-text">Then return to Figma and the plugin should authenticate automatically.</p>
-          ` : `
-            <p>You can now close this window and return to the Figma plugin.</p>
-          `}
+          <p>You can now close this window.</p>
+          <p class="small-text">Return to Figma and the plugin will automatically detect your authentication.</p>
         </div>
-        ${figmaUrl ? `
-          <script>
-            setTimeout(() => {
-              window.location.href = '${figmaUrl}';
-            }, 1000);
-
-            function copyToken() {
-              navigator.clipboard.writeText('${token}');
-              event.target.textContent = 'Copied!';
-              setTimeout(() => {
-                event.target.textContent = 'Copy Token';
-              }, 2000);
+        <script>
+          // Try to communicate with opener
+          if (window.opener && !window.opener.closed) {
+            try {
+              window.opener.postMessage({
+                type: 'figma-auth-success',
+                token: '${sessionToken}'
+              }, '*');
+            } catch (e) {
+              console.log('Could not post to opener:', e);
             }
-          </script>
-        ` : ''}
+          }
+
+          // Auto-close after 2 seconds
+          setTimeout(() => {
+            window.close();
+          }, 2000);
+        </script>
       </body>
     </html>
   `;
