@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Build Figma OAuth URL manually
-    const figmaAuthUrl = `https://www.figma.com/oauth?client_id=${FIGMA_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=file_content:read,library_assets:read,library_content:read&state=${state}&response_type=code`;
+    const figmaAuthUrl = `https://www.figma.com/oauth?client_id=${FIGMA_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=file_content:read,library_assets:read,library_content:read,current_user:read&state=${state}&response_type=code`;
 
     // Redirect to Figma OAuth
     return res.redirect(figmaAuthUrl);
