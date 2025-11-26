@@ -321,6 +321,13 @@ figma.ui.onmessage = async (msg: Message) => {
         console.error('Iteration error:', msg.payload.error);
         break;
 
+      case 'convert-svg-to-png':
+      case 'svg-converted-to-png':
+      case 'svg-conversion-failed':
+        // These messages are handled by the Promise listener in handleIterateDesignVariation
+        // No need to process them in the main handler
+        break;
+
       default:
         console.warn('Unknown message type:', msg.type);
     }
@@ -1637,7 +1644,10 @@ async function handleIterateDesignVariation(payload: any) {
       });
 
       if (!conversionResult.success || !conversionResult.pngBytes) {
-        throw new Error(`Failed to convert SVG to raster image: ${conversionResult.error || 'Unknown error'}`);
+        // Both SVG and PNG conversion failed - the AI generated invalid content
+        const errorMsg = `The AI generated content that couldn't be rendered. This variation was skipped. Try regenerating with a different prompt.`;
+        console.error(`Variation ${variationIndex + 1} failed:`, conversionResult.error);
+        throw new Error(errorMsg);
       }
 
       // Create image node from PNG bytes
