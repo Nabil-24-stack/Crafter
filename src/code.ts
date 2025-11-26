@@ -14,6 +14,51 @@ import {
 import { expandSimplifiedLayout } from './schemaExpander';
 import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
 
+/**
+ * Sanitize SVG to be compatible with Figma
+ * Removes/fixes features that Figma doesn't support
+ */
+function sanitizeSvgForFigma(svgString: string): string {
+  let cleaned = svgString;
+
+  // Remove undefined gradient references (common issue)
+  // Find all url(#...) references and check if they're defined
+  const urlRefs = cleaned.match(/url\(#([^)]+)\)/g) || [];
+  const definedIds = cleaned.match(/id="([^"]+)"/g) || [];
+  const definedIdSet = new Set(definedIds.map(id => id.replace(/id="([^"]+)"/, '$1')));
+
+  urlRefs.forEach(ref => {
+    const id = ref.replace(/url\(#([^)]+)\)/, '$1');
+    if (!definedIdSet.has(id)) {
+      // Replace undefined gradient with solid color
+      cleaned = cleaned.replace(new RegExp(`fill="${ref}"`, 'g'), 'fill="#CCCCCC"');
+      cleaned = cleaned.replace(new RegExp(`stroke="${ref}"`, 'g'), 'stroke="#CCCCCC"');
+    }
+  });
+
+  // Fix duplicate font-family attributes (keeps first occurrence)
+  cleaned = cleaned.replace(/(<[^>]*font-family="[^"]*")(\s+font-family="[^"]*")/g, '$1');
+
+  // Simplify font-family (Figma doesn't like fallback fonts or unknown fonts)
+  // Replace Menlo (monospace) with Inter for consistency
+  cleaned = cleaned.replace(/font-family="Menlo"/g, 'font-family="Inter"');
+  cleaned = cleaned.replace(/font-family="[^"]*,([^"]+)"/g, (match, fonts) => {
+    const firstFont = fonts.split(',')[0].trim().replace(/['"]/g, '');
+    return `font-family="${firstFont}"`;
+  });
+
+  // Remove text-anchor (Figma doesn't support this well)
+  cleaned = cleaned.replace(/\s+text-anchor="[^"]*"/g, '');
+
+  // Remove xml:space
+  cleaned = cleaned.replace(/\s+xml:space="[^"]*"/g, '');
+
+  //  Remove stroke-dasharray with empty values or zeros
+  cleaned = cleaned.replace(/\s+stroke-dasharray="0(,0)*"/g, '');
+
+  return cleaned;
+}
+
 // Show the plugin UI
 figma.showUI(__html__, { width: 480, height: 700 });
 
@@ -1543,8 +1588,11 @@ async function handleIterateDesignVariation(payload: any) {
       },
     });
 
+    // Sanitize SVG for Figma compatibility
+    const sanitizedSvg = sanitizeSvgForFigma(svg);
+
     // Create SVG node
-    const svgNode = figma.createNodeFromSvg(svg);
+    const svgNode = figma.createNodeFromSvg(sanitizedSvg);
 
     // Create new frame to hold the iteration
     const newFrame = figma.createFrame();
