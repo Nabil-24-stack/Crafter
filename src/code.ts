@@ -40,12 +40,14 @@ function sanitizeSvgForFigma(svgString: string): string {
   cleaned = cleaned.replace(/(<[^>]*font-family="[^"]*")(\s+font-family="[^"]*")/g, '$1');
 
   // Simplify font-family (Figma doesn't like fallback fonts or unknown fonts)
-  // Replace Menlo (monospace) with Inter for consistency
+  // Replace generic/unknown fonts with Inter
   cleaned = cleaned.replace(/font-family="Menlo"/g, 'font-family="Inter"');
-  cleaned = cleaned.replace(/font-family="[^"]*,([^"]+)"/g, (match, fonts) => {
-    const firstFont = fonts.split(',')[0].trim().replace(/['"]/g, '');
-    return `font-family="${firstFont}"`;
-  });
+  cleaned = cleaned.replace(/font-family="monospace"/g, 'font-family="Inter"');
+  cleaned = cleaned.replace(/font-family="sans-serif"/g, 'font-family="Inter"');
+  cleaned = cleaned.replace(/font-family="serif"/g, 'font-family="Inter"');
+
+  // Remove fallback fonts (e.g., "Inter, sans-serif" -> "Inter")
+  cleaned = cleaned.replace(/font-family="([^",]+),[^"]*"/g, 'font-family="$1"');
 
   // Remove text-anchor (Figma doesn't support this well)
   cleaned = cleaned.replace(/\s+text-anchor="[^"]*"/g, '');
