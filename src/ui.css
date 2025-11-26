@@ -1873,13 +1873,13 @@ body {
 
 .login-modal-content {
   padding: 40px;
-  text-align: center;
+  text-align: left;
 }
 
 .login-modal-logo {
   width: 64px;
   height: 64px;
-  margin: 0 auto 24px;
+  margin: 0 0 24px 0;
 }
 
 .login-modal-logo img {
