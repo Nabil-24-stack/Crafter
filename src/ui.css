@@ -109,7 +109,7 @@ body {
 }
 
 .welcome-logo {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .logo-image {
@@ -126,7 +126,7 @@ body {
   font-size: 24px;
   font-weight: 600;
   color: #161616;
-  margin: 0 0 12px 0;
+  margin: 0 0 4px 0;
   line-height: 1.4;
 }
 
