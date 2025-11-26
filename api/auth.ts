@@ -118,6 +118,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Figma user:', figmaUser.email);
 
       // Create or update user in Supabase Auth using Admin API
+      let userId: string | undefined;
+
+      // Try to create user first
       const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
         email: figmaUser.email,
         email_confirm: true, // Skip email verification
@@ -129,24 +132,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
 
-      if (authError && !authError.message.includes('already registered')) {
-        console.error('Error creating Supabase auth user:', authError);
-        throw new Error('Failed to create user in authentication system');
-      }
+      if (authError) {
+        // Check if error is because user already exists
+        if (authError.status === 422 || authError.message.includes('already registered') || authError.message.includes('email_exists')) {
+          console.log('User already exists, fetching existing user...');
+          // Get existing user by email
+          const { data: existingUsers } = await supabase.auth.admin.listUsers();
+          const existingUser = existingUsers?.users?.find(u => u.email === figmaUser.email);
 
-      // If user already exists, get their ID
-      let userId = authUser?.user?.id;
-      if (!userId) {
-        const { data: existingUser } = await supabase.auth.admin.listUsers();
-        const user = existingUser?.users?.find(u => u.email === figmaUser.email);
-        userId = user?.id;
+          if (existingUser) {
+            userId = existingUser.id;
+            console.log('Found existing user:', userId);
+
+            // Update user metadata
+            await supabase.auth.admin.updateUserById(userId, {
+              user_metadata: {
+                figma_id: figmaUser.id,
+                full_name: figmaUser.handle || figmaUser.email.split('@')[0],
+                avatar_url: figmaUser.img_url,
+                provider: 'figma'
+              }
+            });
+          }
+        } else {
+          // Other error, throw it
+          console.error('Error creating Supabase auth user:', authError);
+          throw new Error('Failed to create user in authentication system');
+        }
+      } else {
+        userId = authUser?.user?.id;
+        console.log('Created new user:', userId);
       }
 
       if (!userId) {
         throw new Error('Failed to get user ID');
       }
-
-      console.log('Supabase Auth user ID:', userId);
 
       // Store session data temporarily for polling (expires in 5 minutes)
       pendingAuthSessions.set(state as string, {
