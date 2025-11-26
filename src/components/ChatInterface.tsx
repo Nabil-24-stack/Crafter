@@ -122,10 +122,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const handlePromptClick = (prompt: string) => {
-    // Automatically send the prompt (input will be cleared by useEffect when generation completes)
-    if (selectedFrameInfo && !isGenerating) {
-      onSendMessage(prompt, numVariations, selectedModel);
+    // Check if user is authenticated before sending
+    if (!selectedFrameInfo || isGenerating) {
+      return;
     }
+
+    if (!isAuthenticated) {
+      // Store the prompt and show login modal
+      setPendingPrompt({
+        prompt: prompt,
+        variations: numVariations,
+        model: selectedModel
+      });
+      setShowLoginModal(true);
+      return;
+    }
+
+    // Automatically send the prompt (input will be cleared by useEffect when generation completes)
+    onSendMessage(prompt, numVariations, selectedModel);
   };
 
   return (
