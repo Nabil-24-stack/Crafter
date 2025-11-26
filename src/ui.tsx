@@ -19,6 +19,64 @@ import './ui.css';
 // @ts-ignore
 import crafterLogo from '../Logo/crafter_logo.png';
 
+/**
+ * Convert SVG string to PNG Uint8Array for Figma
+ * Used as fallback when createNodeFromSvg fails
+ */
+async function convertSvgToPng(svgString: string, width: number = 1440, height: number = 1024): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+
+    // Create image from SVG
+    const img = new Image();
+    const blob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+
+    img.onload = () => {
+      // Draw SVG to canvas
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert canvas to PNG blob
+      canvas.toBlob((pngBlob) => {
+        if (!pngBlob) {
+          reject(new Error('Failed to convert canvas to blob'));
+          return;
+        }
+
+        // Convert blob to Uint8Array
+        const reader = new FileReader();
+        reader.onload = () => {
+          const arrayBuffer = reader.result as ArrayBuffer;
+          const uint8Array = new Uint8Array(arrayBuffer);
+          URL.revokeObjectURL(url);
+          resolve(uint8Array);
+        };
+        reader.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Failed to read PNG blob'));
+        };
+        reader.readAsArrayBuffer(pngBlob);
+      }, 'image/png');
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load SVG as image'));
+    };
+
+    img.src = url;
+  });
+}
+
 const App = () => {
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
@@ -181,6 +239,40 @@ const App = () => {
         case 'iteration-error':
           console.error('Iteration error:', msg.payload);
           handleVariationError(msg.payload.error);
+          break;
+
+        case 'convert-svg-to-png':
+          // Handle SVG-to-PNG conversion request (fallback when createNodeFromSvg fails)
+          (async () => {
+            try {
+              const { svg, variationIndex, frameId } = msg.payload;
+              const pngBytes = await convertSvgToPng(svg);
+
+              // Send PNG bytes back to plugin
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'svg-converted-to-png',
+                  payload: {
+                    pngBytes: Array.from(pngBytes), // Convert Uint8Array to regular array for postMessage
+                    variationIndex,
+                    frameId,
+                  }
+                }
+              }, '*');
+            } catch (error) {
+              console.error('Failed to convert SVG to PNG:', error);
+              // Notify plugin of conversion failure
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'svg-conversion-failed',
+                  payload: {
+                    variationIndex: msg.payload.variationIndex,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                  }
+                }
+              }, '*');
+            }
+          })();
           break;
 
         default:

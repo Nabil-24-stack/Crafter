@@ -1593,14 +1593,75 @@ async function handleIterateDesignVariation(payload: any) {
     // Sanitize SVG for Figma compatibility
     const sanitizedSvg = sanitizeSvgForFigma(svg);
 
-    // Create SVG node
-    const svgNode = figma.createNodeFromSvg(sanitizedSvg);
+    let contentNode: SceneNode;
+    let nodeWidth: number;
+    let nodeHeight: number;
+
+    try {
+      // Try to create SVG node (vector)
+      const svgNode = figma.createNodeFromSvg(sanitizedSvg);
+      contentNode = svgNode;
+      nodeWidth = svgNode.width;
+      nodeHeight = svgNode.height;
+    } catch (svgError) {
+      console.warn('Failed to create SVG node, falling back to raster image:', svgError);
+
+      // Request UI to convert SVG to PNG
+      figma.ui.postMessage({
+        type: 'convert-svg-to-png',
+        payload: {
+          svg: sanitizedSvg,
+          variationIndex,
+          frameId: frameNode.id,
+        },
+      });
+
+      // Wait for conversion response
+      const conversionResult = await new Promise<{ success: boolean; pngBytes?: number[]; error?: string }>((resolve) => {
+        const handler = (msg: any) => {
+          if (msg.type === 'svg-converted-to-png' && msg.payload.variationIndex === variationIndex) {
+            figma.ui.off('message', handler);
+            resolve({ success: true, pngBytes: msg.payload.pngBytes });
+          } else if (msg.type === 'svg-conversion-failed' && msg.payload.variationIndex === variationIndex) {
+            figma.ui.off('message', handler);
+            resolve({ success: false, error: msg.payload.error });
+          }
+        };
+        figma.ui.on('message', handler);
+
+        // Timeout after 30 seconds
+        setTimeout(() => {
+          figma.ui.off('message', handler);
+          resolve({ success: false, error: 'Conversion timeout' });
+        }, 30000);
+      });
+
+      if (!conversionResult.success || !conversionResult.pngBytes) {
+        throw new Error(`Failed to convert SVG to raster image: ${conversionResult.error || 'Unknown error'}`);
+      }
+
+      // Create image node from PNG bytes
+      const pngUint8Array = new Uint8Array(conversionResult.pngBytes);
+      const image = figma.createImage(pngUint8Array);
+      const rectangle = figma.createRectangle();
+
+      // Use default dimensions if we can't extract from SVG
+      const defaultWidth = 1440;
+      const defaultHeight = 1024;
+
+      rectangle.resize(defaultWidth, defaultHeight);
+      rectangle.fills = [{ type: 'IMAGE', scaleMode: 'FILL', imageHash: image.hash }];
+
+      contentNode = rectangle;
+      nodeWidth = defaultWidth;
+      nodeHeight = defaultHeight;
+    }
 
     // Create new frame to hold the iteration
     const newFrame = figma.createFrame();
     newFrame.name = `${frameNode.name} (Iteration ${variationIndex + 1})`;
-    newFrame.appendChild(svgNode);
-    newFrame.resize(svgNode.width, svgNode.height);
+    newFrame.appendChild(contentNode);
+    newFrame.resize(nodeWidth, nodeHeight);
 
     // Position to the right of the original frame, with spacing between variations
     const spacing = 100;

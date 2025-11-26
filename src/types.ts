@@ -30,7 +30,10 @@ export type MessageType =
   | 'start-oauth' // Start OAuth flow
   | 'auth-complete' // OAuth complete with token
   | 'store-auth-token' // Store token from OAuth callback
-  | 'logout'; // Log out user
+  | 'logout' // Log out user
+  | 'convert-svg-to-png' // Request UI to convert SVG to PNG
+  | 'svg-converted-to-png' // Response with PNG bytes
+  | 'svg-conversion-failed'; // Response when conversion fails
 
 export interface Message {
   type: MessageType;
