@@ -956,35 +956,7 @@ const App = () => {
     }));
   };
 
-  // Login screen (before authentication)
-  if (!isAuthenticated) {
-    return (
-      <div className="container">
-        <div className="login-container">
-          <div className="login-header">
-            <h2 className="login-heading">Log in/Create account</h2>
-            <button className="google-login-button" onClick={handleGoogleLogin}>
-              Continue with Figma
-            </button>
-          </div>
-          <div className="login-content">
-            <div className="welcome-logo">
-              <img src={crafterLogo} alt="Crafter" className="logo-image" />
-            </div>
-            <div className="welcome-text">
-              <h1 className="welcome-title">Ideate UI concepts at speed - all using your design system</h1>
-              <p className="welcome-subtitle">Let's scan your design system so I can use it to generate on-brand designs.</p>
-            </div>
-            <div className="login-action">
-              <button className="button scan-button-disabled" disabled>
-                Start Scan
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // No longer blocking on authentication - users can scan without login
 
   // Initial screen (before design system scanned)
   if (!designSystem) {
@@ -1025,6 +997,15 @@ const App = () => {
     // Initial welcome screen
     return (
       <div className="container">
+        {/* Login button at top right */}
+        {!isAuthenticated && (
+          <div className="top-login-button-container">
+            <button className="top-login-button" onClick={handleGoogleLogin}>
+              Log in with Figma
+            </button>
+          </div>
+        )}
+
         <div className="initial-screen">
           <div className="welcome-logo">
             <img src={crafterLogo} alt="Crafter" className="logo-image" />
@@ -1054,10 +1035,12 @@ const App = () => {
         designSystem={designSystem}
         selectedFrameInfo={selectedFrameInfo}
         isGenerating={isGenerating}
+        isAuthenticated={isAuthenticated}
         onSendMessage={handleSendMessage}
         onStop={handleStop}
         onNewChat={handleNewChat}
         onExpandVariation={handleExpandVariation}
+        onLogin={handleGoogleLogin}
         userEmail={userEmail}
         onLogout={handleLogout}
       />

@@ -1777,3 +1777,143 @@ body {
   animation: fadeIn 0.4s ease-out 3s forwards;
   opacity: 0;
 }
+
+/* Top Login Button */
+.top-login-button-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.top-login-button {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #161616;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.top-login-button:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Login Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.login-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 400px;
+  max-width: 90vw;
+  position: relative;
+  animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #9CA3AF;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.modal-close-button:hover {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.login-modal-content {
+  padding: 40px;
+  text-align: center;
+}
+
+.login-modal-logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+}
+
+.login-modal-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.login-modal-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #161616;
+  margin-bottom: 8px;
+}
+
+.login-modal-subtitle {
+  font-size: 14px;
+  color: #6B7280;
+  margin-bottom: 32px;
+}
+
+.login-modal-button {
+  background: #36E4D8;
+  color: #161616;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.login-modal-button:hover {
+  background: #2DD4C7;
+}
