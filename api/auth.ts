@@ -115,8 +115,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         img_url: string
       };
 
-      console.log('Figma user:', figmaUser.email);
-
       // Create or update user in Supabase Auth using Admin API
       let userId: string | undefined;
 
