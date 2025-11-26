@@ -1011,7 +1011,7 @@ const App = () => {
             <img src={crafterLogo} alt="Crafter" className="logo-image" />
           </div>
           <div className="welcome-content">
-            <h1 className="welcome-title">Ideate UI concepts at speed - all using your design system</h1>
+            <h1 className="welcome-title">Vibe design ideas in seconds</h1>
             <p className="welcome-subtitle">Let's scan your design system so I can use it to generate on-brand designs.</p>
           </div>
           <div className="initial-buttons">
