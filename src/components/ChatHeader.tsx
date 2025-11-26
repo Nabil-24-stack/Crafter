@@ -7,11 +7,20 @@ import * as React from 'react';
 interface ChatHeaderProps {
   chatName: string;
   onNewChat: () => void;
+  isAuthenticated: boolean;
+  onLogin?: () => void;
   userEmail?: string;
   onLogout?: () => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ chatName, onNewChat, userEmail, onLogout }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({
+  chatName,
+  onNewChat,
+  isAuthenticated,
+  onLogin,
+  userEmail,
+  onLogout
+}) => {
   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
   const profileRef = React.useRef<HTMLDivElement>(null);
 
@@ -32,6 +41,20 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ chatName, onNewChat, use
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // If not authenticated, show only login button
+  if (!isAuthenticated) {
+    return (
+      <div className="chat-header">
+        <div className="chat-header-login">
+          <button className="chat-header-login-button" onClick={onLogin}>
+            Log in with Figma
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Authenticated view with chat controls and profile
   return (
     <div className="chat-header">
       <h2 className="chat-title">{chatName}</h2>

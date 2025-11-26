@@ -144,7 +144,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className="chat-interface">
-      <ChatHeader chatName={chat.name} onNewChat={onNewChat} userEmail={userEmail} onLogout={onLogout} />
+      <ChatHeader
+        chatName={chat.name}
+        onNewChat={onNewChat}
+        isAuthenticated={isAuthenticated}
+        onLogin={onLogin}
+        userEmail={userEmail}
+        onLogout={onLogout}
+      />
 
       {showWarning && (
         <ChatWarningBanner

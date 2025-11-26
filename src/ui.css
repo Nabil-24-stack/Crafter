@@ -1917,3 +1917,27 @@ body {
 .login-modal-button:hover {
   background: #2DD4C7;
 }
+
+/* Chat Header Login Button (when not authenticated) */
+.chat-header-login {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.chat-header-login-button {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #161616;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chat-header-login-button:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
