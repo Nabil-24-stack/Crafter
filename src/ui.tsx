@@ -1076,8 +1076,10 @@ const App = () => {
                 <circle cx="32" cy="32" r="28" stroke="#36E4D8" strokeWidth="8" strokeLinecap="round" strokeDasharray="175.93" strokeDashoffset="44" className="spinner-circle"/>
               </svg>
             </div>
-            <h2 className="scanning-title">Scanning components...</h2>
-            <p className="welcome-subtitle">You won't be able to move in this file briefly as scanning takes place. This will take a moment.</p>
+            <div className="welcome-content">
+              <h2 className="scanning-title">Scanning components...</h2>
+              <p className="welcome-subtitle">You won't be able to move in this file briefly as scanning takes place. This will take a moment.</p>
+            </div>
           </div>
         </div>
       );
