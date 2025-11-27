@@ -19,6 +19,10 @@ import './ui.css';
 // @ts-ignore
 import crafterLogo from '../Logo/crafter_logo.png';
 
+// Feature flag: Set to false to disable authentication (while OAuth app is pending approval)
+// Set to true when Figma OAuth app is approved
+const REQUIRE_AUTHENTICATION = false;
+
 /**
  * Convert SVG string to PNG Uint8Array for Figma
  * Used as fallback when createNodeFromSvg fails
@@ -1082,8 +1086,8 @@ const App = () => {
     // Initial welcome screen
     return (
       <div className="container">
-        {/* Login button at top right */}
-        {!isAuthenticated && (
+        {/* Login button at top right - only show if authentication is required */}
+        {REQUIRE_AUTHENTICATION && !isAuthenticated && (
           <div className="top-login-button-container">
             <button className="top-login-button" onClick={handleGoogleLogin}>
               Log in with Figma
@@ -1120,7 +1124,7 @@ const App = () => {
         designSystem={designSystem}
         selectedFrameInfo={selectedFrameInfo}
         isGenerating={isGenerating}
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={REQUIRE_AUTHENTICATION ? isAuthenticated : true}
         onSendMessage={handleSendMessage}
         onStop={handleStop}
         onNewChat={handleNewChat}
