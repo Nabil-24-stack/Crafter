@@ -144,11 +144,13 @@ body {
 .spinner-circle {
   animation: rotate 1.5s linear infinite;
   transform-origin: center;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from { transform: rotate(0deg) translateZ(0); }
+  to { transform: rotate(360deg) translateZ(0); }
 }
 
 .scanning-title {
