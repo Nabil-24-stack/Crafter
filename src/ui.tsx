@@ -1077,6 +1077,7 @@ const App = () => {
               </svg>
             </div>
             <h2 className="scanning-title">Scanning components...</h2>
+            <p className="welcome-subtitle">You won't be able to move in this file briefly as scanning takes place. This will take a moment.</p>
           </div>
         </div>
       );
