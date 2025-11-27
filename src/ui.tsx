@@ -88,18 +88,7 @@ const App = () => {
   // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
-  const [scanningMessageIndex, setScanningMessageIndex] = React.useState(0);
   const [showSuccess, setShowSuccess] = React.useState(false);
-
-  // Predefined scanning messages that rotate
-  const scanningMessages = [
-    'Scanning components...',
-    'Analyzing design tokens...',
-    'Extracting color styles...',
-    'Processing text styles...',
-    'Building design system...',
-    'Almost there...'
-  ];
 
   // Chat state
   const [chat, setChat] = React.useState<Chat>({
@@ -132,20 +121,6 @@ const App = () => {
   React.useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'check-auth' } }, '*');
   }, []);
-
-  // Rotate scanning messages while scanning
-  React.useEffect(() => {
-    if (!isScanning) {
-      setScanningMessageIndex(0);
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setScanningMessageIndex((prev) => (prev + 1) % 6); // 6 messages total
-    }, 2500); // Change message every 2.5 seconds
-
-    return () => clearInterval(interval);
-  }, [isScanning]);
 
   // Set up message listener on mount
   React.useEffect(() => {
@@ -1090,7 +1065,7 @@ const App = () => {
       );
     }
 
-    // Scanning screen - show rotating messages
+    // Scanning screen - show simple loading message
     if (isScanning) {
       return (
         <div className="container">
@@ -1101,7 +1076,7 @@ const App = () => {
                 <circle cx="32" cy="32" r="28" stroke="#36E4D8" strokeWidth="8" strokeLinecap="round" strokeDasharray="175.93" strokeDashoffset="44" className="spinner-circle"/>
               </svg>
             </div>
-            <h2 className="scanning-title">{scanningMessages[scanningMessageIndex]}</h2>
+            <h2 className="scanning-title">Scanning components...</h2>
           </div>
         </div>
       );
