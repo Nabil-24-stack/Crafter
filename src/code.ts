@@ -381,12 +381,6 @@ function inferComponentCategory(name: string): string {
 async function handleGetDesignSystem() {
   console.log('Extracting design system from current file...');
 
-  // Send initial progress message
-  figma.ui.postMessage({
-    type: 'design-system-scan-progress',
-    payload: { status: 'Extracting design system from current file...' }
-  });
-
   const MAX_COMPONENTS = 3000; // Limit to prevent performance issues on huge files
 
   // Find component definitions, but stop scanning at MAX_COMPONENTS
@@ -418,13 +412,6 @@ async function handleGetDesignSystem() {
   scanForComponents(figma.root);
 
   console.log(`Found ${totalFound} component nodes in file${limitReached ? ` (stopped at ${MAX_COMPONENTS})` : ''}`);
-
-  // Send progress: found components (with small delay to allow UI to update)
-  await new Promise(resolve => setTimeout(resolve, 300));
-  figma.ui.postMessage({
-    type: 'design-system-scan-progress',
-    payload: { status: `Found ${totalFound} components...` }
-  });
 
   if (limitReached) {
     console.log(`⚠️ File has ${totalFound}+ components - limited to ${MAX_COMPONENTS} for performance`);
@@ -510,13 +497,6 @@ async function handleGetDesignSystem() {
 
   console.log(`Found ${allComponents.length} local components in file`);
   console.log(`✅ Analyzed visual properties for ${analyzedCount} components`);
-
-  // Send progress: analyzing properties (with small delay to allow UI to update)
-  await new Promise(resolve => setTimeout(resolve, 300));
-  figma.ui.postMessage({
-    type: 'design-system-scan-progress',
-    payload: { status: 'Analyzing properties...' }
-  });
 
   // Get local color styles using async version
   const localPaintStyles = await figma.getLocalPaintStylesAsync();

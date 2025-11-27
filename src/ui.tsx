@@ -68,9 +68,10 @@ async function convertSvgToPng(svgString: string, width: number = 1440, height: 
       }, 'image/png');
     };
 
-    img.onerror = () => {
+    img.onerror = (error) => {
       URL.revokeObjectURL(url);
-      reject(new Error('Failed to load SVG as image'));
+      console.error('SVG that failed to render:', svgString.substring(0, 500) + '...');
+      reject(new Error('Failed to load SVG as image - SVG is malformed or contains unsupported features'));
     };
 
     img.src = url;
@@ -87,8 +88,18 @@ const App = () => {
   // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
-  const [scanningStatus, setScanningStatus] = React.useState<string>('');
+  const [scanningMessageIndex, setScanningMessageIndex] = React.useState(0);
   const [showSuccess, setShowSuccess] = React.useState(false);
+
+  // Predefined scanning messages that rotate
+  const scanningMessages = [
+    'Scanning components...',
+    'Analyzing design tokens...',
+    'Extracting color styles...',
+    'Processing text styles...',
+    'Building design system...',
+    'Almost there...'
+  ];
 
   // Chat state
   const [chat, setChat] = React.useState<Chat>({
@@ -121,6 +132,20 @@ const App = () => {
   React.useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'check-auth' } }, '*');
   }, []);
+
+  // Rotate scanning messages while scanning
+  React.useEffect(() => {
+    if (!isScanning) {
+      setScanningMessageIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setScanningMessageIndex((prev) => (prev + 1) % scanningMessages.length);
+    }, 2500); // Change message every 2.5 seconds
+
+    return () => clearInterval(interval);
+  }, [isScanning, scanningMessages.length]);
 
   // Set up message listener on mount
   React.useEffect(() => {
@@ -157,10 +182,6 @@ const App = () => {
           } catch (e) {
             console.error('Failed to decode token:', e);
           }
-          break;
-
-        case 'design-system-scan-progress':
-          setScanningStatus(msg.payload.status);
           break;
 
         case 'design-system-data':
@@ -1069,7 +1090,7 @@ const App = () => {
       );
     }
 
-    // Scanning screen - show progress messages
+    // Scanning screen - show rotating messages
     if (isScanning) {
       return (
         <div className="container">
@@ -1080,7 +1101,7 @@ const App = () => {
                 <circle cx="32" cy="32" r="28" stroke="#36E4D8" strokeWidth="8" strokeLinecap="round" strokeDasharray="175.93" strokeDashoffset="44" className="spinner-circle"/>
               </svg>
             </div>
-            <h2 className="scanning-title">{scanningStatus || 'Extracting design system from current file...'}</h2>
+            <h2 className="scanning-title">{scanningMessages[scanningMessageIndex]}</h2>
           </div>
         </div>
       );
