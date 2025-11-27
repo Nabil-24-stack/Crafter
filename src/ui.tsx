@@ -141,11 +141,11 @@ const App = () => {
     }
 
     const interval = setInterval(() => {
-      setScanningMessageIndex((prev) => (prev + 1) % scanningMessages.length);
+      setScanningMessageIndex((prev) => (prev + 1) % 6); // 6 messages total
     }, 2500); // Change message every 2.5 seconds
 
     return () => clearInterval(interval);
-  }, [isScanning, scanningMessages.length]);
+  }, [isScanning]);
 
   // Set up message listener on mount
   React.useEffect(() => {
