@@ -1304,12 +1304,17 @@ Your SVG must be structured like a Figma Auto Layout design:
 • For 14px font: y = containerY + padding + 11
 • This ensures text appears visually centered in Figma
 
-**Button Text Centering:**
-• Button text must be perfectly centered vertically
-• Formula: textY = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
-• Example: 40px tall button with 14px text: y = buttonY + 20 + 5 = buttonY + 25
-• Always set text-anchor="middle" for horizontal centering
-• Text x-coordinate: x = buttonX + (buttonWidth / 2)
+**Button Text Centering (CRITICAL - STRICTLY ENFORCED):**
+• Button text MUST be perfectly centered BOTH horizontally AND vertically
+• Horizontal centering formula: textX = buttonX + (buttonWidth / 2)
+• Vertical centering formula: textY = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
+• Example: 160px wide, 40px tall button at (40, 240) with 14px text:
+  - textX = 40 + (160 / 2) = 120
+  - textY = 240 + (40 / 2) + (14 × 0.35) = 240 + 20 + 5 = 265
+• ALWAYS set text-anchor="middle" for horizontal centering
+• NEVER use text-anchor="start" or left-aligned text in buttons
+• NEVER offset text to the left or right - it must be precisely centered
+• Test your math: if buttonX=40, buttonWidth=160, then textX MUST BE 120 (not 60, not 80)
 
 **Icon + Text Alignment:**
 • Icons and adjacent text must share the same baseline
@@ -1332,6 +1337,9 @@ Your SVG must be structured like a Figma Auto Layout design:
 ❌ NEVER use: x="100" y="150" spacing="23px" (inconsistent grid)
 ❌ NEVER use: text y="50" inside rect y="40" height="40" (clipped text)
 ❌ NEVER use: unequal top/bottom padding (looks uncentered)
+❌ NEVER use: text-anchor="start" in buttons (causes left-aligned text)
+❌ NEVER use: button text x-coordinate that doesn't equal buttonX + (buttonWidth / 2)
+❌ NEVER offset button text to one side - it MUST be mathematically centered
 
 ✅ CORRECT PATTERNS (GRID-ALIGNED, FIGMA-READY)
 
@@ -1340,9 +1348,17 @@ Your SVG must be structured like a Figma Auto Layout design:
 <text x="60" y="152" font-size="16" font-weight="600">Title</text>
 <text x="60" y="176" font-size="14" fill="#666666">Subtitle</text>
 
-✅ Button with centered text:
+✅ Button with PERFECTLY centered text (FOLLOW THIS PATTERN EXACTLY):
 <rect x="40" y="240" width="160" height="40" rx="8" fill="#0066cc"/>
 <text x="120" y="265" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Click Here</text>
+<!-- Math check: textX = buttonX + (buttonWidth / 2) = 40 + 80 = 120 ✓ -->
+<!-- Math check: textY = buttonY + 20 + 5 = 240 + 25 = 265 ✓ -->
+
+✅ Another button example (wider button):
+<rect x="200" y="120" width="240" height="48" rx="8" fill="#16a34a"/>
+<text x="320" y="150" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">Submit Form</text>
+<!-- Math check: textX = 200 + (240 / 2) = 200 + 120 = 320 ✓ -->
+<!-- Math check: textY = 120 + (48 / 2) + (16 × 0.35) = 120 + 24 + 6 = 150 ✓ -->
 
 ✅ Icon + Text row (aligned baseline):
 <circle cx="48" cy="312" r="8" fill="#0066cc"/>
@@ -1384,7 +1400,7 @@ Your SVG must be structured like a Figma Auto Layout design:
 • Row spacing: 0px (touching) or 8px (separated)
 • Cell padding: 16px horizontal, centered vertically
 
-CRITICAL RULES FOR TEXT:
+CRITICAL RULES FOR TEXT ALIGNMENT (MOST COMMON ERROR - READ CAREFULLY):
 • ALWAYS include text labels for every UI element
 • Add text to ALL buttons, headers, cards, navigation items, forms
 • Use meaningful, realistic text (e.g., "Dashboard", "Revenue: $45k", "Submit", "Profile")
@@ -1393,7 +1409,29 @@ CRITICAL RULES FOR TEXT:
 • Use appropriate font sizes: headings (18-32px), body (14-16px), labels (12-14px)
 • Use appropriate font weights: headings (600-700), body (400-500)
 • ALWAYS set font-style="normal" on ALL <text> elements (never use italic unless explicitly requested)
-• Calculate text y-position using formulas above for perfect vertical centering
+
+**TEXT CENTERING IN BUTTONS (VERIFY YOUR MATH BEFORE OUTPUTTING):**
+1. For horizontal centering:
+   - ALWAYS set text-anchor="middle"
+   - textX = buttonX + (buttonWidth / 2)
+   - Example: button at x="40" width="160" → textX MUST BE "120"
+   - Example: button at x="200" width="240" → textX MUST BE "320"
+
+2. For vertical centering:
+   - textY = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
+   - Example: button at y="240" height="40", fontSize="14" → textY = 240 + 20 + 5 = "265"
+   - Example: button at y="120" height="48", fontSize="16" → textY = 120 + 24 + 6 = "150"
+
+3. COMMON MISTAKES TO AVOID:
+   - ❌ Using text-anchor="start" (causes left-aligned text)
+   - ❌ Using textX = buttonX + padding (text appears left-aligned)
+   - ❌ Forgetting to add half the width (textX = buttonX is WRONG)
+   - ❌ Not using text-anchor="middle" attribute
+
+4. SELF-CHECK BEFORE OUTPUTTING:
+   - Does textX = buttonX + (buttonWidth / 2)? If not, fix it.
+   - Is text-anchor="middle" present? If not, add it.
+   - Is the text visually centered when you imagine the coordinates? If not, recalculate.
 
 🚫 FIGMA SVG LIMITATIONS (CRITICAL):
 
@@ -1902,6 +1940,24 @@ CRITICAL ITERATION RULES:
    • ALL coordinates and dimensions must be multiples of 8
    • Text must be properly baseline-aligned using the formulas
    • Design must remain immediately usable in Figma without manual adjustments
+
+7. TEXT ALIGNMENT REQUIREMENTS (CRITICAL - MOST COMMON ERROR):
+   **For ALL button text:**
+   • MUST use text-anchor="middle" for horizontal centering
+   • Horizontal position: textX = buttonX + (buttonWidth / 2)
+   • Vertical position: textY = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
+   • NEVER use text-anchor="start" or left-align button text
+   • VERIFY YOUR MATH: if button is at x="40" width="160", text MUST be at x="120"
+
+   **For general text in containers:**
+   • Left-aligned text: use text-anchor="start" and x = containerX + padding
+   • Centered text: use text-anchor="middle" and x = containerX + (containerWidth / 2)
+   • Vertical position: y = containerY + padding + (fontSize × 0.75)
+
+   **Self-check before outputting:**
+   • Is button text using text-anchor="middle"? ✓
+   • Does textX equal buttonX + (buttonWidth / 2)? ✓
+   • Will the text appear visually centered when rendered? ✓
 
 EXAMPLE - If user says "make the header blue":
 ✅ DO: Change header fill="#0066cc", adjust text color for contrast, keep all coordinates identical, maintain grid alignment
