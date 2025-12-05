@@ -41,17 +41,22 @@ export default async function handler(
   }
 
   try {
-    const { prompt, numVariations, designSystem } = req.body as {
+    const { prompt, numVariations, designSystem, model } = req.body as {
       prompt: string;
       numVariations: number;
       designSystem: DesignSystemData;
+      model?: 'claude' | 'gemini';
     };
+
+    // Default to Claude if no model specified
+    const selectedModel = model || 'claude';
 
     console.log('Received request:', {
       hasPrompt: !!prompt,
       hasNumVariations: !!numVariations,
       hasDesignSystem: !!designSystem,
       numVariations,
+      model: selectedModel,
       designSystemKeys: designSystem ? Object.keys(designSystem) : 'null',
     });
 
@@ -76,16 +81,6 @@ export default async function handler(
       return;
     }
 
-    // Get API key
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      console.error('ANTHROPIC_API_KEY not configured');
-      res.status(500).json({
-        error: 'Server configuration error: API key not found',
-      });
-      return;
-    }
-
     // Build the prompt
     const systemPrompt = buildVariationPromptSystemPrompt(designSystem);
     const userPrompt = `User's original design request: "${prompt}"
@@ -97,37 +92,90 @@ Return ONLY a JSON array of ${numVariations} string${numVariations > 1 ? 's' : '
 Example format:
 ["${prompt} — [specific variation direction 1]", "${prompt} — [specific variation direction 2]"]`;
 
-    console.log(`Calling Claude API to generate ${numVariations} variation prompts...`);
+    console.log(`Calling ${selectedModel === 'gemini' ? 'Gemini' : 'Claude'} API to generate ${numVariations} variation prompts...`);
 
-    // Call Claude API
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1024, // Variation prompts are short
-        messages: [
-          {
-            role: 'user',
-            content: `${systemPrompt}\n\n${userPrompt}`,
+    let responseText: string;
+
+    if (selectedModel === 'gemini') {
+      // Call Gemini API
+      const geminiApiKey = process.env.GEMINI_API_KEY;
+      if (!geminiApiKey) {
+        console.error('GEMINI_API_KEY not configured');
+        res.status(500).json({
+          error: 'Server configuration error: Gemini API key not found',
+        });
+        return;
+      }
+
+      const geminiResponse = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiApiKey,
           },
-        ],
-      }),
-    });
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `${systemPrompt}\n\n${userPrompt}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
 
-    if (!claudeResponse.ok) {
-      const errorText = await claudeResponse.text();
-      throw new Error(`Claude API error ${claudeResponse.status}: ${errorText}`);
+      if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text();
+        throw new Error(`Gemini API error ${geminiResponse.status}: ${errorText}`);
+      }
+
+      const geminiData = await geminiResponse.json() as any;
+      responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+      console.log('Gemini response received');
+    } else {
+      // Call Claude API (default)
+      const claudeApiKey = process.env.ANTHROPIC_API_KEY;
+      if (!claudeApiKey) {
+        console.error('ANTHROPIC_API_KEY not configured');
+        res.status(500).json({
+          error: 'Server configuration error: Claude API key not found',
+        });
+        return;
+      }
+
+      const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': claudeApiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 1024, // Variation prompts are short
+          messages: [
+            {
+              role: 'user',
+              content: `${systemPrompt}\n\n${userPrompt}`,
+            },
+          ],
+        }),
+      });
+
+      if (!claudeResponse.ok) {
+        const errorText = await claudeResponse.text();
+        throw new Error(`Claude API error ${claudeResponse.status}: ${errorText}`);
+      }
+
+      const claudeData = await claudeResponse.json() as any;
+      responseText = claudeData.content?.[0]?.text || '[]';
+      console.log('Claude response received');
     }
-
-    const data = await claudeResponse.json() as any;
-    const responseText = data.content?.[0]?.text || '[]';
-
-    console.log('Claude response received');
 
     // Parse the variation prompts
     const variationPrompts = parseVariationPromptsResponse(responseText, numVariations, prompt);

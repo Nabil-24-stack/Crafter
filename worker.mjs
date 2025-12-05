@@ -370,14 +370,16 @@ async function callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageData
         contents: [
           {
             parts: [
-              {
-                text: `${systemPrompt}\n\n${userPrompt}`,
-              },
+              // Image FIRST - allows Gemini to start processing visual context immediately
               {
                 inlineData: {
                   mimeType: 'image/png',
                   data: imageDataBase64,
                 },
+              },
+              // Instructions SECOND - Gemini can reference the image while reading instructions
+              {
+                text: `${systemPrompt}\n\n${userPrompt}`,
               },
             ],
           },

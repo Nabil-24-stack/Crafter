@@ -18,10 +18,14 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import './ui.css';
 // @ts-ignore
 import crafterLogo from '../Logo/crafter_logo.png';
+// @ts-ignore
+import figmaIcon from '../Icons/Figma_icon.svg';
+// @ts-ignore
+import scanIcon from '../Icons/scan_icon.svg';
 
 // Feature flag: Set to false to disable authentication (while OAuth app is pending approval)
 // Set to true when Figma OAuth app is approved
-const REQUIRE_AUTHENTICATION = false;
+const REQUIRE_AUTHENTICATION = true;
 
 /**
  * Convert SVG string to PNG Uint8Array for Figma
@@ -389,6 +393,15 @@ const App = () => {
     setIsAuthenticated(false);
     setAuthToken(null);
     setUserEmail('');
+    // Reset design system to take user back to welcome screen
+    setDesignSystem(null);
+    // Reset chat
+    setChat({
+      id: generateId(),
+      name: 'Blank Chat',
+      messages: [],
+      createdAt: Date.now(),
+    });
   };
 
   // Handle send message
@@ -512,7 +525,8 @@ const App = () => {
   const generateVariationPrompts = async (
     masterPrompt: string,
     n: number,
-    ds?: DesignSystemData
+    ds?: DesignSystemData,
+    model?: 'claude' | 'gemini'
   ): Promise<string[]> => {
     const systemToUse = ds || designSystem;
 
@@ -532,6 +546,7 @@ const App = () => {
           prompt: masterPrompt,
           numVariations: n,
           designSystem: systemToUse,
+          model: model || 'claude', // Pass selected model to use same LLM for variations
         }),
       });
 
@@ -597,8 +612,8 @@ const App = () => {
       // Update status: generating variation prompts
       updateIterationStatus('in-progress');
 
-      // Generate variation prompts
-      const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds);
+      // Generate variation prompts using the same model selected for generation
+      const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds, model);
       console.log('Generated variation prompts:', variationPrompts);
 
       // Update variations with sub-prompts (commented out - we show reasoning instead)
@@ -1083,25 +1098,43 @@ const App = () => {
       );
     }
 
-    // Initial welcome screen
+    // Authentication screen - show first if user is not authenticated
+    if (REQUIRE_AUTHENTICATION && !isAuthenticated) {
+      return (
+        <div className="container">
+          <div className="initial-screen">
+            <div className="welcome-logo">
+              <img src={crafterLogo} alt="Crafter" className="logo-image" />
+            </div>
+            <div className="welcome-content">
+              <h1 className="welcome-title">Vibe design ideas in seconds</h1>
+              <p className="welcome-subtitle">Generate UI designs with your design system</p>
+            </div>
+            <div className="initial-buttons">
+              <button
+                className="button scan-button"
+                onClick={handleGoogleLogin}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              >
+                <img src={figmaIcon} alt="" style={{ width: '24px', height: '24px' }} />
+                Continue with Figma
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Design system scan screen - show after authentication
     return (
       <div className="container">
-        {/* Login button at top right - only show if authentication is required */}
-        {REQUIRE_AUTHENTICATION && !isAuthenticated && (
-          <div className="top-login-button-container">
-            <button className="top-login-button" onClick={handleGoogleLogin}>
-              Log in with Figma
-            </button>
-          </div>
-        )}
-
         <div className="initial-screen">
-          <div className="welcome-logo">
-            <img src={crafterLogo} alt="Crafter" className="logo-image" />
+          <div className="welcome-icon">
+            <img src={scanIcon} alt="" style={{ width: '64px', height: '64px' }} />
           </div>
           <div className="welcome-content">
-            <h1 className="welcome-title">Vibe design ideas in seconds</h1>
-            <p className="welcome-subtitle">Let's scan your design system so I can use it to generate on-brand designs.</p>
+            <h1 className="welcome-title">Scan your design system so I can use it to generate on-brand designs.</h1>
+            <p className="welcome-subtitle">This may take time depending on how large you file is.</p>
           </div>
           <div className="initial-buttons">
             <button
