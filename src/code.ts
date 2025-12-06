@@ -1591,12 +1591,12 @@ async function detectRepeatingPattern(children: readonly SceneNode[]): Promise<{
 /**
  * Construct Figma layout from JSON structure (Milestone A - exact matching only)
  */
-function constructFigmaLayout(structure: any, designSystem: any): SceneNode {
+async function constructFigmaLayout(structure: any, designSystem: any): Promise<SceneNode> {
   switch (structure.type) {
     case 'FRAME':
-      return buildFrameNode(structure, designSystem);
+      return await buildFrameNode(structure, designSystem);
     case 'COMPONENT':
-      return instantiateComponent(structure, designSystem);
+      return await instantiateComponent(structure, designSystem);
     case 'TEXT':
       return buildTextNode(structure, designSystem);
     default:
@@ -1607,7 +1607,7 @@ function constructFigmaLayout(structure: any, designSystem: any): SceneNode {
 /**
  * Build a FRAME node with Auto Layout
  */
-function buildFrameNode(spec: any, designSystem: any): FrameNode {
+async function buildFrameNode(spec: any, designSystem: any): Promise<FrameNode> {
   const frame = figma.createFrame();
   frame.name = spec.name;
 
@@ -1650,17 +1650,17 @@ function buildFrameNode(spec: any, designSystem: any): FrameNode {
     }
   }
 
-  // Recursively build children
+  // Recursively build children (ASYNC)
   if (spec.children && Array.isArray(spec.children)) {
-    spec.children.forEach((childSpec: any) => {
+    for (const childSpec of spec.children) {
       try {
-        const childNode = constructFigmaLayout(childSpec, designSystem);
+        const childNode = await constructFigmaLayout(childSpec, designSystem);
         frame.appendChild(childNode);
       } catch (error) {
         console.error(`Failed to create child: ${error}`);
         // Continue with other children
       }
-    });
+    }
   }
 
   return frame;
@@ -1669,7 +1669,7 @@ function buildFrameNode(spec: any, designSystem: any): FrameNode {
 /**
  * Instantiate a COMPONENT node (Milestone A - exact match only)
  */
-function instantiateComponent(spec: any, designSystem: any): InstanceNode {
+async function instantiateComponent(spec: any, designSystem: any): Promise<InstanceNode> {
   // Find component by exact name match
   const component = designSystem.components.find((c: any) => c.name === spec.componentName);
 
@@ -1677,8 +1677,8 @@ function instantiateComponent(spec: any, designSystem: any): InstanceNode {
     throw new Error(`Component not found: ${spec.componentName}`);
   }
 
-  // Get component from Figma
-  const componentNode = figma.getNodeById(component.id);
+  // Get component from Figma (ASYNC)
+  const componentNode = await figma.getNodeByIdAsync(component.id);
   if (!componentNode || (componentNode.type !== 'COMPONENT' && componentNode.type !== 'COMPONENT_SET')) {
     throw new Error(`Component node not found or invalid: ${spec.componentName}`);
   }
@@ -1930,7 +1930,7 @@ async function handleIterateDesignVariation(payload: any) {
     });
 
     // Construct the editable layout
-    const layoutNode = constructFigmaLayout(figmaStructure, designSystem);
+    const layoutNode = await constructFigmaLayout(figmaStructure, designSystem);
 
     if (layoutNode.type !== 'FRAME') {
       throw new Error('Root structure must be a FRAME');
