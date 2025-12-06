@@ -198,11 +198,12 @@ const App = () => {
 
         case 'frame-png-exported':
           if (msg.payload.imageData) {
-            // Start iteration with the exported PNG
+            // Start iteration with the exported PNG and structural hints
             const pending = pendingIterationRef.current;
             if (pending) {
               startIterationWithPNG(
                 msg.payload.imageData,
+                msg.payload.structuralHints,
                 pending.prompt,
                 pending.variations,
                 pending.designSystem,
@@ -600,6 +601,7 @@ const App = () => {
   // Start iteration after PNG is exported
   const startIterationWithPNG = async (
     imageData: string,
+    structuralHints: any,
     iterPrompt: string,
     variations: number,
     ds: DesignSystemData,
@@ -631,6 +633,7 @@ const App = () => {
 
           const iterationResult = await iterateLayout(
             imageData,
+            structuralHints,
             varPrompt,
             ds,
             model,
@@ -669,11 +672,12 @@ const App = () => {
               pluginMessage: {
                 type: 'iterate-design-variation',
                 payload: {
-                  svg: iterationResult.svg,
+                  figmaStructure: iterationResult.figmaStructure,
                   reasoning: iterationResult.reasoning,
                   frameId: fid,
                   variationIndex: index,
                   totalVariations: variations,
+                  designSystem: ds,
                 },
               },
             },

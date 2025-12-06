@@ -128,6 +128,7 @@ function generateMockLayout(prompt: string, designSystem: DesignSystemData): Gen
  */
 export async function iterateLayout(
   imageData: string,
+  structuralHints: any,
   userPrompt: string,
   designSystem: DesignSystemData,
   model: 'claude' | 'gemini' = 'claude',
@@ -153,6 +154,7 @@ export async function iterateLayout(
         mode: 'iterate',
         prompt: userPrompt,
         imageData,
+        structuralHints,
         designSystem,
         model,
         chatHistory,

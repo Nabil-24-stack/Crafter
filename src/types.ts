@@ -224,9 +224,11 @@ export interface IterationRequest {
 }
 
 export interface IterationResult {
-  svg: string; // Updated SVG markup
+  svg?: string; // Updated SVG markup (deprecated - for backwards compatibility)
+  figmaStructure?: FigmaLayoutNode; // NEW: Editable Figma layout structure
   reasoning?: string;
   job_id?: string; // Job ID for subscribing to realtime reasoning updates
+  warnings?: string[];
 }
 
 // Chat interface structures
@@ -282,4 +284,170 @@ export interface Chat {
   currentFrameId?: string; // Frame locked for current iteration
   lockedFrameName?: string; // Frame name locked on first send
   createdAt: number;
+}
+
+// ============================================================================
+// Editable Layout System (Milestone A)
+// ============================================================================
+
+/**
+ * Discriminated union for Figma layout nodes
+ * Uses strict type checking to prevent invalid structures
+ */
+
+// FRAME node: Can have children and Auto Layout properties
+export interface FigmaFrameNode {
+  type: 'FRAME';
+  name: string;
+
+  // Auto Layout properties (optional)
+  layoutMode?: 'VERTICAL' | 'HORIZONTAL' | 'NONE';
+  itemSpacing?: number;
+  padding?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  primaryAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+  counterAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX';
+
+  // Children (only FRAME can have children)
+  children?: FigmaLayoutNode[];
+
+  // Optional semantic role hint
+  role?: 'header' | 'main' | 'section' | 'card' | 'list' | 'navigation';
+
+  // Fill style (optional)
+  fillStyleName?: string;
+
+  // FRAME nodes cannot have these fields (enforced by discriminated union)
+  componentName?: never;
+  componentVariant?: never;
+  text?: never;
+  textStyleName?: never;
+}
+
+// COMPONENT node: References design system component, cannot have children
+export interface FigmaComponentNode {
+  type: 'COMPONENT';
+  name: string;
+
+  // Required: Component reference
+  componentName: string;
+
+  // Optional: Variant properties
+  componentVariant?: Record<string, string>;
+
+  // Optional: Text override for text nodes inside component
+  text?: string;
+
+  // COMPONENT nodes cannot have these fields
+  children?: never;
+  layoutMode?: never;
+  itemSpacing?: never;
+  padding?: never;
+  primaryAxisAlignItems?: never;
+  counterAxisAlignItems?: never;
+  role?: never;
+  fillStyleName?: never;
+  textStyleName?: never;
+}
+
+// TEXT node: Standalone text, cannot have children or component properties
+export interface FigmaTextNode {
+  type: 'TEXT';
+  name: string;
+
+  // Required: Text content
+  text: string;
+
+  // Optional: Text style reference
+  textStyleName?: string;
+
+  // TEXT nodes cannot have these fields
+  children?: never;
+  componentName?: never;
+  componentVariant?: never;
+  layoutMode?: never;
+  itemSpacing?: never;
+  padding?: never;
+  primaryAxisAlignItems?: never;
+  counterAxisAlignItems?: never;
+  role?: never;
+  fillStyleName?: never;
+}
+
+/**
+ * Union type for all Figma layout nodes
+ */
+export type FigmaLayoutNode = FigmaFrameNode | FigmaComponentNode | FigmaTextNode;
+
+/**
+ * AI output schema (versioned)
+ */
+export interface GenerationOutput {
+  version: '1.0';
+  reasoning: string;
+  figmaStructure: FigmaLayoutNode;
+  warnings?: string[];
+}
+
+/**
+ * Structural hints for iteration context
+ * Provides semantic information about existing frame
+ */
+export interface StructuralHints {
+  hintsVersion: '1.0';
+  frameName: string;
+  usesAutoLayout: boolean;
+
+  // Layout properties (if Auto Layout enabled)
+  layoutMode?: 'VERTICAL' | 'HORIZONTAL' | 'NONE';
+  itemSpacing?: number;
+  padding?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+
+  // Children information
+  children: ChildHint[] | ChildrenSummary;
+
+  // Used design system elements
+  usedComponents: string[];
+  usedTextStyles: string[];
+  fillStyleName?: string;
+}
+
+/**
+ * Individual child hint (for ≤20 children)
+ */
+export interface ChildHint {
+  type: string;
+  name: string;
+  isComponent?: boolean;
+  componentName?: string;
+  text?: string; // Truncated to 100 chars
+}
+
+/**
+ * Children summary (for >20 children with pattern detection)
+ */
+export interface ChildrenSummary {
+  summary: string; // e.g., "List of 50 Card items"
+  example?: ChildHint;
+  count: number;
+}
+
+/**
+ * Validation result from schema validation
+ */
+export interface ValidationResult {
+  valid: boolean;
+  type?: 'SCHEMA_ERROR' | 'WARNING';
+  message?: string;
+  errors?: Array<{ path: string; message: string }>;
+  warnings?: string[];
 }

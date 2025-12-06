@@ -1267,7 +1267,7 @@ async function handleExportFramePNG(payload: any) {
     }
 
     // Export frame as PNG
-    const pngData = await frameNode.exportAsync({
+    const pngData = await (frameNode as FrameNode).exportAsync({
       format: 'PNG',
       constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
     });
@@ -1275,11 +1275,15 @@ async function handleExportFramePNG(payload: any) {
     // Convert Uint8Array to base64
     const base64 = figma.base64Encode(pngData);
 
+    // Extract structural hints for editable layout system
+    const structuralHints = extractStructuralHints(frameNode as FrameNode);
+
     figma.ui.postMessage({
       type: 'frame-png-exported',
       payload: {
         imageData: base64,
         frameId: frameNode.id,
+        structuralHints, // Include structural hints
       },
     });
 
@@ -1408,6 +1412,342 @@ async function serializeNode(node: SceneNode): Promise<any> {
   return baseData;
 }
 
+// ============================================================================
+// Editable Layout System Functions (Milestone A)
+// ============================================================================
+
+/**
+ * Extract structural hints from a frame for iteration context
+ * Provides semantic information without perfect serialization
+ */
+async function extractStructuralHints(frameNode: FrameNode): Promise<any> {
+  const children = frameNode.children;
+  const usesAutoLayout = frameNode.layoutMode !== 'NONE';
+
+  // Extract children hints with tiering
+  let childrenHints: any;
+
+  if (children.length <= 20) {
+    // Full detail for small frames
+    childrenHints = await Promise.all(children.map(child => extractChildInfo(child)));
+  } else {
+    // Pattern detection for large frames
+    const pattern = await detectRepeatingPattern(children);
+    if (pattern) {
+      childrenHints = {
+        summary: `List of ${children.length} ${pattern.type} items`,
+        example: await extractChildInfo(children[0]),
+        count: children.length
+      };
+    } else {
+      // Mixed content - show first 10 + summary
+      const first10 = await Promise.all(children.slice(0, 10).map(child => extractChildInfo(child)));
+      childrenHints = [
+        ...first10,
+        { summary: `...and ${children.length - 10} more children` }
+      ];
+    }
+  }
+
+  // Extract used components and text styles
+  const usedComponents = new Set<string>();
+  const usedTextStyles = new Set<string>();
+
+  async function scanNode(node: SceneNode) {
+    if (node.type === 'INSTANCE') {
+      const instance = node as InstanceNode;
+      try {
+        const mainComponent = await instance.getMainComponentAsync();
+        if (mainComponent) {
+          usedComponents.add(mainComponent.name);
+        }
+      } catch (e) {
+        // Component not found, skip
+      }
+    }
+    if (node.type === 'TEXT') {
+      const textNode = node as TextNode;
+      if (textNode.textStyleId && typeof textNode.textStyleId === 'string') {
+        try {
+          const textStyle = figma.getStyleById(textNode.textStyleId);
+          if (textStyle) {
+            usedTextStyles.add(textStyle.name);
+          }
+        } catch (e) {
+          // Style not found, skip
+        }
+      }
+    }
+    if ('children' in node) {
+      for (const child of node.children) {
+        await scanNode(child);
+      }
+    }
+  }
+
+  await scanNode(frameNode);
+
+  // Get fill style name if present
+  let fillStyleName: string | undefined;
+  if (frameNode.fillStyleId) {
+    try {
+      const fillStyle = figma.getStyleById(frameNode.fillStyleId as string);
+      if (fillStyle) {
+        fillStyleName = fillStyle.name;
+      }
+    } catch (e) {
+      // Style not found
+    }
+  }
+
+  return {
+    hintsVersion: '1.0',
+    frameName: frameNode.name,
+    usesAutoLayout,
+    layoutMode: frameNode.layoutMode,
+    itemSpacing: frameNode.itemSpacing,
+    padding: {
+      top: frameNode.paddingTop,
+      right: frameNode.paddingRight,
+      bottom: frameNode.paddingBottom,
+      left: frameNode.paddingLeft
+    },
+    children: childrenHints,
+    usedComponents: Array.from(usedComponents),
+    usedTextStyles: Array.from(usedTextStyles),
+    fillStyleName
+  };
+}
+
+/**
+ * Extract basic info about a single child node
+ */
+async function extractChildInfo(child: SceneNode): Promise<any> {
+  const info: any = {
+    type: child.type,
+    name: child.name
+  };
+
+  if (child.type === 'INSTANCE') {
+    const instance = child as InstanceNode;
+    info.isComponent = true;
+    try {
+      const mainComponent = await instance.getMainComponentAsync();
+      info.componentName = mainComponent?.name;
+    } catch (e) {
+      // Component not found
+      info.componentName = 'unknown';
+    }
+  }
+
+  if (child.type === 'TEXT') {
+    const textNode = child as TextNode;
+    info.text = textNode.characters.substring(0, 100); // Truncate long text
+  }
+
+  return info;
+}
+
+/**
+ * Detect if children follow a repeating pattern
+ */
+async function detectRepeatingPattern(children: readonly SceneNode[]): Promise<{ type: string } | null> {
+  if (children.length < 3) return null;
+
+  // Check if most children are the same type
+  const typeCounts = new Map<string, number>();
+  for (const child of children) {
+    let key: string = child.type;
+    if (child.type === 'INSTANCE') {
+      const instance = child as InstanceNode;
+      try {
+        const mainComponent = await instance.getMainComponentAsync();
+        key = `INSTANCE:${mainComponent?.name || 'unknown'}`;
+      } catch (e) {
+        key = 'INSTANCE:unknown';
+      }
+    }
+    typeCounts.set(key, (typeCounts.get(key) || 0) + 1);
+  }
+
+  // Find most common type
+  let maxCount = 0;
+  let maxType = '';
+  for (const [type, count] of typeCounts) {
+    if (count > maxCount) {
+      maxCount = count;
+      maxType = type;
+    }
+  }
+
+  // If >70% are the same type, consider it a pattern
+  if (maxCount / children.length > 0.7) {
+    return { type: maxType.replace('INSTANCE:', '') };
+  }
+
+  return null;
+}
+
+/**
+ * Construct Figma layout from JSON structure (Milestone A - exact matching only)
+ */
+function constructFigmaLayout(structure: any, designSystem: any): SceneNode {
+  switch (structure.type) {
+    case 'FRAME':
+      return buildFrameNode(structure, designSystem);
+    case 'COMPONENT':
+      return instantiateComponent(structure, designSystem);
+    case 'TEXT':
+      return buildTextNode(structure, designSystem);
+    default:
+      throw new Error(`Unknown node type: ${structure.type}`);
+  }
+}
+
+/**
+ * Build a FRAME node with Auto Layout
+ */
+function buildFrameNode(spec: any, designSystem: any): FrameNode {
+  const frame = figma.createFrame();
+  frame.name = spec.name;
+
+  // Apply Auto Layout if specified
+  if (spec.layoutMode && spec.layoutMode !== 'NONE') {
+    frame.layoutMode = spec.layoutMode;
+
+    if (spec.itemSpacing !== undefined) {
+      frame.itemSpacing = spec.itemSpacing;
+    }
+
+    if (spec.padding) {
+      frame.paddingTop = spec.padding.top || 0;
+      frame.paddingRight = spec.padding.right || 0;
+      frame.paddingBottom = spec.padding.bottom || 0;
+      frame.paddingLeft = spec.padding.left || 0;
+    }
+
+    if (spec.primaryAxisAlignItems) {
+      frame.primaryAxisAlignItems = spec.primaryAxisAlignItems;
+    }
+
+    if (spec.counterAxisAlignItems) {
+      frame.counterAxisAlignItems = spec.counterAxisAlignItems;
+    }
+  }
+
+  // Apply fill style if specified
+  if (spec.fillStyleName) {
+    const colorStyle = designSystem.colors.find((c: any) => c.name === spec.fillStyleName);
+    if (colorStyle) {
+      try {
+        const style = figma.getStyleById(colorStyle.id);
+        if (style && style.type === 'PAINT') {
+          frame.fillStyleId = style.id;
+        }
+      } catch (e) {
+        console.warn(`Fill style not found: ${spec.fillStyleName}`);
+      }
+    }
+  }
+
+  // Recursively build children
+  if (spec.children && Array.isArray(spec.children)) {
+    spec.children.forEach((childSpec: any) => {
+      try {
+        const childNode = constructFigmaLayout(childSpec, designSystem);
+        frame.appendChild(childNode);
+      } catch (error) {
+        console.error(`Failed to create child: ${error}`);
+        // Continue with other children
+      }
+    });
+  }
+
+  return frame;
+}
+
+/**
+ * Instantiate a COMPONENT node (Milestone A - exact match only)
+ */
+function instantiateComponent(spec: any, designSystem: any): InstanceNode {
+  // Find component by exact name match
+  const component = designSystem.components.find((c: any) => c.name === spec.componentName);
+
+  if (!component) {
+    throw new Error(`Component not found: ${spec.componentName}`);
+  }
+
+  // Get component from Figma
+  const componentNode = figma.getNodeById(component.id);
+  if (!componentNode || (componentNode.type !== 'COMPONENT' && componentNode.type !== 'COMPONENT_SET')) {
+    throw new Error(`Component node not found or invalid: ${spec.componentName}`);
+  }
+
+  // Create instance
+  let instance: InstanceNode;
+  if (componentNode.type === 'COMPONENT') {
+    instance = (componentNode as ComponentNode).createInstance();
+  } else {
+    // Component set - use default variant
+    const componentSet = componentNode as ComponentSetNode;
+    const defaultComponent = componentSet.defaultVariant as ComponentNode;
+    instance = defaultComponent.createInstance();
+  }
+
+  instance.name = spec.name;
+
+  // Apply text override if specified
+  if (spec.text) {
+    // Find text nodes within the instance
+    const textNodes = instance.findAll(n => n.type === 'TEXT') as TextNode[];
+    if (textNodes.length > 0) {
+      // Override the first text node (simple approach for Milestone A)
+      const textNode = textNodes[0];
+      try {
+        textNode.characters = spec.text;
+      } catch (error) {
+        console.warn(`Could not override text: ${error}`);
+      }
+    }
+  }
+
+  return instance;
+}
+
+/**
+ * Build a TEXT node
+ */
+function buildTextNode(spec: any, designSystem: any): TextNode {
+  const textNode = figma.createText();
+  textNode.name = spec.name;
+
+  // Load font before setting characters
+  figma.loadFontAsync(textNode.fontName as FontName).then(() => {
+    textNode.characters = spec.text;
+
+    // Apply text style if specified
+    if (spec.textStyleName) {
+      const textStyle = designSystem.textStyles.find((ts: any) => ts.name === spec.textStyleName);
+      if (textStyle) {
+        try {
+          const style = figma.getStyleById(textStyle.id);
+          if (style && style.type === 'TEXT') {
+            textNode.textStyleId = style.id;
+          }
+        } catch (e) {
+          console.warn(`Text style not found: ${spec.textStyleName}`);
+        }
+      }
+    }
+  }).catch(error => {
+    console.error('Failed to load font:', error);
+    // Set text anyway with default font
+    textNode.characters = spec.text;
+  });
+
+  return textNode;
+}
+
 /**
  * Handles iteration request - applies changes to selected frame
  */
@@ -1526,14 +1866,26 @@ async function handleIterateDesign(payload: any) {
  * Handles iteration variation generation (multiple iterations side-by-side)
  */
 async function handleIterateDesignVariation(payload: any) {
-  const { svg, reasoning, frameId, variationIndex, totalVariations } = payload;
+  const { figmaStructure, reasoning, frameId, variationIndex, totalVariations, designSystem } = payload;
 
-  if (!frameId || !svg) {
-    console.log('ERROR: Missing frameId or SVG');
+  if (!frameId || !figmaStructure) {
+    console.log('ERROR: Missing frameId or figmaStructure');
     figma.ui.postMessage({
       type: 'iteration-error',
       payload: {
-        error: 'Missing frameId or SVG content',
+        error: 'Missing frameId or figmaStructure',
+        variationIndex,
+      },
+    });
+    return;
+  }
+
+  if (!designSystem) {
+    console.log('ERROR: Missing designSystem');
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: {
+        error: 'Missing designSystem',
         variationIndex,
       },
     });
@@ -1577,81 +1929,15 @@ async function handleIterateDesignVariation(payload: any) {
       },
     });
 
-    // Sanitize SVG for Figma compatibility
-    const sanitizedSvg = sanitizeSvgForFigma(svg);
+    // Construct the editable layout
+    const layoutNode = constructFigmaLayout(figmaStructure, designSystem);
 
-    let contentNode: SceneNode;
-    let nodeWidth: number;
-    let nodeHeight: number;
-
-    try {
-      // Try to create SVG node (vector)
-      const svgNode = figma.createNodeFromSvg(sanitizedSvg);
-      contentNode = svgNode;
-      nodeWidth = svgNode.width;
-      nodeHeight = svgNode.height;
-    } catch (svgError) {
-      console.warn('Failed to create SVG node, falling back to raster image:', svgError);
-
-      // Request UI to convert SVG to PNG
-      figma.ui.postMessage({
-        type: 'convert-svg-to-png',
-        payload: {
-          svg: sanitizedSvg,
-          variationIndex,
-          frameId: frameNode.id,
-        },
-      });
-
-      // Wait for conversion response
-      const conversionResult = await new Promise<{ success: boolean; pngBytes?: number[]; error?: string }>((resolve) => {
-        const handler = (msg: any) => {
-          if (msg.type === 'svg-converted-to-png' && msg.payload.variationIndex === variationIndex) {
-            figma.ui.off('message', handler);
-            resolve({ success: true, pngBytes: msg.payload.pngBytes });
-          } else if (msg.type === 'svg-conversion-failed' && msg.payload.variationIndex === variationIndex) {
-            figma.ui.off('message', handler);
-            resolve({ success: false, error: msg.payload.error });
-          }
-        };
-        figma.ui.on('message', handler);
-
-        // Timeout after 30 seconds
-        setTimeout(() => {
-          figma.ui.off('message', handler);
-          resolve({ success: false, error: 'Conversion timeout' });
-        }, 30000);
-      });
-
-      if (!conversionResult.success || !conversionResult.pngBytes) {
-        // Both SVG and PNG conversion failed - the AI generated invalid content
-        const errorMsg = `The AI generated content that couldn't be rendered. This variation was skipped. Try regenerating with a different prompt.`;
-        console.error(`Variation ${variationIndex + 1} failed:`, conversionResult.error);
-        throw new Error(errorMsg);
-      }
-
-      // Create image node from PNG bytes
-      const pngUint8Array = new Uint8Array(conversionResult.pngBytes);
-      const image = figma.createImage(pngUint8Array);
-      const rectangle = figma.createRectangle();
-
-      // Use default dimensions if we can't extract from SVG
-      const defaultWidth = 1440;
-      const defaultHeight = 1024;
-
-      rectangle.resize(defaultWidth, defaultHeight);
-      rectangle.fills = [{ type: 'IMAGE', scaleMode: 'FILL', imageHash: image.hash }];
-
-      contentNode = rectangle;
-      nodeWidth = defaultWidth;
-      nodeHeight = defaultHeight;
+    if (layoutNode.type !== 'FRAME') {
+      throw new Error('Root structure must be a FRAME');
     }
 
-    // Create new frame to hold the iteration
-    const newFrame = figma.createFrame();
+    const newFrame = layoutNode as FrameNode;
     newFrame.name = `${frameNode.name} (Iteration ${variationIndex + 1})`;
-    newFrame.appendChild(contentNode);
-    newFrame.resize(nodeWidth, nodeHeight);
 
     // Position to the right of the original frame, with spacing between variations
     const spacing = 100;
@@ -1661,6 +1947,8 @@ async function handleIterateDesignVariation(payload: any) {
     // Add to same parent as original frame
     if (frameNode.parent && frameNode.parent.type !== 'PAGE') {
       (frameNode.parent as FrameNode).appendChild(newFrame);
+    } else {
+      figma.currentPage.appendChild(newFrame);
     }
 
     // Store the newly created frame in the session

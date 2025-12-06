@@ -903,6 +903,329 @@ function sanitizeSVG(svg) {
   return sanitized;
 }
 
+// ============================================================================
+// Editable Layout System Functions (Milestone A)
+// ============================================================================
+
+/**
+ * Extract Figma JSON from AI response
+ * Handles ```json blocks or raw JSON objects
+ */
+function extractFigmaJSON(responseText) {
+  let text = responseText.trim();
+
+  console.log('Raw JSON response (first 300 chars):', text.substring(0, 300));
+
+  // 1. Prefer ```json ... ``` block
+  const jsonBlockMatch = text.match(/```json\s*\n([\s\S]*?)\n```/);
+  if (jsonBlockMatch) {
+    console.log('Found JSON block');
+    return JSON.parse(jsonBlockMatch[1]);
+  }
+
+  // 2. Fallback: First { ... } object
+  const objectMatch = text.match(/\{[\s\S]*\}/);
+  if (objectMatch) {
+    console.log('Found JSON object');
+    return JSON.parse(objectMatch[0]);
+  }
+
+  throw new Error('No JSON object found in response');
+}
+
+/**
+ * Validate Figma structure against schema
+ * Returns { valid, type, errors/warnings }
+ */
+function validateFigmaStructure(json, designSystem) {
+  const errors = [];
+
+  // Schema validation (triggers retry)
+  if (!json.version) {
+    return {
+      valid: false,
+      type: 'SCHEMA_ERROR',
+      message: 'Missing required field: version'
+    };
+  }
+
+  if (!json.figmaStructure) {
+    return {
+      valid: false,
+      type: 'SCHEMA_ERROR',
+      message: 'Missing required field: figmaStructure'
+    };
+  }
+
+  if (json.version !== '1.0') {
+    return {
+      valid: false,
+      type: 'SCHEMA_ERROR',
+      message: `Unsupported version: ${json.version}. Expected: 1.0`
+    };
+  }
+
+  // Recursively validate node structure
+  function validateNode(node, path = 'figmaStructure') {
+    if (!node.type) {
+      errors.push({ path, message: 'Missing required field: type' });
+      return;
+    }
+
+    if (!node.name) {
+      errors.push({ path, message: 'Missing required field: name' });
+    }
+
+    // Type-specific validation
+    switch (node.type) {
+      case 'COMPONENT':
+        // COMPONENT must have componentName
+        if (!node.componentName) {
+          errors.push({ path, message: 'COMPONENT node missing required field: componentName' });
+        }
+        // COMPONENT cannot have children
+        if (node.children && node.children.length > 0) {
+          errors.push({ path, message: 'COMPONENT nodes cannot have children' });
+        }
+        // COMPONENT cannot have layout properties
+        if (node.layoutMode || node.itemSpacing || node.padding) {
+          errors.push({ path, message: 'COMPONENT nodes cannot have layoutMode, itemSpacing, or padding' });
+        }
+        break;
+
+      case 'TEXT':
+        // TEXT must have text content
+        if (!node.text && node.text !== '') {
+          errors.push({ path, message: 'TEXT node missing required field: text' });
+        }
+        // TEXT cannot have children
+        if (node.children && node.children.length > 0) {
+          errors.push({ path, message: 'TEXT nodes cannot have children' });
+        }
+        // TEXT cannot have component properties
+        if (node.componentName || node.componentVariant) {
+          errors.push({ path, message: 'TEXT nodes cannot have componentName or componentVariant' });
+        }
+        break;
+
+      case 'FRAME':
+        // FRAME can have children - validate recursively
+        if (node.children && Array.isArray(node.children)) {
+          node.children.forEach((child, i) => {
+            validateNode(child, `${path}.children[${i}]`);
+          });
+        }
+        // FRAME cannot have TEXT-specific properties
+        if (node.text || node.textStyleName) {
+          errors.push({ path, message: 'FRAME nodes cannot have text or textStyleName' });
+        }
+        // FRAME cannot have COMPONENT-specific properties
+        if (node.componentName || node.componentVariant) {
+          errors.push({ path, message: 'FRAME nodes cannot have componentName or componentVariant' });
+        }
+        break;
+
+      default:
+        errors.push({ path, message: `Unknown node type: ${node.type}` });
+    }
+
+    // Validate padding structure if present
+    if (node.padding) {
+      if (typeof node.padding !== 'object' || Array.isArray(node.padding)) {
+        errors.push({ path, message: 'padding must be an object with {top, right, bottom, left}' });
+      } else if (
+        typeof node.padding.top !== 'number' ||
+        typeof node.padding.right !== 'number' ||
+        typeof node.padding.bottom !== 'number' ||
+        typeof node.padding.left !== 'number'
+      ) {
+        errors.push({ path, message: 'padding must have numeric top, right, bottom, left properties' });
+      }
+    }
+  }
+
+  validateNode(json.figmaStructure);
+
+  if (errors.length > 0) {
+    return {
+      valid: false,
+      type: 'SCHEMA_ERROR',
+      errors
+    };
+  }
+
+  // Success - return warnings if any
+  return {
+    valid: true,
+    warnings: json.warnings || []
+  };
+}
+
+/**
+ * Build retry prompt for schema/parse errors
+ * Surgical prompt, doesn't re-paste full system prompt
+ */
+function buildRetryPrompt(originalPrompt, error, invalidJSON) {
+  const errorDetails = error.errors
+    ? error.errors.map(e => `- ${e.path}: ${e.message}`).join('\n')
+    : error.message;
+
+  return `RETRY: Invalid JSON response
+
+ERROR:
+${errorDetails}
+
+YOUR INVALID OUTPUT:
+${invalidJSON.substring(0, 500)}${invalidJSON.length > 500 ? '...' : ''}
+
+REQUIREMENTS:
+- Return single JSON object only
+- Wrap in \`\`\`json code block
+- Must have: version, reasoning, figmaStructure
+- COMPONENT nodes: must have componentName, cannot have children
+- TEXT nodes: must have text, cannot have children or componentName
+- FRAME nodes: can have children, cannot have text or componentName
+- padding must be object: {top, right, bottom, left}
+
+${originalPrompt}`;
+}
+
+/**
+ * Build system prompt for layout generation using HTML/CSS mental model
+ */
+function buildLayoutSystemPrompt(designSystem) {
+  // Get component list
+  const componentList = designSystem.components
+    .slice(0, 100) // Limit to keep prompt concise
+    .map(c => `- ${c.name}`)
+    .join('\n');
+
+  // Get text style list
+  const textStyleList = designSystem.textStyles
+    .slice(0, 50)
+    .map(ts => `- ${ts.name}`)
+    .join('\n');
+
+  return `You are a UI designer generating Figma Auto Layout structures.
+
+MENTAL MODEL: Think in HTML/CSS
+
+When designing, think using familiar HTML/CSS concepts:
+- <div style="display: flex; flex-direction: column"> → layoutMode: "VERTICAL"
+- <div style="display: flex; flex-direction: row"> → layoutMode: "HORIZONTAL"
+- gap: 16px → itemSpacing: 16
+- padding: 24px → padding: {top: 24, right: 24, bottom: 24, left: 24}
+- justify-content: space-between → primaryAxisAlignItems: "SPACE_BETWEEN"
+- justify-content: center → primaryAxisAlignItems: "CENTER"
+- align-items: center → counterAxisAlignItems: "CENTER"
+
+Think in HTML/CSS internally but DO NOT output HTML in your response.
+
+OUTPUT FORMAT: Figma JSON only
+
+WORKED EXAMPLE:
+
+Input:
+{
+  "structural_hints": {
+    "frameName": "Dashboard",
+    "usesAutoLayout": true,
+    "layoutMode": "VERTICAL",
+    "itemSpacing": 24,
+    "padding": { "top": 32, "right": 32, "bottom": 32, "left": 32 },
+    "children": [
+      { "type": "TEXT", "name": "Dashboard Title", "text": "Dashboard" },
+      { "type": "INSTANCE", "componentName": "Button/Primary", "name": "Settings" }
+    ],
+    "usedComponents": ["Button/Primary"],
+    "usedTextStyles": ["Heading/L"]
+  },
+  "user_request": "Make this more minimal"
+}
+
+Output (ONLY this JSON format, no HTML):
+\`\`\`json
+{
+  "version": "1.0",
+  "reasoning": "Reduced spacing from 24px to 12px and padding from 32px to 16px for a more compact, minimal appearance. Changed button to Secondary variant for subtle styling.",
+  "figmaStructure": {
+    "type": "FRAME",
+    "name": "Dashboard",
+    "layoutMode": "VERTICAL",
+    "itemSpacing": 12,
+    "padding": { "top": 16, "right": 16, "bottom": 16, "left": 16 },
+    "children": [
+      {
+        "type": "TEXT",
+        "name": "Title",
+        "text": "Dashboard",
+        "textStyleName": "Heading/L"
+      },
+      {
+        "type": "COMPONENT",
+        "componentName": "Button/Secondary"
+      }
+    ]
+  }
+}
+\`\`\`
+
+FIELD USAGE RULES (STRICT):
+
+FRAME nodes can have:
+- type: "FRAME" (required)
+- name: string (required)
+- layoutMode: "VERTICAL" | "HORIZONTAL" | "NONE" (optional)
+- itemSpacing: number (optional)
+- padding: {top, right, bottom, left} - ALWAYS object form (optional)
+- primaryAxisAlignItems: "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN" (optional)
+- counterAxisAlignItems: "MIN" | "CENTER" | "MAX" (optional)
+- children: array of nodes (optional)
+- role: semantic hint like "header", "section" (optional)
+- fillStyleName: exact design system color name (optional)
+
+FRAME nodes CANNOT have: componentName, componentVariant, text, textStyleName
+
+COMPONENT nodes can have:
+- type: "COMPONENT" (required)
+- name: string (required)
+- componentName: string (required - exact name from available components)
+- componentVariant: {property: "value"} (optional)
+- text: string (optional - for overriding text inside component)
+
+COMPONENT nodes CANNOT have: children, layoutMode, itemSpacing, padding
+
+TEXT nodes can have:
+- type: "TEXT" (required)
+- name: string (required)
+- text: string (required)
+- textStyleName: exact design system text style name (optional)
+
+TEXT nodes CANNOT have: children, componentName, layoutMode, padding
+
+OPTIONAL vs REQUIRED:
+
+REQUIRED fields:
+- type (always)
+- name (always)
+- componentName (for COMPONENT nodes)
+- text (for TEXT nodes)
+
+OPTIONAL fields (only use if you know exact design system name):
+- fillStyleName
+- textStyleName
+
+NEVER invent arbitrary token names. If you're unsure about a style name, omit the field.
+
+AVAILABLE COMPONENTS:
+${componentList || '(No components available)'}
+
+AVAILABLE TEXT STYLES:
+${textStyleList || '(No text styles available)'}
+
+Remember: Think in HTML/CSS Flexbox concepts, but output Figma JSON structure.`;
+}
+
 /**
  * Process a generate job - SVG MODE
  */
@@ -959,120 +1282,60 @@ Remember: Every button, card, header, and UI element MUST have visible text labe
 
 
 /**
- * Process an iterate job - VISION MODE with STREAMING
- * Uses PNG screenshot + design system to generate modified SVG
+ * Process an iterate job - EDITABLE LAYOUT MODE with STREAMING
+ * Uses PNG screenshot + structural hints + design system to generate Figma JSON
  * Streams reasoning tokens in real-time to the database
+ * Auto-retries once on parse/schema errors
  */
 async function processIterateJob(job) {
-  const { prompt, imageData, designSystem, model, chatHistory } = job.input;
+  const { prompt, imageData, designSystem, model, chatHistory, structuralHints } = job.input;
 
   const selectedModel = model || 'claude';
-  console.log(`🎨 Vision Iteration Mode (STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image`);
+  console.log(`🎨 Editable Layout Mode (STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image + structural hints`);
 
-  const systemPrompt = buildSVGSystemPrompt(designSystem);
+  const systemPrompt = buildLayoutSystemPrompt(designSystem);
 
-  // Build user prompt with optional chat history
+  // Build user prompt with structural hints and context
   let contextSection = '';
   if (chatHistory && chatHistory.trim()) {
     contextSection = `\n${chatHistory}\n\nNow, using this context from previous iterations, `;
   }
 
-  const userPrompt = `You are looking at an existing design (see image).${contextSection}The user wants to make the following change:
+  let structuralHintsSection = '';
+  if (structuralHints) {
+    structuralHintsSection = `\n\nCURRENT STRUCTURE (semantic hints about the existing design):
+${JSON.stringify(structuralHints, null, 2)}
 
-"${prompt}"
+${structuralHints.usesAutoLayout ? 'This frame uses Auto Layout.' : 'This frame does NOT use Auto Layout yet - consider adding Auto Layout structure in your output.'}
+`;
+  }
 
-CRITICAL ITERATION RULES:
+  const baseUserPrompt = `You are looking at an existing design (see image).${contextSection}${structuralHintsSection}
 
-1. PRESERVE EXACTLY (unless user explicitly mentions them):
-   • All existing text content and labels - keep the exact same words
-   • All UI elements (buttons, cards, inputs, navigation, etc.)
-   • Overall layout structure and component arrangement
-   • Spacing between elements
-   • All icons, images, and visual elements not mentioned
-   • Component sizes and proportions
-   • ALL grid-aligned coordinates (multiples of 8)
+User wants: "${prompt}"
 
-2. CHANGE ONLY:
-   • What the user EXPLICITLY requested in their prompt
-   • Nothing more, nothing less
+Think in HTML/CSS Flexbox, output Figma JSON.
 
-3. MAINTAIN GRID ALIGNMENT (CRITICAL):
-   • ALL coordinates must remain multiples of 8 (x: 0, 8, 16, 24, 32, 40, 48...)
-   • ALL dimensions must remain multiples of 8 (width: 80, 120, 160, 200...)
-   • NO decimals, NO inline math, NO odd numbers
-   • Text y-coordinates must use proper baseline formulas:
-     - Container text: y = containerY + padding + (fontSize × 0.75)
-     - Button text: y = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
-   • If you add new elements, they must snap to the 8px grid
-   • Preserve vertical spacing multiples of 8 (8px, 16px, 24px, 32px)
-
-4. MAKE NATURAL ADJUSTMENTS:
-   • If you change one element, adjust nearby spacing/alignment if needed for visual harmony
-   • If you change colors, ensure proper contrast is maintained
-   • If you resize an element, adjust its container size proportionally (still multiples of 8)
-   • Maintain visual balance and hierarchy
-   • Maintain equal top/bottom padding in containers
-
-5. REFERENCE THE CURRENT DESIGN:
-   • Study the image carefully - count elements, note text, observe layout
-   • Recreate the SAME structure with the requested modification
-   • Match the existing visual style (rounded corners, shadows, borders, etc.)
-   • Use the SAME number of elements (unless user asks to add/remove)
-   • Preserve the grid-aligned positioning system
-
-6. OUTPUT REQUIREMENTS:
-   • FIRST: Write 2-3 sentences explaining your design approach and what changes you're making
-   • THEN: Generate a complete, pixel-perfect SVG in a code block
-   • Include ALL text labels from the original (unless user changed them)
-   • Match fonts, sizes, weights, colors from the design system
-   • Maintain design system consistency
-   • ALL coordinates and dimensions must be multiples of 8
-   • Text must be properly baseline-aligned using the formulas
-   • Design must remain immediately usable in Figma without manual adjustments
-
-7. TEXT ALIGNMENT REQUIREMENTS (CRITICAL - MOST COMMON ERROR):
-   **For ALL button text:**
-   • MUST use text-anchor="middle" for horizontal centering
-   • Horizontal position: textX = buttonX + (buttonWidth / 2)
-   • Vertical position: textY = buttonY + (buttonHeight / 2) + (fontSize × 0.35)
-   • NEVER use text-anchor="start" or left-align button text
-   • VERIFY YOUR MATH: if button is at x="40" width="160", text MUST be at x="120"
-
-   **For general text in containers:**
-   • Left-aligned text: use text-anchor="start" and x = containerX + padding
-   • Centered text: use text-anchor="middle" and x = containerX + (containerWidth / 2)
-   • Vertical position: y = containerY + padding + (fontSize × 0.75)
-
-   **Self-check before outputting:**
-   • Is button text using text-anchor="middle"? ✓
-   • Does textX equal buttonX + (buttonWidth / 2)? ✓
-   • Will the text appear visually centered when rendered? ✓
-
-EXAMPLE - If user says "make the header blue":
-✅ DO: Change header fill="#0066cc", adjust text color for contrast, keep all coordinates identical, maintain grid alignment
-❌ DON'T: Change x="40" to x="42", change height="80" to height="75", redesign layout, rearrange elements
-
-EXAMPLE - If user says "add a button below the card":
-✅ DO: Calculate new button position using grid: cardY + cardHeight + 24 (spacing), use standard button dimensions (width="160" height="40"), center text properly
-❌ DON'T: Use x="123.5" or height="37", misalign button with existing grid
-
-This is an ITERATION - you're making a surgical change to an existing design while maintaining pixel-perfect grid alignment.`;
+ITERATION RULES:
+1. Preserve all content and structure unless user explicitly requests changes
+2. Make ONLY the changes the user requested
+3. Use components from the design system when appropriate
+4. Maintain visual consistency with the existing design
+5. Output complete Figma JSON structure in \`\`\`json block`;
 
   // Track streaming state
   let reasoningBuffer = '';
   let chunkIndex = 0;
-  let svgStarted = false;
-  let svgContent = '';
-  let lastSvgProgressUpdate = 0;
-  const CHUNK_SIZE = 120; // Insert chunks every ~120 characters for good balance
-  const CHUNK_DELAY_MS = 3000; // 3 second delay between chunks for natural streaming feel
-  const SVG_PROGRESS_INTERVAL = 2000; // Send SVG progress every 2 seconds
+  let jsonStarted = false;
+  let jsonContent = '';
+  const CHUNK_SIZE = 120; // Insert chunks every ~120 characters
+  const CHUNK_DELAY_MS = 3000; // 3 second delay between chunks
 
   // Callback for processing streaming tokens
   const onToken = async (token, fullText) => {
-    // Check if we've reached the SVG content (stop streaming reasoning)
-    if (!svgStarted && (fullText.includes('```svg') || fullText.includes('```xml') || fullText.includes('<svg'))) {
-      svgStarted = true;
+    // Check if we've reached the JSON content (stop streaming reasoning)
+    if (!jsonStarted && (fullText.includes('```json') || fullText.includes('"version"'))) {
+      jsonStarted = true;
 
       // Send any remaining reasoning buffer
       if (reasoningBuffer.trim() && job.id) {
@@ -1080,101 +1343,114 @@ This is an ITERATION - you're making a surgical change to an existing design whi
         reasoningBuffer = '';
       }
 
-      // Initial SVG progress indicator
+      // Initial JSON progress indicator
       if (job.id) {
-        await insertReasoningChunk(job.id, 'Generating vector markup...', chunkIndex++);
-        lastSvgProgressUpdate = Date.now();
+        await insertReasoningChunk(job.id, 'Generating structure...', chunkIndex++);
       }
     }
 
-    // Only accumulate reasoning (before SVG starts)
-    if (!svgStarted) {
+    // Only accumulate reasoning (before JSON starts)
+    if (!jsonStarted) {
       reasoningBuffer += token;
 
       // Insert chunk when buffer reaches threshold
       if (reasoningBuffer.length >= CHUNK_SIZE && job.id) {
         await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
         console.log(`📝 Streamed reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
-        reasoningBuffer = ''; // Reset buffer
-
-        // Add delay to spread chunks out over time for better UX
-        // This makes the streaming feel more natural and gives continuous feedback
+        reasoningBuffer = '';
         await new Promise(resolve => setTimeout(resolve, CHUNK_DELAY_MS));
       }
     } else {
-      // Track SVG content as it's generated
-      svgContent += token;
+      jsonContent += token;
+    }
+  };
 
-      // Send periodic progress updates while SVG is being generated
-      const now = Date.now();
-      if (job.id && now - lastSvgProgressUpdate >= SVG_PROGRESS_INTERVAL) {
-        const svgLines = svgContent.split('\n').length;
-        const progressMessage = `Generating vector... (${svgLines} lines so far)`;
-        await insertReasoningChunk(job.id, progressMessage, chunkIndex++);
-        console.log(`🎨 SVG progress: ${svgLines} lines`);
-        lastSvgProgressUpdate = now;
-        // No delay here - let the LLM stream continue at full speed
+  // Auto-retry logic (up to 2 attempts)
+  let attempt = 0;
+  let lastError = null;
+  let invalidJSON = null;
+  let userPrompt = baseUserPrompt;
+
+  while (attempt < 2) {
+    attempt++;
+
+    // Send retry notification on second attempt
+    if (attempt === 2 && job.id) {
+      await insertReasoningChunk(job.id, '⚠️ First attempt failed, retrying...', chunkIndex++);
+      console.log('⚠️ Retry attempt 2/2');
+      userPrompt = buildRetryPrompt(baseUserPrompt, lastError, invalidJSON);
+      // Reset streaming state for retry
+      reasoningBuffer = '';
+      jsonStarted = false;
+      jsonContent = '';
+    }
+
+    try {
+      // Call the selected AI model with STREAMING
+      const aiResponse = selectedModel === 'gemini'
+        ? await callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken)
+        : await callClaudeWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken);
+
+      const responseText = aiResponse.content[0]?.text || '';
+
+      // Send any remaining reasoning buffer (final chunk)
+      if (reasoningBuffer.trim() && job.id) {
+        await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
+        console.log(`📝 Streamed final reasoning chunk ${chunkIndex}`);
       }
+
+      console.log(`✅ Streaming complete: ${chunkIndex} chunks sent`);
+
+      // Extract and validate JSON
+      console.log('📝 Response text length:', responseText.length);
+      console.log('📝 Response preview:', responseText.substring(0, 500));
+      const json = extractFigmaJSON(responseText);
+      console.log('📦 Extracted JSON keys:', Object.keys(json));
+      console.log('📦 Has figmaStructure:', !!json.figmaStructure);
+      const validation = validateFigmaStructure(json, designSystem);
+
+      if (!validation.valid && validation.type === 'SCHEMA_ERROR') {
+        // Schema error - retry
+        lastError = validation;
+        invalidJSON = responseText;
+        console.error('Schema validation failed:', validation);
+        continue;
+      }
+
+      // Success! Extract reasoning
+      let reasoning = '';
+      const jsonBlockMatch = responseText.match(/```json/);
+      if (jsonBlockMatch) {
+        reasoning = responseText.substring(0, jsonBlockMatch.index).trim();
+      } else {
+        const versionMatch = responseText.match(/\{\s*"version"/);
+        if (versionMatch) {
+          reasoning = responseText.substring(0, versionMatch.index).trim();
+        } else {
+          reasoning = json.reasoning || '';
+        }
+      }
+
+      console.log('✅ Editable layout iteration complete');
+      console.log('📦 Returning figmaStructure:', JSON.stringify(json.figmaStructure, null, 2).substring(0, 300));
+
+      return {
+        figmaStructure: json.figmaStructure,
+        reasoning: reasoning || json.reasoning || `Layout modified with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'}`,
+        warnings: validation.warnings
+      };
+
+    } catch (parseError) {
+      // Parse error - retry
+      lastError = { message: parseError.message };
+      invalidJSON = responseText || 'No response received';
+      console.error('Parse error:', parseError);
+      continue;
     }
-  };
-
-  // Call the selected AI model with STREAMING
-  const aiResponse = selectedModel === 'gemini'
-    ? await callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken)
-    : await callClaudeWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken);
-
-  const responseText = aiResponse.content[0]?.text || '';
-
-  // Send any remaining reasoning buffer (final chunk)
-  if (reasoningBuffer.trim() && job.id) {
-    await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
-    console.log(`📝 Streamed final reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
   }
 
-  // Send final SVG completion message
-  if (svgStarted && job.id) {
-    const finalSvgLines = svgContent.split('\n').length;
-    const completionMessage = `Vector complete (${finalSvgLines} lines)`;
-    await insertReasoningChunk(job.id, completionMessage, chunkIndex++);
-    console.log(`🎨 SVG generation complete: ${finalSvgLines} lines`);
-  }
-
-  console.log(`✅ Streaming complete: ${chunkIndex} chunks sent in real-time (reasoning + SVG progress)`);
-
-  // Extract reasoning (text before the SVG code block) for final output
-  let reasoning = '';
-  const svgCodeBlockMatch = responseText.match(/```(?:svg|xml)?\s*\n/);
-  if (svgCodeBlockMatch) {
-    reasoning = responseText.substring(0, svgCodeBlockMatch.index).trim();
-  } else {
-    // If no code block found, try to find where SVG starts
-    const svgStartMatch = responseText.match(/<svg/);
-    if (svgStartMatch) {
-      reasoning = responseText.substring(0, svgStartMatch.index).trim();
-    }
-  }
-
-  // Clean up reasoning - remove any trailing markdown or extra whitespace
-  reasoning = reasoning.replace(/```.*$/s, '').trim();
-
-  console.log('📝 Final reasoning length:', reasoning.length, 'characters');
-
-  // Extract SVG from response
-  let updatedSVG = extractSVG(responseText);
-
-  if (!updatedSVG || !updatedSVG.includes('<svg')) {
-    throw new Error('Failed to extract valid SVG from AI response');
-  }
-
-  // Sanitize SVG to remove Figma-unsupported features
-  updatedSVG = sanitizeSVG(updatedSVG);
-
-  console.log('✅ Vision iteration complete');
-
-  return {
-    svg: updatedSVG,
-    reasoning: reasoning || `SVG modified with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} Vision`
-  };
+  // Both attempts failed
+  throw new Error(`Failed after 2 attempts: ${lastError?.message || 'Unknown error'}`);
 }
 
 /**
