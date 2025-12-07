@@ -21,6 +21,13 @@ import { IterationRequestMVP, IterationResponseMVP } from './mvpTypes';
 // Debug mode - set to false for production to reduce console noise
 const DEBUG_MODE = true;
 
+// Module-level callback storage for Railway requests
+const mvpRailwayCallbacks = new Map<number, {
+  resolve: (value: IterationResponseMVP) => void;
+  reject: (error: Error) => void;
+  timeout: ReturnType<typeof setTimeout>;
+}>();
+
 function debugLog(...args: any[]) {
   if (DEBUG_MODE) {
     console.log(...args);
@@ -365,11 +372,10 @@ figma.ui.onmessage = async (msg: Message) => {
 
       case 'mvp-railway-response':
         // Handle Railway response and resolve the waiting promise
-        const mvpCallbacks = (globalThis as any).mvpRailwayCallbacks;
-        if (mvpCallbacks && mvpCallbacks.has(msg.payload.variationIndex)) {
-          const { resolve, reject, timeout } = mvpCallbacks.get(msg.payload.variationIndex);
+        if (mvpRailwayCallbacks.has(msg.payload.variationIndex)) {
+          const { resolve, reject, timeout } = mvpRailwayCallbacks.get(msg.payload.variationIndex)!;
           clearTimeout(timeout);
-          mvpCallbacks.delete(msg.payload.variationIndex);
+          mvpRailwayCallbacks.delete(msg.payload.variationIndex);
 
           if (msg.payload.error) {
             reject(new Error(msg.payload.error));
@@ -2419,13 +2425,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
     // 4. Send to UI for Railway call (plugin sandbox can't make HTTP requests)
     console.log(`🚀 Sending to ${model}...`);
 
-    // Store promise resolver in global map
-    if (!(globalThis as any).mvpRailwayCallbacks) {
-      (globalThis as any).mvpRailwayCallbacks = new Map();
-    }
-    const mvpCallbacks = (globalThis as any).mvpRailwayCallbacks;
-
-    // Send request to UI
+    // Send request to UI (store promise resolver in module-level map)
     figma.ui.postMessage({
       type: 'mvp-call-railway',
       payload: {
@@ -2441,11 +2441,11 @@ async function handleIterateDesignVariationMVP(payload: any) {
     // Wait for UI to respond with Railway result (response handled in main message handler)
     const result: IterationResponseMVP = await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        mvpCallbacks.delete(variationIndex);
+        mvpRailwayCallbacks.delete(variationIndex);
         reject(new Error('Railway request timeout'));
       }, 120000); // 2 min timeout
 
-      mvpCallbacks.set(variationIndex, { resolve, reject, timeout });
+      mvpRailwayCallbacks.set(variationIndex, { resolve, reject, timeout });
     });
 
     console.log(`✅ Received response: ${result.reasoning}`);
