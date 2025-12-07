@@ -8,6 +8,7 @@ export type MessageType =
   | 'generate-single-variation'
   | 'iterate-design'
   | 'iterate-design-variation'
+  | 'iterate-design-variation-mvp' // MVP iteration pipeline
   | 'get-design-system'
   | 'design-system-scan-progress' // Progress updates during scanning
   | 'get-selected-frame'

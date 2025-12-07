@@ -13,6 +13,10 @@ import {
 } from './types';
 import { expandSimplifiedLayout } from './schemaExpander';
 import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
+// MVP iteration pipeline
+import { buildFrameSnapshot, extractFrameScopedPalette } from './mvpUtils';
+import { reconstructVariationMVP } from './mvpReconstruction';
+import { IterationRequestMVP, IterationResponseMVP } from './mvpTypes';
 
 // Debug mode - set to false for production to reduce console noise
 const DEBUG_MODE = true;
@@ -323,6 +327,10 @@ figma.ui.onmessage = async (msg: Message) => {
 
       case 'iterate-design-variation':
         await handleIterateDesignVariation(msg.payload);
+        break;
+
+      case 'iterate-design-variation-mvp':
+        await handleIterateDesignVariationMVP(msg.payload);
         break;
 
       case 'iteration-error':
@@ -2276,5 +2284,172 @@ async function applyIterationToChild(parent: FrameNode, updatedChild: any, child
   if (child.type === 'INSTANCE' && updatedChild.text !== undefined) {
     console.log(`Updating component instance text: ${child.name} -> "${updatedChild.text}"`);
     await setComponentText(child as InstanceNode, updatedChild.text);
+  }
+}
+
+// ============================================================================
+// MVP ITERATION HANDLER
+// ============================================================================
+
+/**
+ * Handles iteration variation using the new MVP pipeline with frame-scoped components
+ */
+async function handleIterateDesignVariationMVP(payload: any) {
+  const { instructions, frameId, variationIndex, totalVariations, model } = payload;
+
+  if (!frameId) {
+    console.log('ERROR: Missing frameId');
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: { error: 'Missing frameId', variationIndex },
+    });
+    return;
+  }
+
+  // Find the original frame
+  const originalFrame = await figma.getNodeByIdAsync(frameId);
+
+  if (!originalFrame || originalFrame.type !== 'FRAME') {
+    console.log('ERROR: Original frame not found');
+    figma.ui.postMessage({
+      type: 'iteration-error',
+      payload: { error: 'Original frame not found', variationIndex },
+    });
+    return;
+  }
+
+  try {
+    const frameNode = originalFrame as FrameNode;
+
+    // Initialize session if it doesn't exist yet
+    if (!currentIterationSession) {
+      currentIterationSession = {
+        createdFrames: [],
+        totalVariations: totalVariations,
+      };
+    }
+
+    // Send status update: designing
+    console.log(`✨ Creating variation ${variationIndex + 1} using MVP pipeline...`);
+    figma.ui.postMessage({
+      type: 'variation-status-update',
+      payload: {
+        variationIndex,
+        status: 'designing',
+        statusText: 'Designing with AI',
+      },
+    });
+
+    // 1. Build frame snapshot (structural understanding)
+    console.log("📸 Building frame snapshot...");
+    const frameSnapshot = buildFrameSnapshot(frameNode, 5);
+    console.log(`  → ${frameSnapshot.children.length} top-level nodes captured`);
+
+    // 2. Extract frame-scoped design palette
+    console.log("🎨 Extracting design palette...");
+    const designPalette = await extractFrameScopedPalette(frameNode);
+    console.log(`  → ${designPalette.components.length} components in palette`);
+
+    // 3. Export frame as PNG
+    console.log("🖼️  Exporting frame to PNG...");
+    const pngBytes = await frameNode.exportAsync({
+      format: "PNG",
+      constraint: { type: "SCALE", value: 1 }, // 1x scale for speed
+    });
+    const imagePNG = btoa(String.fromCharCode(...pngBytes));
+    console.log(`  → ${Math.round(imagePNG.length / 1024)} KB`);
+
+    // 4. Send to backend
+    console.log(`🚀 Sending to ${model}...`);
+    const backendURL = 'https://crafter-ai-kappa.vercel.app'; // Change to your backend URL
+    const request: IterationRequestMVP = {
+      frameSnapshot,
+      designPalette,
+      imagePNG,
+      instructions: instructions || "Create a variation of this design",
+      model: model || "claude",
+    };
+
+    const response = await fetch(`${backendURL}/api/iterate-mvp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Backend error: ${error}`);
+    }
+
+    const result: IterationResponseMVP = await response.json();
+    console.log(`✅ Received response: ${result.reasoning}`);
+
+    // 5. Reconstruct variation in Figma
+    console.log("🔨 Reconstructing variation...");
+    const newFrame = await reconstructVariationMVP(
+      result.figmaStructure,
+      designPalette
+    );
+
+    newFrame.name = `${frameNode.name} (Iteration ${variationIndex + 1})`;
+
+    // 6. Position relative to original + offset for variation index
+    const spacing = 100;
+    newFrame.x = frameNode.x + frameNode.width + spacing + (variationIndex * (frameNode.width + spacing));
+    newFrame.y = frameNode.y;
+
+    // 7. Add to canvas
+    figma.currentPage.appendChild(newFrame);
+
+    // Store the newly created frame in the session
+    currentIterationSession.createdFrames.push(newFrame);
+
+    // Clear selection to prevent automatic selection of newly created frame
+    isUpdatingSelectionProgrammatically = true;
+    figma.currentPage.selection = [];
+    isUpdatingSelectionProgrammatically = false;
+
+    // Send status update: complete
+    console.log(`✅ Variation ${variationIndex + 1} created successfully`);
+    figma.ui.postMessage({
+      type: 'variation-status-update',
+      payload: {
+        variationIndex,
+        status: 'complete',
+        statusText: 'Iteration Complete',
+        reasoning: result.reasoning || undefined,
+        createdNodeId: newFrame.id,
+      },
+    });
+
+    // Check if ALL variations have been created
+    if (currentIterationSession.createdFrames.length === totalVariations) {
+      console.log(`✨ ${totalVariations} iteration${totalVariations > 1 ? 's' : ''} created successfully`);
+
+      // Clear the session
+      currentIterationSession = null;
+
+      // Notify UI that all variations are complete
+      figma.ui.postMessage({
+        type: 'all-variations-complete',
+        payload: {
+          totalVariations,
+          completedCount: totalVariations,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Error creating iteration variation:', error);
+
+    // Send error status update for this specific variation
+    figma.ui.postMessage({
+      type: 'variation-status-update',
+      payload: {
+        variationIndex,
+        status: 'error',
+        statusText: 'Error when trying to create the design',
+        error: error instanceof Error ? error.message : 'Failed to create iteration variation',
+      },
+    });
   }
 }
