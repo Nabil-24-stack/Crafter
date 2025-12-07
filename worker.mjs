@@ -1094,11 +1094,12 @@ ${originalPrompt}`;
  * Build system prompt for layout generation using HTML/CSS mental model
  */
 function buildLayoutSystemPrompt(designSystem) {
-  // Get component list
+  // Get ALL component names (no truncation - user files have ~1900 components)
   const componentList = designSystem.components
-    .slice(0, 100) // Limit to keep prompt concise
-    .map(c => `- ${c.name}`)
+    .map(c => `- "${c.name}"`)
     .join('\n');
+
+  console.log(`📋 Sending ${designSystem.components.length} components to AI prompt`);
 
   // Get text style list
   const textStyleList = designSystem.textStyles
@@ -1217,13 +1218,31 @@ OPTIONAL fields (only use if you know exact design system name):
 
 NEVER invent arbitrary token names. If you're unsure about a style name, omit the field.
 
-AVAILABLE COMPONENTS:
+AVAILABLE COMPONENTS (${designSystem.components.length} total - from "Created in this file"):
 ${componentList || '(No components available)'}
 
 AVAILABLE TEXT STYLES:
 ${textStyleList || '(No text styles available)'}
 
-Remember: Think in HTML/CSS Flexbox concepts, but output Figma JSON structure.`;
+CRITICAL RULES FOR COMPONENT USAGE:
+
+1. You MUST use EXACT componentName strings from AVAILABLE COMPONENTS above.
+2. Do NOT invent or guess component names like "Button/Primary" or "Input/Search".
+3. If you need a button, find the closest EXACT match from the list above.
+4. If uncertain, choose the closest match from AVAILABLE COMPONENTS - DO NOT make up names.
+5. Component names are case-sensitive and must match EXACTLY including spacing and slashes.
+
+WORKED EXAMPLES:
+❌ WRONG: componentName: "Button/Primary"
+✅ CORRECT: componentName: "Buttons / Primary / Large"
+
+❌ WRONG: componentName: "Input/Search"
+✅ CORRECT: componentName: "Inputs / Text / Default"
+
+❌ WRONG: componentName: "Card"
+✅ CORRECT: componentName: "Cards / Basic / Default"
+
+Remember: Think in HTML/CSS Flexbox concepts, but output Figma JSON structure with EXACT component names.`;
 }
 
 /**

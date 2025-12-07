@@ -14,6 +14,15 @@ import {
 import { expandSimplifiedLayout } from './schemaExpander';
 import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
 
+// Debug mode - set to false for production to reduce console noise
+const DEBUG_MODE = true;
+
+function debugLog(...args: any[]) {
+  if (DEBUG_MODE) {
+    console.log(...args);
+  }
+}
+
 /**
  * Sanitize SVG to be compatible with Figma
  * Removes/fixes features that Figma doesn't support
@@ -376,46 +385,29 @@ function inferComponentCategory(name: string): string {
 
 /**
  * Extracts the design system from the current Figma file
- * Scans for all LOCAL component definitions in the current file
+ * Uses Figma's official API to get ONLY components created in this file
  */
 async function handleGetDesignSystem() {
+  // Return cached version if available
+  if (cachedDesignSystem) {
+    console.log('✅ Using cached design system');
+    figma.ui.postMessage({
+      type: 'design-system-data',
+      payload: cachedDesignSystem,
+    });
+    return;
+  }
+
   console.log('Extracting design system from current file...');
 
-  const MAX_COMPONENTS = 3000; // Limit to prevent performance issues on huge files
+  // Use Figma's official API - returns ONLY local components (matches "Created in this file")
+  const components = await (figma as any).getLocalComponentsAsync();
+  const componentSets = await (figma as any).getLocalComponentSetsAsync();
 
-  // Find component definitions, but stop scanning at MAX_COMPONENTS
-  const allNodes: SceneNode[] = [];
-  let totalFound = 0;
-  let limitReached = false;
+  // Combine both into single array
+  const allNodes: SceneNode[] = [...components, ...componentSets];
 
-  function scanForComponents(node: BaseNode) {
-    if (limitReached) return;
-
-    if (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') {
-      totalFound++;
-      if (allNodes.length < MAX_COMPONENTS) {
-        allNodes.push(node as SceneNode);
-      } else {
-        limitReached = true;
-        return;
-      }
-    }
-
-    if ('children' in node) {
-      for (const child of node.children) {
-        if (limitReached) break;
-        scanForComponents(child);
-      }
-    }
-  }
-
-  scanForComponents(figma.root);
-
-  console.log(`Found ${totalFound} component nodes in file${limitReached ? ` (stopped at ${MAX_COMPONENTS})` : ''}`);
-
-  if (limitReached) {
-    console.log(`⚠️ File has ${totalFound}+ components - limited to ${MAX_COMPONENTS} for performance`);
-  }
+  console.log(`Found ${allNodes.length} local components in file (matches "Created in this file")`);
 
   /**
    * Safely convert value to string or number
@@ -583,13 +575,8 @@ async function handleGetDesignSystem() {
     textStylesCount: textStyles.length,
   });
 
-  // Cache the design system for schema expansion
+  // Cache the design system for future requests
   cachedDesignSystem = designSystem;
-
-  // Show warning if components were limited
-  if (limitReached) {
-    figma.notify(`⚠️ Scanned ${allComponents.length} components - file has more (limited for performance)`, { timeout: 5000 });
-  }
 
   // Send the design system back to UI
   figma.ui.postMessage({
@@ -1667,20 +1654,73 @@ async function buildFrameNode(spec: any, designSystem: any): Promise<FrameNode> 
 }
 
 /**
+ * Create a fallback frame when a component is not found
+ * TODO: Milestone B - Replace with styled archetype-based fallback
+ */
+function createFallbackFrame(spec: any): FrameNode {
+  const frame = figma.createFrame();
+  frame.name = `[Missing] ${spec.componentName}`;
+  frame.resize(200, 48);
+
+  // Add visible warning
+  frame.fills = [{
+    type: 'SOLID',
+    color: { r: 1, g: 0.9, b: 0.9 }, // Light red background
+  }];
+
+  frame.strokes = [{
+    type: 'SOLID',
+    color: { r: 1, g: 0, b: 0 }, // Red border
+  }];
+  frame.strokeWeight = 2;
+
+  const text = figma.createText();
+  text.characters = `⚠️ ${spec.componentName}`;
+  text.x = 8;
+  text.y = 16;
+
+  frame.appendChild(text);
+
+  return frame;
+}
+
+/**
+ * Find similar component names (for debugging)
+ */
+function findSimilarNames(searchName: string, components: ComponentData[]): string[] {
+  const lower = searchName.toLowerCase();
+  return components
+    .filter(c => c.name.toLowerCase().includes(lower))
+    .slice(0, 5)
+    .map(c => c.name);
+}
+
+/**
  * Instantiate a COMPONENT node (Milestone A - exact match only)
  */
-async function instantiateComponent(spec: any, designSystem: any): Promise<InstanceNode> {
+async function instantiateComponent(spec: any, designSystem: any): Promise<InstanceNode | FrameNode> {
   // Find component by exact name match
   const component = designSystem.components.find((c: any) => c.name === spec.componentName);
 
   if (!component) {
-    throw new Error(`Component not found: ${spec.componentName}`);
+    console.error(`❌ Component not found: "${spec.componentName}"`);
+    debugLog(`📋 Available components (first 20):`,
+      designSystem.components.slice(0, 20).map((c: any) => c.name));
+
+    const similar = findSimilarNames(spec.componentName, designSystem.components);
+    if (similar.length > 0) {
+      debugLog(`💡 Did you mean one of these?`, similar);
+    }
+
+    // Return fallback instead of throwing
+    return createFallbackFrame(spec);
   }
 
   // Get component from Figma (ASYNC)
   const componentNode = await figma.getNodeByIdAsync(component.id);
   if (!componentNode || (componentNode.type !== 'COMPONENT' && componentNode.type !== 'COMPONENT_SET')) {
-    throw new Error(`Component node not found or invalid: ${spec.componentName}`);
+    console.error(`❌ Component node not found or invalid: ${spec.componentName}`);
+    return createFallbackFrame(spec);
   }
 
   // Create instance
