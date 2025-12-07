@@ -14,7 +14,8 @@
     "allowedDomains": [
       "https://*.vercel.app",
       "https://tsqfwommnuhtbeupuwwm.supabase.co",
-      "wss://tsqfwommnuhtbeupuwwm.supabase.co"
+      "wss://tsqfwommnuhtbeupuwwm.supabase.co",
+      "https://crafter-production-6da6.up.railway.app"
     ],
     "devAllowedDomains": [
       "http://localhost:3000"

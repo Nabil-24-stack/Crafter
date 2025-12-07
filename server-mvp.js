@@ -338,9 +338,13 @@ async function callLLM(model, prompt, imagePNGBase64) {
 // ============================================================================
 
 const PORT = process.env.PORT || 3001;
+const RAILWAY_URL = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+  : `http://localhost:${PORT}`;
+
 app.listen(PORT, () => {
   console.log(`🚀 Crafter MVP Server running on port ${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/api/health`);
-  console.log(`   Endpoint: http://localhost:${PORT}/api/iterate-mvp`);
+  console.log(`   Health: ${RAILWAY_URL}/api/health`);
+  console.log(`   Endpoint: ${RAILWAY_URL}/api/iterate-mvp`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
 });
