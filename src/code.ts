@@ -28,6 +28,36 @@ function debugLog(...args: any[]) {
 }
 
 /**
+ * Convert Uint8Array to base64 string
+ * (btoa not available in Figma plugin sandbox)
+ */
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let result = '';
+  let i = 0;
+
+  for (; i < bytes.length - 2; i += 3) {
+    const chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+    result += base64Chars[(chunk >> 18) & 63];
+    result += base64Chars[(chunk >> 12) & 63];
+    result += base64Chars[(chunk >> 6) & 63];
+    result += base64Chars[chunk & 63];
+  }
+
+  // Handle remaining bytes
+  if (i < bytes.length) {
+    const remaining = bytes.length - i;
+    const chunk = (bytes[i] << 16) | ((remaining > 1 ? bytes[i + 1] : 0) << 8);
+    result += base64Chars[(chunk >> 18) & 63];
+    result += base64Chars[(chunk >> 12) & 63];
+    result += remaining > 1 ? base64Chars[(chunk >> 6) & 63] : '=';
+    result += '=';
+  }
+
+  return result;
+}
+
+/**
  * Sanitize SVG to be compatible with Figma
  * Removes/fixes features that Figma doesn't support
  */
@@ -2382,7 +2412,8 @@ async function handleIterateDesignVariationMVP(payload: any) {
       format: "PNG",
       constraint: { type: "SCALE", value: 1 }, // 1x scale for speed
     });
-    const imagePNG = btoa(String.fromCharCode(...pngBytes));
+    // Convert bytes to base64 (btoa not available in Figma plugin sandbox)
+    const imagePNG = uint8ArrayToBase64(pngBytes);
     console.log(`  → ${Math.round(imagePNG.length / 1024)} KB`);
 
     // 4. Send to UI for Railway call (plugin sandbox can't make HTTP requests)
