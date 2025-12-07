@@ -2,10 +2,10 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "rm -f package.json && cp worker-package.json package.json && npm install"
+    "buildCommand": "npm install"
   },
   "deploy": {
-    "startCommand": "node worker.mjs",
+    "startCommand": "node server-mvp.js",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
