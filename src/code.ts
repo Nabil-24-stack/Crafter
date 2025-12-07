@@ -333,6 +333,22 @@ figma.ui.onmessage = async (msg: Message) => {
         await handleIterateDesignVariationMVP(msg.payload);
         break;
 
+      case 'mvp-railway-response':
+        // Handle Railway response and resolve the waiting promise
+        const mvpCallbacks = (globalThis as any).mvpRailwayCallbacks;
+        if (mvpCallbacks && mvpCallbacks.has(msg.payload.variationIndex)) {
+          const { resolve, reject, timeout } = mvpCallbacks.get(msg.payload.variationIndex);
+          clearTimeout(timeout);
+          mvpCallbacks.delete(msg.payload.variationIndex);
+
+          if (msg.payload.error) {
+            reject(new Error(msg.payload.error));
+          } else {
+            resolve(msg.payload.result);
+          }
+        }
+        break;
+
       case 'iteration-error':
         // Error from UI during iteration - just log it, UI already handles display
         console.error('Iteration error:', msg.payload.error);
@@ -2372,6 +2388,12 @@ async function handleIterateDesignVariationMVP(payload: any) {
     // 4. Send to UI for Railway call (plugin sandbox can't make HTTP requests)
     console.log(`🚀 Sending to ${model}...`);
 
+    // Store promise resolver in global map
+    if (!(globalThis as any).mvpRailwayCallbacks) {
+      (globalThis as any).mvpRailwayCallbacks = new Map();
+    }
+    const mvpCallbacks = (globalThis as any).mvpRailwayCallbacks;
+
     // Send request to UI
     figma.ui.postMessage({
       type: 'mvp-call-railway',
@@ -2385,24 +2407,14 @@ async function handleIterateDesignVariationMVP(payload: any) {
       },
     });
 
-    // Wait for UI to respond with Railway result
+    // Wait for UI to respond with Railway result (response handled in main message handler)
     const result: IterationResponseMVP = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Railway request timeout')), 120000); // 2 min timeout
+      const timeout = setTimeout(() => {
+        mvpCallbacks.delete(variationIndex);
+        reject(new Error('Railway request timeout'));
+      }, 120000); // 2 min timeout
 
-      const handler = (msg: any) => {
-        if (msg.type === 'mvp-railway-response' && msg.payload.variationIndex === variationIndex) {
-          clearTimeout(timeout);
-          figma.ui.off('message', handler);
-
-          if (msg.payload.error) {
-            reject(new Error(msg.payload.error));
-          } else {
-            resolve(msg.payload.result);
-          }
-        }
-      };
-
-      figma.ui.on('message', handler);
+      mvpCallbacks.set(variationIndex, { resolve, reject, timeout });
     });
 
     console.log(`✅ Received response: ${result.reasoning}`);
