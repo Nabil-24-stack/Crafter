@@ -400,12 +400,17 @@ async function handleGetDesignSystem() {
 
   console.log('Extracting design system from current file...');
 
-  // Use Figma's official API - returns ONLY local components (matches "Created in this file")
-  const components = await (figma as any).getLocalComponentsAsync();
-  const componentSets = await (figma as any).getLocalComponentSetsAsync();
+  // Use findAllWithCriteria to get ONLY local components (not from libraries)
+  // This matches what's shown in "Created in this file" in Assets panel
+  const components = await figma.root.findAllWithCriteria({
+    types: ['COMPONENT', 'COMPONENT_SET']
+  });
 
-  // Combine both into single array
-  const allNodes: SceneNode[] = [...components, ...componentSets];
+  // Filter to only include components where parent is in current file (not from libraries)
+  const allNodes = components.filter(node => {
+    // Check if this node is actually defined in this file (not a remote component)
+    return node.parent !== null; // Remote components have null parent in this file
+  });
 
   console.log(`Found ${allNodes.length} local components in file (matches "Created in this file")`);
 
