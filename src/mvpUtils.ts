@@ -13,16 +13,18 @@ import {
 /**
  * SINGLE SOURCE OF TRUTH for component key resolution.
  * Use this everywhere: snapshot building, palette extraction, reconstruction.
+ * ASYNC: Uses getMainComponentAsync() as required by Figma's async API
  */
-export function getComponentKey(node: ComponentNode | InstanceNode): string {
+export async function getComponentKey(node: ComponentNode | InstanceNode): Promise<string> {
   let component: ComponentNode;
 
   if (node.type === "INSTANCE") {
     const instance = node as InstanceNode;
-    if (!instance.mainComponent) {
+    const mainComp = await instance.getMainComponentAsync();
+    if (!mainComp) {
       throw new Error(`Instance ${node.name} has no main component`);
     }
-    component = instance.mainComponent;
+    component = mainComp;
   } else {
     component = node as ComponentNode;
   }
@@ -52,12 +54,13 @@ export function inferComponentRole(name: string): ComponentRole {
 
 /**
  * Build a frame snapshot with minimal depth (MVP version)
+ * ASYNC: Now uses async getComponentKey
  */
-export function buildFrameSnapshot(
+export async function buildFrameSnapshot(
   frame: FrameNode,
   maxDepth: number = 5
-): FrameSnapshotMVP {
-  function buildNode(node: SceneNode, depth: number): SnapshotNodeMVP | null {
+): Promise<FrameSnapshotMVP> {
+  async function buildNode(node: SceneNode, depth: number): Promise<SnapshotNodeMVP | null> {
     if (depth > maxDepth) return null;
 
     const snapshot: SnapshotNodeMVP = {
@@ -70,7 +73,7 @@ export function buildFrameSnapshot(
     if (node.type === "INSTANCE") {
       const instance = node as InstanceNode;
       try {
-        snapshot.componentKey = getComponentKey(instance);
+        snapshot.componentKey = await getComponentKey(instance);
       } catch (error) {
         console.warn(`Could not get component key for instance ${node.name}:`, error);
         return null; // Skip instances without valid components
@@ -85,9 +88,9 @@ export function buildFrameSnapshot(
       snapshot.layoutMode = layoutMode === "GRID" ? "NONE" : layoutMode;
 
       if (depth < maxDepth && "children" in frameNode) {
-        snapshot.children = frameNode.children
-          .map(child => buildNode(child, depth + 1))
-          .filter((n): n is SnapshotNodeMVP => n !== null);
+        const childPromises = frameNode.children.map(child => buildNode(child, depth + 1));
+        const childResults = await Promise.all(childPromises);
+        snapshot.children = childResults.filter((n): n is SnapshotNodeMVP => n !== null);
       }
     }
 
@@ -100,9 +103,9 @@ export function buildFrameSnapshot(
     return snapshot;
   }
 
-  const children = frame.children
-    .map(child => buildNode(child, 1))
-    .filter((n): n is SnapshotNodeMVP => n !== null);
+  const childPromises = frame.children.map(child => buildNode(child, 1));
+  const childResults = await Promise.all(childPromises);
+  const children = childResults.filter((n): n is SnapshotNodeMVP => n !== null);
 
   return {
     id: frame.id,
@@ -115,6 +118,7 @@ export function buildFrameSnapshot(
 
 /**
  * Extract frame-scoped design palette (only components used in this frame)
+ * ASYNC: Now properly awaits getComponentKey calls
  */
 export async function extractFrameScopedPalette(
   frame: FrameNode
@@ -122,11 +126,11 @@ export async function extractFrameScopedPalette(
   const usedComponentKeys = new Set<string>();
   const componentUsageCount = new Map<string, number>();
 
-  // Traverse frame to find all INSTANCE nodes
-  function traverse(node: SceneNode) {
+  // Traverse frame to find all INSTANCE nodes (async version)
+  async function traverse(node: SceneNode): Promise<void> {
     if (node.type === "INSTANCE") {
       try {
-        const key = getComponentKey(node as InstanceNode);
+        const key = await getComponentKey(node as InstanceNode);
         usedComponentKeys.add(key);
         componentUsageCount.set(key, (componentUsageCount.get(key) || 0) + 1);
       } catch (error) {
@@ -135,13 +139,12 @@ export async function extractFrameScopedPalette(
     }
 
     if ("children" in node) {
-      for (const child of node.children) {
-        traverse(child);
-      }
+      // Process children in parallel for better performance
+      await Promise.all(node.children.map(child => traverse(child)));
     }
   }
 
-  traverse(frame);
+  await traverse(frame);
 
   console.log(`📊 Found ${usedComponentKeys.size} unique components used in frame`);
 

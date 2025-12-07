@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { iterateLayout } from './claudeService';
 import {
   Chat,
   ChatMessage,
@@ -13,8 +12,6 @@ import {
   VariationStatus,
 } from './types';
 import { ChatInterface } from './components/ChatInterface';
-import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks } from './supabaseClient';
-import type { RealtimeChannel } from '@supabase/supabase-js';
 import './ui.css';
 // @ts-ignore
 import crafterLogo from '../Logo/crafter_logo.png';
@@ -115,10 +112,8 @@ const App = () => {
   // Generation state
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [activeJobIds, setActiveJobIds] = React.useState<string[]>([]);
-  const activeJobIdsRef = React.useRef<Set<string>>(new Set());
 
-  // Realtime subscription channels (keyed by job_id)
-  const realtimeChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
+  // Note: activeJobIdsRef and realtimeChannelsRef removed - not needed for MVP direct Railway calls
 
   // Generate unique ID
   function generateId(): string {
@@ -246,6 +241,71 @@ const App = () => {
           handleVariationError(msg.payload.error);
           break;
 
+        case 'iteration-mvp-complete':
+          // Handle MVP iteration completion
+          console.log('MVP iteration complete:', msg.payload);
+          if (msg.payload.success) {
+            const { variationIndex, reasoning } = msg.payload;
+            updateVariationStatus(variationIndex, 'complete', 'Iteration Complete', reasoning);
+          } else {
+            const { variationIndex, error } = msg.payload;
+            updateVariationStatus(variationIndex, 'error', 'Error', undefined, error);
+          }
+          break;
+
+        case 'mvp-call-railway':
+          // Plugin is requesting UI to call Railway (plugin can't make HTTP requests)
+          (async () => {
+            try {
+              const { frameSnapshot, designPalette, imagePNG, instructions, model, variationIndex } = msg.payload;
+              console.log(`UI calling Railway for variation ${variationIndex}...`);
+
+              const response = await fetch('https://crafter-production-6da6.up.railway.app/api/iterate-mvp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  frameSnapshot,
+                  designPalette,
+                  imagePNG,
+                  instructions,
+                  model,
+                }),
+              });
+
+              if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Railway error ${response.status}: ${errorText}`);
+              }
+
+              const result = await response.json();
+              console.log(`✅ Railway responded for variation ${variationIndex}`);
+
+              // Send result back to plugin
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'mvp-railway-response',
+                  payload: {
+                    variationIndex,
+                    result,
+                  },
+                },
+              }, '*');
+            } catch (error) {
+              console.error('Railway call failed:', error);
+              // Send error back to plugin
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'mvp-railway-response',
+                  payload: {
+                    variationIndex: msg.payload.variationIndex,
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                  },
+                },
+              }, '*');
+            }
+          })();
+          break;
+
         case 'convert-svg-to-png':
           // Handle SVG-to-PNG conversion request (fallback when createNodeFromSvg fails)
           (async () => {
@@ -289,15 +349,10 @@ const App = () => {
     parent.postMessage({ pluginMessage: { type: 'get-selected-frame' } }, '*');
   }, []);
 
-  // Cleanup realtime subscriptions on unmount
+  // Note: Realtime subscription cleanup removed - MVP doesn't use Supabase job queue
   React.useEffect(() => {
     return () => {
-      console.log('Cleaning up all realtime subscriptions...');
-      realtimeChannelsRef.current.forEach(async (channel, jobId) => {
-        await unsubscribeFromReasoningChunks(channel);
-        console.log(`Unsubscribed from job ${jobId}`);
-      });
-      realtimeChannelsRef.current.clear();
+      console.log('Component unmounting...');
     };
   }, []);
 
@@ -631,74 +686,31 @@ const App = () => {
           // Update status: designing
           updateVariationStatus(index, 'designing', 'AI is designing');
 
-          const iterationResult = await iterateLayout(
-            imageData,
-            structuralHints,
-            varPrompt,
-            ds,
-            model,
-            chatHistory,
-            // Subscribe immediately when job starts (before polling completes)
-            (jobId) => {
-              console.log(`Job started for variation ${index + 1}: ${jobId}`);
-              console.log(`Subscribing to reasoning chunks for job ${jobId}`);
+          // Use MVP handler - send message to plugin code which handles everything
+          // This bypasses the old Supabase job queue system entirely
+          console.log(`Starting MVP iteration for variation ${index + 1}`);
 
-              // Track this job ID for potential cancellation
-              activeJobIdsRef.current.add(jobId);
-
-              const channel = subscribeToReasoningChunks(
-                jobId,
-                (chunk) => {
-                  console.log(`Received chunk ${chunk.chunk_index} for variation ${index + 1}`);
-                  updateStreamingReasoning(index, chunk.chunk_text, true);
-                },
-                (error) => {
-                  console.error(`Realtime subscription error for variation ${index + 1}:`, error);
-                }
-              );
-
-              // Store channel for cleanup
-              realtimeChannelsRef.current.set(jobId, channel);
-            }
-          );
-          console.log(`Iteration variation ${index + 1} result received:`, iterationResult);
-
-          // Update status: rendering
-          updateVariationStatus(index, 'rendering', 'Creating in Figma');
-
-          // Send to plugin for rendering
+          // Send to plugin for MVP iteration (plugin code handles Railway call + rendering)
           parent.postMessage(
             {
               pluginMessage: {
-                type: 'iterate-design-variation',
+                type: 'iterate-design-variation-mvp',
                 payload: {
-                  figmaStructure: iterationResult.figmaStructure,
-                  reasoning: iterationResult.reasoning,
+                  instructions: varPrompt,
                   frameId: fid,
                   variationIndex: index,
                   totalVariations: variations,
-                  designSystem: ds,
+                  model: model,
                 },
               },
             },
             '*'
           );
 
-          // Update status: complete (with final reasoning, keeping streaming content)
-          updateVariationStatus(index, 'complete', 'Iteration Complete', iterationResult.reasoning);
-
-          // Stop streaming indicator and cleanup subscription after a brief delay
-          // This gives users time to see the complete reasoning
-          setTimeout(() => {
-            if (iterationResult.job_id) {
-              updateStreamingReasoning(index, '', false); // Turn off live indicator (keeps text)
-              const channel = realtimeChannelsRef.current.get(iterationResult.job_id);
-              if (channel) {
-                unsubscribeFromReasoningChunks(channel);
-                realtimeChannelsRef.current.delete(iterationResult.job_id);
-              }
-            }
-          }, 2000); // 2 second delay to show complete streaming
+          // Update status: complete
+          // Note: The plugin code will handle the actual rendering
+          // We'll get a callback when it's done
+          updateVariationStatus(index, 'complete', 'Iteration Complete', 'MVP iteration sent to plugin')
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
           updateVariationStatus(
@@ -986,29 +998,8 @@ const App = () => {
     console.log('Stopping iteration...');
     setIsGenerating(false);
 
-    // Cancel all active jobs in Supabase
-    const jobsToCancel = Array.from(activeJobIdsRef.current);
-    console.log(`Cancelling ${jobsToCancel.length} active jobs:`, jobsToCancel);
-
-    for (const jobId of jobsToCancel) {
-      try {
-        await fetch('https://crafter-ai-kappa.vercel.app/api/cancel-job', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ job_id: jobId }),
-        });
-        console.log(`Cancelled job ${jobId}`);
-      } catch (error) {
-        console.error(`Failed to cancel job ${jobId}:`, error);
-      }
-    }
-    activeJobIdsRef.current.clear();
-
-    // Unsubscribe from all active realtime channels
-    realtimeChannelsRef.current.forEach((channel) => {
-      unsubscribeFromReasoningChunks(channel);
-    });
-    realtimeChannelsRef.current.clear();
+    // Note: Job cancellation removed - MVP uses direct Railway calls (no job queue)
+    console.log('Stop requested - MVP iterations will complete but new ones will not start');
 
     // Update all in-progress variations to 'stopped' status
     if (currentMessageRef.current) {

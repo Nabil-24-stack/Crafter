@@ -9,6 +9,9 @@ export type MessageType =
   | 'iterate-design'
   | 'iterate-design-variation'
   | 'iterate-design-variation-mvp' // MVP iteration pipeline
+  | 'iteration-mvp-complete' // MVP iteration completion callback
+  | 'mvp-call-railway' // Request UI to call Railway (plugin can't make HTTP requests)
+  | 'mvp-railway-response' // Railway response from UI back to plugin
   | 'get-design-system'
   | 'design-system-scan-progress' // Progress updates during scanning
   | 'get-selected-frame'

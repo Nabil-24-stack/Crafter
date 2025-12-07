@@ -2054,6 +2054,16 @@ async function handleIterateDesignVariation(payload: any) {
         error: error instanceof Error ? error.message : 'Failed to create iteration variation',
       },
     });
+
+    // Send MVP error completion message
+    figma.ui.postMessage({
+      type: 'iteration-mvp-complete',
+      payload: {
+        variationIndex,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create iteration variation',
+      },
+    });
   }
 }
 
@@ -2342,7 +2352,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
 
     // 1. Build frame snapshot (structural understanding)
     console.log("📸 Building frame snapshot...");
-    const frameSnapshot = buildFrameSnapshot(frameNode, 5);
+    const frameSnapshot = await buildFrameSnapshot(frameNode, 5);
     console.log(`  → ${frameSnapshot.children.length} top-level nodes captured`);
 
     // 2. Extract frame-scoped design palette
@@ -2359,29 +2369,42 @@ async function handleIterateDesignVariationMVP(payload: any) {
     const imagePNG = btoa(String.fromCharCode(...pngBytes));
     console.log(`  → ${Math.round(imagePNG.length / 1024)} KB`);
 
-    // 4. Send to backend
+    // 4. Send to UI for Railway call (plugin sandbox can't make HTTP requests)
     console.log(`🚀 Sending to ${model}...`);
-    const backendURL = 'https://crafter-ai-kappa.vercel.app'; // Change to your backend URL
-    const request: IterationRequestMVP = {
-      frameSnapshot,
-      designPalette,
-      imagePNG,
-      instructions: instructions || "Create a variation of this design",
-      model: model || "claude",
-    };
 
-    const response = await fetch(`${backendURL}/api/iterate-mvp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
+    // Send request to UI
+    figma.ui.postMessage({
+      type: 'mvp-call-railway',
+      payload: {
+        frameSnapshot,
+        designPalette,
+        imagePNG,
+        instructions: instructions || "Create a variation of this design",
+        model: model || "claude",
+        variationIndex,
+      },
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Backend error: ${error}`);
-    }
+    // Wait for UI to respond with Railway result
+    const result: IterationResponseMVP = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Railway request timeout')), 120000); // 2 min timeout
 
-    const result: IterationResponseMVP = await response.json();
+      const handler = (msg: any) => {
+        if (msg.type === 'mvp-railway-response' && msg.payload.variationIndex === variationIndex) {
+          clearTimeout(timeout);
+          figma.ui.off('message', handler);
+
+          if (msg.payload.error) {
+            reject(new Error(msg.payload.error));
+          } else {
+            resolve(msg.payload.result);
+          }
+        }
+      };
+
+      figma.ui.on('message', handler);
+    });
+
     console.log(`✅ Received response: ${result.reasoning}`);
 
     // 5. Reconstruct variation in Figma
@@ -2419,6 +2442,16 @@ async function handleIterateDesignVariationMVP(payload: any) {
         statusText: 'Iteration Complete',
         reasoning: result.reasoning || undefined,
         createdNodeId: newFrame.id,
+      },
+    });
+
+    // Send MVP completion message for UI to handle
+    figma.ui.postMessage({
+      type: 'iteration-mvp-complete',
+      payload: {
+        variationIndex,
+        success: true,
+        reasoning: result.reasoning,
       },
     });
 

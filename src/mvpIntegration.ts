@@ -19,7 +19,7 @@ export async function runIterationMVP(
 
   // 1. Build frame snapshot (structural understanding)
   console.log("📸 Building frame snapshot...");
-  const frameSnapshot = buildFrameSnapshot(frame, 5);
+  const frameSnapshot = await buildFrameSnapshot(frame, 5);
   console.log(`  → ${frameSnapshot.children.length} top-level nodes captured`);
 
   // 2. Extract frame-scoped design palette
