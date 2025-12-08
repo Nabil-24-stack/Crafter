@@ -209,27 +209,38 @@ ${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
 
   // Build structural context section
   let structuralContext = '';
-  if (extractedStyle.structure) {
+  if (extractedStyle.structure && extractedStyle.structure.elements.length > 0) {
     const { structure } = extractedStyle;
+
+    // Build preservation rules dynamically based on what exists
+    const preservationRules = [];
+    const navigationElements = structure.elements.filter(e =>
+      ['sidebar', 'navigation', 'header'].includes(e.type)
+    );
+    const contentElements = structure.elements.filter(e =>
+      ['main-content', 'unknown', 'card', 'form'].includes(e.type)
+    );
+
+    if (navigationElements.length > 0) {
+      preservationRules.push(`**PRESERVE these navigation/shell elements** - Keep them in their current positions and structure:\n${navigationElements.map(e => `   - ${e.name} (${e.type})`).join('\n')}`);
+    }
+
+    if (contentElements.length > 0) {
+      preservationRules.push(`**MODIFY these content areas** as per user instructions:\n${contentElements.map(e => `   - ${e.name} (${e.type})`).join('\n')}`);
+    } else if (structure.hierarchy.contentArea) {
+      preservationRules.push(`**MODIFY the content area** named "${structure.hierarchy.contentArea}" as per user instructions`);
+    }
+
     structuralContext = `
 ## CURRENT FRAME STRUCTURE
 
-The selected frame has a **${structure.layout.type}** layout with these components:
-
 **Identified Sections:**
-${structure.elements.map(e => `- **${e.name}** (${e.type}): ${e.bounds.width}×${e.bounds.height}px at position (${e.bounds.x}, ${e.bounds.y})`).join('\n')}
+${structure.elements.map(e => `- ${e.name} (${e.type}): ${e.bounds.width}×${e.bounds.height}px`).join('\n')}
 
-**Layout Analysis:**
-- Has Sidebar: ${structure.layout.hasSidebar ? 'Yes' : 'No'}
-- Has Header: ${structure.layout.hasHeader ? 'Yes' : 'No'}
-- Has Footer: ${structure.layout.hasFooter ? 'Yes' : 'No'}
-- Main Content Area: ${structure.hierarchy.contentArea || 'Center'}
+**Design Strategy:**
+${preservationRules.join('\n')}
 
-**IMPORTANT PRESERVATION RULES:**
-1. ${structure.layout.hasSidebar ? '**PRESERVE the sidebar** - Keep its position, width, and navigation elements intact' : ''}
-2. ${structure.layout.hasHeader ? '**PRESERVE the header** - Keep its position, height, and branding elements intact' : ''}
-3. **MODIFY ONLY the content area** named "${structure.hierarchy.contentArea || 'main content'}" based on user instructions
-4. **MAINTAIN the overall layout structure** - Don't change from ${structure.layout.type} to something else
+**Key Principle:** Preserve the overall layout structure and navigation elements. Apply creative changes primarily to content areas.
 
 `;
   }
@@ -345,29 +356,36 @@ ${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
 
   // Build structural context section
   let structuralContext = '';
-  if (extractedStyle.structure) {
+  if (extractedStyle.structure && extractedStyle.structure.elements.length > 0) {
     const { structure } = extractedStyle;
+
+    // Build preservation rules dynamically based on what exists
+    const navigationElements = structure.elements.filter(e =>
+      ['sidebar', 'navigation', 'header'].includes(e.type)
+    );
+    const contentElements = structure.elements.filter(e =>
+      ['main-content', 'unknown', 'card', 'form'].includes(e.type)
+    );
+
+    let preservationGuidance = '';
+    if (navigationElements.length > 0) {
+      preservationGuidance += `\nPreserve these navigation/shell elements:\n${navigationElements.map(e => `- ${e.name} (${e.type})`).join('\n')}`;
+    }
+    if (contentElements.length > 0) {
+      preservationGuidance += `\n\nModify these content areas as per user instructions:\n${contentElements.map(e => `- ${e.name} (${e.type})`).join('\n')}`;
+    }
+
     structuralContext = `
 # Current Frame Structure
 
-<layout_analysis>
-Layout Type: ${structure.layout.type}
-Has Sidebar: ${structure.layout.hasSidebar ? 'Yes' : 'No'}
-Has Header: ${structure.layout.hasHeader ? 'Yes' : 'No'}
-Has Footer: ${structure.layout.hasFooter ? 'Yes' : 'No'}
-Main Content Area: ${structure.hierarchy.contentArea || 'Center'}
-</layout_analysis>
-
 <identified_sections>
-${structure.elements.map(e => `- ${e.name} (${e.type}): ${e.bounds.width}×${e.bounds.height}px at (${e.bounds.x}, ${e.bounds.y})`).join('\n')}
+${structure.elements.map(e => `- ${e.name} (${e.type}): ${e.bounds.width}×${e.bounds.height}px`).join('\n')}
 </identified_sections>
 
-<preservation_rules>
-1. ${structure.layout.hasSidebar ? 'PRESERVE the sidebar - Keep its position, width, and navigation elements intact' : ''}
-2. ${structure.layout.hasHeader ? 'PRESERVE the header - Keep its position, height, and branding elements intact' : ''}
-3. MODIFY ONLY the content area named "${structure.hierarchy.contentArea || 'main content'}"
-4. MAINTAIN the overall ${structure.layout.type} layout structure
-</preservation_rules>
+<design_strategy>${preservationGuidance}
+
+Key Principle: Preserve the overall layout structure and navigation elements. Apply creative changes primarily to content areas.
+</design_strategy>
 
 `;
   }
