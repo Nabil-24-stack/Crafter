@@ -60,10 +60,10 @@ export async function runIterationMVP(
   const result: IterationResponseMVP = await response.json();
   console.log(`✅ Received response: ${result.reasoning}`);
 
-  // 5. Reconstruct variation in Figma
-  console.log("🔨 Reconstructing variation...");
+  // 5. Convert HTML/CSS to Figma
+  console.log("🔨 Converting HTML/CSS to Figma...");
   const newFrame = await reconstructVariationMVP(
-    result.figmaStructure,
+    result.htmlLayout,
     designPalette
   );
 

@@ -79,51 +79,31 @@ export interface FrameSnapshotMVP {
 }
 
 // ============================================================================
-// LLM OUTPUT TYPES (What the AI returns)
+// LLM OUTPUT TYPES (What the AI returns) - HTML/CSS FORMAT
 // ============================================================================
 
 /**
- * Layout node types the AI can return
+ * HTML/CSS layout structure returned by AI
+ * This leverages LLM's strong training on web layouts
  */
-export type LayoutNodeMVP =
-  | { type: "INSTANCE"; name: string; componentKey: string }
-  | {
-      type: "FRAME";
-      name: string;
-      layoutMode?: "HORIZONTAL" | "VERTICAL" | "NONE";
-      itemSpacing?: number;
-      padding?: { top: number; right: number; bottom: number; left: number };
-      primaryAxisSizingMode?: "FIXED" | "AUTO";
-      counterAxisSizingMode?: "FIXED" | "AUTO";
-      primaryAxisAlignItems?: "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN";
-      counterAxisAlignItems?: "MIN" | "CENTER" | "MAX";
-      children: LayoutNodeMVP[];
-    }
-  | { type: "TEXT"; name: string; characters: string }
-  | { type: "RECTANGLE"; name: string; width: number; height: number };
-
-/**
- * Root layout structure returned by AI
- */
-export interface LayoutStructureMVP {
-  type: "FRAME";
-  name: string;
-  layoutMode?: "HORIZONTAL" | "VERTICAL" | "NONE";
-  itemSpacing?: number;
-  padding?: { top: number; right: number; bottom: number; left: number };
-  primaryAxisSizingMode?: "FIXED" | "AUTO";
-  counterAxisSizingMode?: "FIXED" | "AUTO";
-  primaryAxisAlignItems?: "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN";
-  counterAxisAlignItems?: "MIN" | "CENTER" | "MAX";
-  children: LayoutNodeMVP[];
+export interface HTMLCSSLayoutMVP {
+  html: string;        // Semantic HTML structure with class names
+  css: string;         // CSS styles (Flexbox-based layouts)
+  componentMap: {      // Maps HTML class names to Figma component keys
+    [className: string]: {
+      componentKey: string;
+      componentName: string;
+      variant?: Record<string, string>;
+    };
+  };
 }
 
 /**
- * Complete AI response with reasoning
+ * Complete AI response with reasoning (HTML/CSS format)
  */
 export interface LLMResponseMVP {
   reasoning: string;
-  figmaStructure: LayoutStructureMVP;
+  htmlLayout: HTMLCSSLayoutMVP;  // Changed from figmaStructure
 }
 
 // ============================================================================
@@ -142,9 +122,9 @@ export interface IterationRequestMVP {
 }
 
 /**
- * Response from backend to plugin
+ * Response from backend to plugin (HTML/CSS format)
  */
 export interface IterationResponseMVP {
   reasoning: string;
-  figmaStructure: LayoutStructureMVP;
+  htmlLayout: HTMLCSSLayoutMVP;
 }

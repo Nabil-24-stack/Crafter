@@ -68,24 +68,28 @@ app.post('/api/iterate-mvp', async (req, res) => {
           throw new Error(`Failed to parse JSON: ${parseError.message}`);
         }
 
-        // Basic validation
-        if (!parsed.reasoning || !parsed.figmaStructure) {
-          throw new Error('Response missing required fields: reasoning or figmaStructure');
+        // Basic validation for HTML/CSS output
+        if (!parsed.reasoning || !parsed.htmlLayout) {
+          throw new Error('Response missing required fields: reasoning or htmlLayout');
         }
 
-        if (parsed.figmaStructure.type !== 'FRAME') {
-          throw new Error('figmaStructure.type must be "FRAME"');
+        if (!parsed.htmlLayout.html) {
+          throw new Error('htmlLayout.html is required');
         }
 
-        if (!Array.isArray(parsed.figmaStructure.children)) {
-          throw new Error('figmaStructure.children must be an array');
+        if (!parsed.htmlLayout.css) {
+          throw new Error('htmlLayout.css is required');
+        }
+
+        if (!parsed.htmlLayout.componentMap || typeof parsed.htmlLayout.componentMap !== 'object') {
+          throw new Error('htmlLayout.componentMap must be an object');
         }
 
         console.log(`✅ Validation passed (attempt ${attempt})`);
 
         return res.json({
           reasoning: parsed.reasoning,
-          figmaStructure: parsed.figmaStructure
+          htmlLayout: parsed.htmlLayout
         });
 
       } catch (error) {
@@ -160,31 +164,51 @@ ${instructions}
 
 6. **For FRAME nodes with children, include Auto Layout properties** (layoutMode, itemSpacing, padding, sizing modes, alignment) to create properly structured layouts.
 
-## OUTPUT FORMAT
+## OUTPUT FORMAT (HTML/CSS)
 
-Return a JSON object with this exact structure:
+Return a JSON object with HTML/CSS layout structure:
 
 \`\`\`json
 {
   "reasoning": "Brief explanation of what you changed and why (1-2 sentences)",
-  "figmaStructure": {
-    "type": "FRAME",
-    "name": "...",
-    "layoutMode": "VERTICAL",
-    "itemSpacing": 16,
-    "padding": { "top": 24, "right": 24, "bottom": 24, "left": 24 },
-    "primaryAxisSizingMode": "AUTO",
-    "counterAxisSizingMode": "FIXED",
-    "children": [
-      {
-        "type": "INSTANCE",
-        "name": "...",
-        "componentKey": "..."
+  "htmlLayout": {
+    "html": "<div class=\\"screen\\">\\n  <div class=\\"app-logo\\"></div>\\n  <div class=\\"login-form\\"></div>\\n  <section class=\\"pricing\\">\\n    <div class=\\"card-starter\\"></div>\\n    <div class=\\"card-pro\\"></div>\\n  </section>\\n</div>",
+    "css": ".screen { display: flex; flex-direction: column; gap: 48px; padding: 80px; }\\n.pricing { display: flex; flex-direction: row; gap: 24px; }\\n.card-starter, .card-pro { width: 320px; }",
+    "componentMap": {
+      "app-logo": {
+        "componentKey": "9181c660...",
+        "componentName": "App Logo"
+      },
+      "login-form": {
+        "componentKey": "248d7d71...",
+        "componentName": "Login Form"
+      },
+      "card-starter": {
+        "componentKey": "abc123...",
+        "componentName": "Pricing Card - Starter"
       }
-    ]
+    }
   }
 }
 \`\`\`
+
+### HTML RULES:
+- Use semantic tags (<div>, <section>, <header>, etc.)
+- Use descriptive class names for each element
+- For design system components, use class names and map them in componentMap
+- Keep HTML structure simple and clean
+
+### CSS RULES:
+- Use Flexbox for all layouts (display: flex)
+- Use flex-direction: column or row
+- Use gap for spacing between children
+- Use padding for container spacing
+- Specify width/height for components when needed
+- Use simple property: value format
+
+### COMPONENT MAPPING:
+- Map each component class name to its Figma componentKey
+- This allows us to create actual Figma component instances
 
 Now create the new layout variation based on the user's instructions.`;
 }
@@ -235,31 +259,42 @@ You can use ANY component from the design palette above. Components with usageCo
 
 For FRAME nodes with children, you SHOULD include Auto Layout properties (layoutMode, itemSpacing, padding, sizing modes, alignment) to create properly structured layouts.
 
-## 3. Output Format
+## 3. Output Format (HTML/CSS)
 
-Return ONLY a valid JSON object with this structure:
+Return ONLY a valid JSON object with HTML/CSS structure:
 
 \`\`\`json
 {
   "reasoning": "1-2 sentence explanation of changes",
-  "figmaStructure": {
-    "type": "FRAME",
-    "name": "New Frame Name",
-    "layoutMode": "VERTICAL",
-    "itemSpacing": 16,
-    "padding": { "top": 24, "right": 24, "bottom": 24, "left": 24 },
-    "primaryAxisSizingMode": "AUTO",
-    "counterAxisSizingMode": "FIXED",
-    "children": [ /* array of nodes */ ]
+  "htmlLayout": {
+    "html": "<div class=\\"container\\">...</div>",
+    "css": ".container { display: flex; flex-direction: column; gap: 24px; padding: 32px; }",
+    "componentMap": {
+      "class-name": {
+        "componentKey": "component-key-here",
+        "componentName": "Component Name"
+      }
+    }
   }
 }
 \`\`\`
 
-Node types:
-- INSTANCE: { type, name, componentKey }
-- FRAME: { type, name, layoutMode?, itemSpacing?, padding?, primaryAxisSizingMode?, counterAxisSizingMode?, primaryAxisAlignItems?, counterAxisAlignItems?, children? }
-- TEXT: { type, name, characters }
-- RECTANGLE: { type, name, width, height }
+### HTML Requirements:
+- Use semantic HTML5 tags
+- Use descriptive class names
+- Map component classes in componentMap
+- Keep structure simple
+
+### CSS Requirements:
+- Use Flexbox (display: flex, flex-direction, gap, padding)
+- Avoid absolute positioning
+- Use px units for dimensions
+- Keep it minimal and focused on layout
+
+### Component Mapping:
+- For each design system component, assign a class name
+- Map that class to the componentKey in componentMap
+- Example: "app-logo" → { componentKey: "9181c660...", componentName: "App Logo" }
 
 Return your response now.`;
 }
