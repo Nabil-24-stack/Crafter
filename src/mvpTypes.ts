@@ -87,7 +87,18 @@ export interface FrameSnapshotMVP {
  */
 export type LayoutNodeMVP =
   | { type: "INSTANCE"; name: string; componentKey: string }
-  | { type: "FRAME"; name: string; layoutMode?: "HORIZONTAL" | "VERTICAL" | "NONE"; children: LayoutNodeMVP[] }
+  | {
+      type: "FRAME";
+      name: string;
+      layoutMode?: "HORIZONTAL" | "VERTICAL" | "NONE";
+      itemSpacing?: number;
+      padding?: { top: number; right: number; bottom: number; left: number };
+      primaryAxisSizingMode?: "FIXED" | "AUTO";
+      counterAxisSizingMode?: "FIXED" | "AUTO";
+      primaryAxisAlignItems?: "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN";
+      counterAxisAlignItems?: "MIN" | "CENTER" | "MAX";
+      children: LayoutNodeMVP[];
+    }
   | { type: "TEXT"; name: string; characters: string }
   | { type: "RECTANGLE"; name: string; width: number; height: number };
 
@@ -97,6 +108,13 @@ export type LayoutNodeMVP =
 export interface LayoutStructureMVP {
   type: "FRAME";
   name: string;
+  layoutMode?: "HORIZONTAL" | "VERTICAL" | "NONE";
+  itemSpacing?: number;
+  padding?: { top: number; right: number; bottom: number; left: number };
+  primaryAxisSizingMode?: "FIXED" | "AUTO";
+  counterAxisSizingMode?: "FIXED" | "AUTO";
+  primaryAxisAlignItems?: "MIN" | "CENTER" | "MAX" | "SPACE_BETWEEN";
+  counterAxisAlignItems?: "MIN" | "CENTER" | "MAX";
   children: LayoutNodeMVP[];
 }
 

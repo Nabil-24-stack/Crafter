@@ -6,6 +6,30 @@ import { LayoutStructureMVP, LayoutNodeMVP, DesignPaletteMVP } from './mvpTypes'
 import { buildComponentMap, preloadFonts } from './mvpUtils';
 
 /**
+ * Applies Auto Layout properties to a frame with sensible defaults
+ */
+function applyAutoLayoutProps(frame: FrameNode, spec: any) {
+  frame.layoutMode = spec.layoutMode || "VERTICAL";
+  frame.itemSpacing = spec.itemSpacing ?? 16;
+
+  const padding = spec.padding || { top: 24, right: 24, bottom: 24, left: 24 };
+  frame.paddingTop = padding.top;
+  frame.paddingRight = padding.right;
+  frame.paddingBottom = padding.bottom;
+  frame.paddingLeft = padding.left;
+
+  frame.primaryAxisSizingMode = spec.primaryAxisSizingMode || "AUTO";
+  frame.counterAxisSizingMode = spec.counterAxisSizingMode || "FIXED";
+
+  if (spec.primaryAxisAlignItems) {
+    frame.primaryAxisAlignItems = spec.primaryAxisAlignItems;
+  }
+  if (spec.counterAxisAlignItems) {
+    frame.counterAxisAlignItems = spec.counterAxisAlignItems;
+  }
+}
+
+/**
  * Converts validated figmaStructure back into Figma nodes.
  * Reuses components via createInstance when componentKey is present.
  */
@@ -26,6 +50,9 @@ export async function reconstructVariationMVP(
   // 3. Create root frame
   const rootFrame = figma.createFrame();
   rootFrame.name = figmaStructure.name;
+
+  // Apply Auto Layout properties to root frame
+  applyAutoLayoutProps(rootFrame, figmaStructure);
 
   // 4. Recursively create children
   let successCount = 0;
@@ -78,9 +105,8 @@ async function createNodeMVP(
       const frame = figma.createFrame();
       frame.name = spec.name;
 
-      if (spec.layoutMode) {
-        frame.layoutMode = spec.layoutMode === "NONE" ? "VERTICAL" : spec.layoutMode;
-      }
+      // Apply Auto Layout properties
+      applyAutoLayoutProps(frame, spec);
 
       // Create children recursively
       if (spec.children) {

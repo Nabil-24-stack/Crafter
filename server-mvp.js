@@ -156,6 +156,8 @@ ${instructions}
 
 5. **Output valid JSON only.** The root must be a FRAME.
 
+6. **For FRAME nodes with children, include Auto Layout properties** (layoutMode, itemSpacing, padding, sizing modes, alignment) to create properly structured layouts.
+
 ## OUTPUT FORMAT
 
 Return a JSON object with this exact structure:
@@ -166,6 +168,11 @@ Return a JSON object with this exact structure:
   "figmaStructure": {
     "type": "FRAME",
     "name": "...",
+    "layoutMode": "VERTICAL",
+    "itemSpacing": 16,
+    "padding": { "top": 24, "right": 24, "bottom": 24, "left": 24 },
+    "primaryAxisSizingMode": "AUTO",
+    "counterAxisSizingMode": "FIXED",
     "children": [
       {
         "type": "INSTANCE",
@@ -218,7 +225,11 @@ When a component instance exists in the current structure, you MUST preserve it 
 
 **DO NOT** rebuild components from rectangles, text, and other primitives. **REUSE THE COMPONENT.**
 
-## 2. Output Format
+## 2. Auto Layout Properties
+
+For FRAME nodes with children, you SHOULD include Auto Layout properties (layoutMode, itemSpacing, padding, sizing modes, alignment) to create properly structured layouts.
+
+## 3. Output Format
 
 Return ONLY a valid JSON object with this structure:
 
@@ -228,6 +239,11 @@ Return ONLY a valid JSON object with this structure:
   "figmaStructure": {
     "type": "FRAME",
     "name": "New Frame Name",
+    "layoutMode": "VERTICAL",
+    "itemSpacing": 16,
+    "padding": { "top": 24, "right": 24, "bottom": 24, "left": 24 },
+    "primaryAxisSizingMode": "AUTO",
+    "counterAxisSizingMode": "FIXED",
     "children": [ /* array of nodes */ ]
   }
 }
@@ -235,7 +251,7 @@ Return ONLY a valid JSON object with this structure:
 
 Node types:
 - INSTANCE: { type, name, componentKey }
-- FRAME: { type, name, children? }
+- FRAME: { type, name, layoutMode?, itemSpacing?, padding?, primaryAxisSizingMode?, counterAxisSizingMode?, primaryAxisAlignItems?, counterAxisAlignItems?, children? }
 - TEXT: { type, name, characters }
 - RECTANGLE: { type, name, width, height }
 
