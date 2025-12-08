@@ -305,6 +305,10 @@ export interface FigmaFrameNode {
   type: 'FRAME';
   name: string;
 
+  // NEW: Preservation mechanism
+  sourceNodeId?: string; // If set, clone this exact node from original
+  role?: 'shell' | 'content' | 'global-nav' | 'local-nav'; // Region role for preservation
+
   // Auto Layout properties (optional)
   layoutMode?: 'VERTICAL' | 'HORIZONTAL' | 'NONE';
   itemSpacing?: number;
@@ -320,26 +324,28 @@ export interface FigmaFrameNode {
   // Children (only FRAME can have children)
   children?: FigmaLayoutNode[];
 
-  // Optional semantic role hint
-  role?: 'header' | 'main' | 'section' | 'card' | 'list' | 'navigation';
-
   // Fill style (optional)
   fillStyleName?: string;
 
   // FRAME nodes cannot have these fields (enforced by discriminated union)
   componentName?: never;
   componentVariant?: never;
+  styleToken?: never;
   text?: never;
   textStyleName?: never;
 }
 
-// COMPONENT node: References design system component, cannot have children
-export interface FigmaComponentNode {
-  type: 'COMPONENT';
+// INSTANCE node: Instance of a component (not the component definition itself)
+export interface FigmaInstanceNode {
+  type: 'INSTANCE';
   name: string;
 
-  // Required: Component reference
-  componentName: string;
+  // NEW: Preservation or token-based creation
+  sourceNodeId?: string; // If set, clone this exact instance
+  styleToken?: string; // Use predefined token (e.g., "button/primary")
+
+  // Component reference (for non-token instances)
+  componentName?: string;
 
   // Optional: Variant properties
   componentVariant?: Record<string, string>;
@@ -347,7 +353,7 @@ export interface FigmaComponentNode {
   // Optional: Text override for text nodes inside component
   text?: string;
 
-  // COMPONENT nodes cannot have these fields
+  // INSTANCE nodes cannot have these fields
   children?: never;
   layoutMode?: never;
   itemSpacing?: never;
@@ -364,6 +370,9 @@ export interface FigmaTextNode {
   type: 'TEXT';
   name: string;
 
+  // NEW: Preservation mechanism
+  sourceNodeId?: string; // If set, clone this exact text node
+
   // Required: Text content
   text: string;
 
@@ -374,6 +383,7 @@ export interface FigmaTextNode {
   children?: never;
   componentName?: never;
   componentVariant?: never;
+  styleToken?: never;
   layoutMode?: never;
   itemSpacing?: never;
   padding?: never;
@@ -386,7 +396,7 @@ export interface FigmaTextNode {
 /**
  * Union type for all Figma layout nodes
  */
-export type FigmaLayoutNode = FigmaFrameNode | FigmaComponentNode | FigmaTextNode;
+export type FigmaLayoutNode = FigmaFrameNode | FigmaInstanceNode | FigmaTextNode;
 
 /**
  * AI output schema (versioned)

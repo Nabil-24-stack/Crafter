@@ -8,6 +8,8 @@
 export interface StructuralElement {
   type: 'navigation' | 'header' | 'sidebar' | 'main-content' | 'footer' | 'card' | 'form' | 'unknown';
   name: string;
+  nodeId: string; // NEW: Figma node ID for exact cloning
+  role: 'shell' | 'content' | 'global-nav' | 'local-nav'; // NEW: Region role for preservation rules
   bounds: {
     x: number;
     y: number;
@@ -17,6 +19,15 @@ export interface StructuralElement {
   children: number;
   hasText: boolean;
   isAutoLayout: boolean;
+  styleToken?: string; // NEW: If this matches a known token
+}
+
+/**
+ * Style token for consistent components
+ */
+export interface StyleToken {
+  tokenId: string; // e.g., "button/primary", "card/default"
+  nodeId: string; // Figma node ID that uses this token
 }
 
 /**
@@ -35,6 +46,7 @@ export interface StructuralContext {
     topLevel: string[]; // Names of top-level sections
     contentArea: string | null; // Name of main content area
   };
+  styleTokens: StyleToken[]; // NEW: Detected style tokens
 }
 
 /**
@@ -235,6 +247,78 @@ function detectCommonLayouts(frame: FrameNode): string[] {
 }
 
 /**
+ * Predefined style tokens (start small and stable)
+ */
+const STYLE_TOKEN_REGISTRY = {
+  'button/primary': { matches: (node: SceneNode) => {
+    const name = node.name.toLowerCase();
+    return (name.includes('button') || name.includes('btn')) &&
+           'fills' in node && Array.isArray(node.fills) && node.fills[0]?.type === 'SOLID';
+  }},
+  'button/secondary': { matches: (node: SceneNode) => {
+    const name = node.name.toLowerCase();
+    return (name.includes('button') || name.includes('btn')) &&
+           name.includes('secondary');
+  }},
+  'card/default': { matches: (node: SceneNode) => {
+    const name = node.name.toLowerCase();
+    return name.includes('card') && 'cornerRadius' in node;
+  }},
+  'input/default': { matches: (node: SceneNode) => {
+    const name = node.name.toLowerCase();
+    return name.includes('input') || name.includes('field') || name.includes('textbox');
+  }},
+  'container/section': { matches: (node: SceneNode) => {
+    return node.type === 'FRAME' && 'layoutMode' in node && node.layoutMode !== 'NONE';
+  }}
+};
+
+/**
+ * Detect style token for a node
+ */
+function detectStyleToken(node: SceneNode): string | undefined {
+  for (const [tokenId, token] of Object.entries(STYLE_TOKEN_REGISTRY)) {
+    if (token.matches(node)) {
+      return tokenId;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Assign role to element based on type and name
+ */
+function assignElementRole(element: { type: string; name: string }): 'shell' | 'content' | 'global-nav' | 'local-nav' {
+  const name = element.name.toLowerCase();
+  const type = element.type;
+
+  // Global navigation elements
+  if (type === 'sidebar' || type === 'navigation' ||
+      name.includes('sidebar') || name.includes('sidenav')) {
+    return 'global-nav';
+  }
+
+  // Shell elements (header, footer)
+  if (type === 'header' || type === 'footer' ||
+      name.includes('header') || name.includes('toolbar') || name.includes('footer')) {
+    return 'shell';
+  }
+
+  // Local navigation (tabs, menus)
+  if (name.includes('tab') || name.includes('menu') || name.includes('nav')) {
+    return 'local-nav';
+  }
+
+  // Main content area
+  if (type === 'main-content' || name.includes('content') || name.includes('main')) {
+    return 'content';
+  }
+
+  // Default: treat as shell (preserve by default)
+  return 'shell';
+}
+
+/**
  * Identify the type of a structural element based on its name and position
  */
 function identifyElementType(node: SceneNode, parentFrame: FrameNode): StructuralElement['type'] {
@@ -289,6 +373,7 @@ function identifyElementType(node: SceneNode, parentFrame: FrameNode): Structura
 export function extractStructuralContext(frame: FrameNode): StructuralContext {
   const elements: StructuralElement[] = [];
   const topLevelNames: string[] = [];
+  const styleTokens: StyleToken[] = [];
   let hasSidebar = false;
   let hasHeader = false;
   let hasFooter = false;
@@ -299,10 +384,13 @@ export function extractStructuralContext(frame: FrameNode): StructuralContext {
   frame.children.forEach((child, index) => {
     if (child.type === 'FRAME' || child.type === 'GROUP' || child.type === 'INSTANCE') {
       const elementType = identifyElementType(child, frame);
+      const styleToken = detectStyleToken(child);
 
       const element: StructuralElement = {
         type: elementType,
         name: child.name,
+        nodeId: child.id, // NEW: Store Figma node ID
+        role: assignElementRole({ type: elementType, name: child.name }), // NEW: Assign role
         bounds: {
           x: 'x' in child ? child.x : 0,
           y: 'y' in child ? child.y : 0,
@@ -312,10 +400,16 @@ export function extractStructuralContext(frame: FrameNode): StructuralContext {
         children: 'children' in child ? child.children.length : 0,
         hasText: 'children' in child ? child.children.some(c => c.type === 'TEXT') : false,
         isAutoLayout: child.type === 'FRAME' && child.layoutMode !== 'NONE',
+        styleToken: styleToken, // NEW: Add detected style token
       };
 
       elements.push(element);
       topLevelNames.push(child.name);
+
+      // Track style tokens
+      if (styleToken) {
+        styleTokens.push({ tokenId: styleToken, nodeId: child.id });
+      }
 
       // Update flags
       if (elementType === 'sidebar') hasSidebar = true;
@@ -367,6 +461,7 @@ export function extractStructuralContext(frame: FrameNode): StructuralContext {
       topLevel: topLevelNames,
       contentArea: mainContentArea,
     },
+    styleTokens, // NEW: Include detected style tokens
   };
 }
 

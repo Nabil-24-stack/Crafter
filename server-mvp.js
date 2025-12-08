@@ -8,6 +8,18 @@ const cors = require('cors');
 
 const app = express();
 
+// ============================================================================
+// STYLE TOKEN REGISTRY (predefined, small, stable)
+// ============================================================================
+const STYLE_TOKENS = {
+  'button/primary': 'Primary button with brand color',
+  'button/secondary': 'Secondary button with subtle styling',
+  'card/default': 'Standard card container with shadow',
+  'input/default': 'Text input field',
+  'container/page': 'Page-level container with padding',
+  'container/section': 'Section container with vertical spacing'
+};
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -207,133 +219,143 @@ ${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
 
 ` : '';
 
-  // Build structural context section
+  // Build structural context section with roles and node IDs
   let structuralContext = '';
+  let preservationRules = '';
+
   if (extractedStyle.structure && extractedStyle.structure.elements.length > 0) {
     const { structure } = extractedStyle;
 
-    // Build preservation rules dynamically based on what exists
-    const preservationRules = [];
-    const navigationElements = structure.elements.filter(e =>
-      ['sidebar', 'navigation', 'header'].includes(e.type)
-    );
-    const contentElements = structure.elements.filter(e =>
-      ['main-content', 'unknown', 'card', 'form'].includes(e.type)
-    );
-
-    if (navigationElements.length > 0) {
-      preservationRules.push(`**PRESERVE these navigation/shell elements** - Keep them in their current positions and structure:\n${navigationElements.map(e => `   - ${e.name} (${e.type})`).join('\n')}`);
-    }
-
-    if (contentElements.length > 0) {
-      preservationRules.push(`**MODIFY these content areas** as per user instructions:\n${contentElements.map(e => `   - ${e.name} (${e.type})`).join('\n')}`);
-    } else if (structure.hierarchy.contentArea) {
-      preservationRules.push(`**MODIFY the content area** named "${structure.hierarchy.contentArea}" as per user instructions`);
-    }
+    // Group elements by role
+    const shellElements = structure.elements.filter(e => e.role === 'shell');
+    const globalNavElements = structure.elements.filter(e => e.role === 'global-nav');
+    const localNavElements = structure.elements.filter(e => e.role === 'local-nav');
+    const contentElements = structure.elements.filter(e => e.role === 'content');
 
     structuralContext = `
-## CURRENT FRAME STRUCTURE
+## FRAME STRUCTURE WITH PRESERVATION RULES
 
-**Identified Sections:**
-${structure.elements.map(e => `- ${e.name} (${e.type}): ${e.bounds.width}×${e.bounds.height}px`).join('\n')}
+**Element Inventory with Node IDs:**
+${structure.elements.map(e => `- ${e.name} (role="${e.role}", nodeId="${e.nodeId}")`).join('\n')}
 
-**Design Strategy:**
-${preservationRules.join('\n')}
-
-**Key Principle:** Preserve the overall layout structure and navigation elements. Apply creative changes primarily to content areas.
+**STRICT PRESERVATION BY ROLE:**
+${shellElements.length > 0 ? `- **Shell elements (ALWAYS preserve with sourceNodeId):**\n${shellElements.map(e => `    - ${e.name}: nodeId="${e.nodeId}"`).join('\n')}` : ''}
+${globalNavElements.length > 0 ? `- **Global navigation (ALWAYS preserve with sourceNodeId):**\n${globalNavElements.map(e => `    - ${e.name}: nodeId="${e.nodeId}"`).join('\n')}` : ''}
+${localNavElements.length > 0 ? `- **Local navigation (preserve unless explicitly mentioned):**\n${localNavElements.map(e => `    - ${e.name}: nodeId="${e.nodeId}"`).join('\n')}` : ''}
+${contentElements.length > 0 ? `- **Content areas (MODIFY based on instructions):**\n${contentElements.map(e => `    - ${e.name}: nodeId="${e.nodeId}"`).join('\n')}` : ''}
 
 `;
   }
 
-  return `You are a Figma design expert. Create a new layout variation that preserves key UI elements while creatively modifying the content area.
+  const tokenList = Object.keys(STYLE_TOKENS).join(', ');
+
+  return `You are a Figma design expert. You MUST use the three-mode output system for EVERY node.
 
 ${errorContext}${structuralContext}
-## EXTRACTED VISUAL STYLE
+## CRITICAL: THREE-MODE OUTPUT SYSTEM
 
-Use this style as your design reference:
+**You MUST use ONE of these three approaches for EVERY node:**
 
-**Colors:**
-- Primary: ${extractedStyle.colors.primary}
-- Secondary: ${extractedStyle.colors.secondary}
-- Text: ${extractedStyle.colors.text}
-- Background: ${extractedStyle.colors.background}
+1. **PRESERVE EXACTLY (sourceNodeId)**
+   - For: All shell and global-nav elements, plus any element not mentioned in user request
+   - Output: { "type": "FRAME", "name": "Sidebar", "sourceNodeId": "123:456" }
+   - Result: Exact clone of original node
 
-**Typography:**
-- Font sizes: ${extractedStyle.typography.sizes.join(', ')}px
-- Font weights: ${extractedStyle.typography.weights.join(', ')}
-- Font families: ${extractedStyle.typography.families.join(', ')}
+2. **USE TOKEN (styleToken)**
+   - For: New UI elements that match our design system
+   - Output: { "type": "INSTANCE", "name": "Submit", "styleToken": "button/primary" }
+   - Available tokens: ${tokenList}
+   - NEVER create custom styles - only use these tokens
 
-**Spacing:**
-- Padding values: ${extractedStyle.spacing.padding.join(', ')}px
-- Gap values: ${extractedStyle.spacing.gaps.join(', ')}px
+3. **LAYOUT ONLY (bare FRAME)**
+   - For: Pure structural containers with NO visual styling
+   - Output: { "type": "FRAME", "name": "Container", "layoutMode": "VERTICAL", "children": [...] }
+   - NO colors, padding, or effects - only structure!
 
-**Layout:**
-- Container widths: ${extractedStyle.layout.containerWidths.join(', ')}px
-- Common layouts: ${extractedStyle.layout.commonLayouts.join(', ')}
+**FORBIDDEN: You may NOT output custom fills, strokes, effects, or arbitrary styles**
 
-## USER INSTRUCTIONS
+## VISUAL REFERENCE (PNG IMAGE)
 
-${instructions}
+The attached PNG shows the EXACT visual design. Use it for:
+1. **Spacing and proportions** - Match the whitespace and relative sizes exactly
+2. **Visual density** - Keep similar information density per area
+3. **Component identification** - Recognize which components to preserve vs modify
 
-## OUTPUT FORMAT
+## EXTRACTED VISUAL STYLE (for reference only)
 
-Return ONLY valid JSON with this structure:
+**Colors:** ${extractedStyle.colors.primary}, ${extractedStyle.colors.secondary}, ${extractedStyle.colors.text}, ${extractedStyle.colors.background}
+**Typography:** ${extractedStyle.typography.sizes.join(', ')}px sizes, ${extractedStyle.typography.weights.join(', ')} weights
+**Spacing:** ${extractedStyle.spacing.padding.join(', ')}px padding, ${extractedStyle.spacing.gaps.join(', ')}px gaps
+
+## USER REQUEST ANALYSIS
+
+User instruction: "${instructions}"
+
+Based on this request, determine:
+- Which region does this affect? (shell, navigation, or content?)
+- Which specific nodes need modification?
+- Which nodes MUST be preserved exactly?
+
+## OUTPUT FORMAT EXAMPLE
+
+For a "Design Team tab" request where Sidebar (nodeId="1:100") and Header (nodeId="1:101") are shell/navigation:
 
 \`\`\`json
 {
-  "reasoning": "Brief 1-2 sentence explanation of what you changed",
+  "reasoning": "Preserved sidebar and header exactly, created new team content area with member cards",
   "figmaJson": {
     "type": "FRAME",
     "name": "Root",
-    "layoutMode": "VERTICAL",
-    "primaryAxisSizingMode": "AUTO",
-    "counterAxisSizingMode": "FIXED",
-    "width": 1200,
-    "height": 800,
-    "itemSpacing": 24,
-    "paddingTop": 48,
-    "paddingRight": 48,
-    "paddingBottom": 48,
-    "paddingLeft": 48,
-    "primaryAxisAlignItems": "MIN",
-    "counterAxisAlignItems": "MIN",
-    "fills": [{ "type": "SOLID", "color": { "r": 0.96, "g": 0.96, "b": 0.96 } }],
-    "cornerRadius": 0,
+    "sourceNodeId": "1:1000",
     "children": [
       {
-        "type": "TEXT",
-        "characters": "Welcome",
-        "fontSize": 48,
-        "fontFamily": "Inter",
-        "fontWeight": "bold",
-        "fills": [{ "type": "SOLID", "color": { "r": 0, "g": 0, "b": 0 } }],
-        "textAlignHorizontal": "LEFT"
+        "type": "FRAME",
+        "name": "Sidebar",
+        "sourceNodeId": "1:100"
+      },
+      {
+        "type": "FRAME",
+        "name": "Header",
+        "sourceNodeId": "1:101"
+      },
+      {
+        "type": "FRAME",
+        "name": "TeamContent",
+        "layoutMode": "VERTICAL",
+        "children": [
+          {
+            "type": "TEXT",
+            "name": "Title",
+            "text": "Team Members"
+          },
+          {
+            "type": "INSTANCE",
+            "name": "TeamCard1",
+            "styleToken": "card/default"
+          },
+          {
+            "type": "INSTANCE",
+            "name": "InviteButton",
+            "styleToken": "button/primary"
+          }
+        ]
       }
     ]
   }
 }
 \`\`\`
 
-## DESIGN PRINCIPLES
-
-1. **Preserve Brand Consistency** - Keep navigation, headers, and key brand elements unchanged
-2. **Focus on Content Area** - Apply creative changes only to the main content area
-3. **Maintain Visual Hierarchy** - Respect the established hierarchy and information architecture
-4. **Use Consistent Spacing** - Apply the extracted spacing values throughout
-
 ## TECHNICAL RULES
 
-1. **RGB colors MUST be 0-1 range** (NOT 0-255). Example: red = {r: 1, g: 0, b: 0}
-2. **Root must be type "FRAME"**
-3. **Valid layoutMode values:** "HORIZONTAL", "VERTICAL", "NONE"
-4. **Valid sizingMode values:** "FIXED", "AUTO"
-5. **Valid fontWeight values:** "normal", "medium", "semibold", "bold"
-6. **Valid textAlignHorizontal:** "LEFT", "CENTER", "RIGHT"
-7. **Valid primaryAxisAlignItems:** "MIN", "CENTER", "MAX", "SPACE_BETWEEN"
-8. **Valid counterAxisAlignItems:** "MIN", "CENTER", "MAX"
-9. **Use extracted style values** - colors, font sizes, spacing from the style guide above
-10. **Include actual text content** in TEXT nodes (characters field is required)
-11. **Keep JSON concise** - avoid deeply nested structures (max 3-4 levels deep)
+1. **Node types:** FRAME (containers), INSTANCE (components), TEXT (text only)
+2. **Three modes only:** sourceNodeId, styleToken, or bare layout frame
+3. **NO custom styles:** Never output fills, strokes, fontSize, fontFamily, etc.
+4. **Valid layoutMode:** "HORIZONTAL", "VERTICAL", "NONE" (only for layout frames)
+5. **sourceNodeId format:** Use exact nodeId from element inventory
+6. **styleToken values:** Only use tokens from the list: ${tokenList}
+7. **TEXT nodes:** Must include "text" field with actual content
+8. **Preserve by default:** If unsure, preserve with sourceNodeId
+9. **Keep JSON minimal:** Only required fields, no extra properties
 
 Return your response now.`;
 }
