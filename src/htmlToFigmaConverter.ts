@@ -216,9 +216,10 @@ export function cssToFigmaLayout(styles: ComputedStyles): {
   // Extract padding
   const padding = parsePadding(styles);
 
-  // Determine sizing modes
-  const primaryAxisSizingMode = styles.flexGrow === '1' ? 'AUTO' : 'FIXED';
-  const counterAxisSizingMode = 'FIXED'; // Default
+  // Sizing modes are now determined in convertNodeToFigma() based on context
+  // Set to default values here (will be overridden)
+  const primaryAxisSizingMode = 'FIXED';
+  const counterAxisSizingMode = 'FIXED';
 
   // Map justify-content to primaryAxisAlignItems
   let primaryAxisAlignItems: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN' | undefined;
@@ -407,11 +408,12 @@ export async function convertHTMLToFigma(
   // 1. Parse HTML with CSS styles applied
   const parsedTree = parseHTMLWithStyles(htmlLayout.html, htmlLayout.css);
 
-  // 2. Convert parsed tree to Figma nodes
+  // 2. Convert parsed tree to Figma nodes (mark as root)
   const rootFrame = await convertNodeToFigma(
     parsedTree,
     htmlLayout.componentMap,
-    componentMap
+    componentMap,
+    true  // isRoot = true for the top-level frame
   ) as FrameNode;
 
   console.log('✅ HTML/CSS conversion complete');
@@ -425,7 +427,8 @@ export async function convertHTMLToFigma(
 async function convertNodeToFigma(
   node: ParsedNode,
   htmlComponentMap: Record<string, { componentKey: string; componentName: string }>,
-  figmaComponentMap: Map<string, ComponentNode>
+  figmaComponentMap: Map<string, ComponentNode>,
+  isRoot: boolean = false
 ): Promise<SceneNode> {
 
   // 1. Check if this node maps to a design system component
@@ -469,8 +472,6 @@ async function convertNodeToFigma(
     frame.paddingRight = layout.padding.right;
     frame.paddingBottom = layout.padding.bottom;
     frame.paddingLeft = layout.padding.left;
-    frame.primaryAxisSizingMode = layout.primaryAxisSizingMode;
-    frame.counterAxisSizingMode = layout.counterAxisSizingMode;
 
     if (layout.primaryAxisAlignItems) {
       frame.primaryAxisAlignItems = layout.primaryAxisAlignItems;
@@ -492,21 +493,100 @@ async function convertNodeToFigma(
     frame.cornerRadius = borderRadius;
   }
 
-  // 6. Apply fixed size if specified
+  // 6. Determine frame sizing based on CSS
   const width = parseCSSUnit(node.styles.width);
   const height = parseCSSUnit(node.styles.height);
-  if (width && height) {
-    frame.resize(width, height);
+  const hasExplicitWidth = width > 0;
+  const hasExplicitHeight = height > 0;
+
+  // Special handling for root frame
+  if (isRoot) {
+    if (!hasExplicitWidth || !hasExplicitHeight) {
+      // Root frame needs reasonable default size
+      frame.resize(
+        hasExplicitWidth ? width : 1200,
+        hasExplicitHeight ? height : 800
+      );
+    } else {
+      frame.resize(width, height);
+    }
+
+    // Root frame uses FIXED sizing
+    if (layout.layoutMode !== 'NONE') {
+      frame.primaryAxisSizingMode = 'FIXED';
+      frame.counterAxisSizingMode = 'FIXED';
+    }
+  } else {
+    // Non-root frames: intelligent sizing based on CSS and Auto Layout
+    if (hasExplicitWidth && hasExplicitHeight) {
+      // Both dimensions specified → FIXED sizing
+      frame.resize(width, height);
+      if (layout.layoutMode !== 'NONE') {
+        frame.primaryAxisSizingMode = 'FIXED';
+        frame.counterAxisSizingMode = 'FIXED';
+      }
+    } else if (layout.layoutMode !== 'NONE') {
+      // Auto Layout enabled but no explicit size → AUTO (hug content) in Figma API
+      // Note: Figma API uses 'AUTO' for what the UI calls "Hug"
+      frame.primaryAxisSizingMode = 'AUTO';
+      frame.counterAxisSizingMode = 'AUTO';
+
+      // If width specified, fix the counter axis (for HORIZONTAL) or primary axis (for VERTICAL)
+      if (hasExplicitWidth) {
+        if (layout.layoutMode === 'HORIZONTAL') {
+          frame.counterAxisSizingMode = 'FIXED';
+          frame.resize(width, 100); // Temporary height, will adjust to content
+        } else {
+          frame.primaryAxisSizingMode = 'FIXED';
+          frame.resize(width, 100);
+        }
+      }
+
+      // If height specified, fix the appropriate axis
+      if (hasExplicitHeight) {
+        if (layout.layoutMode === 'VERTICAL') {
+          frame.counterAxisSizingMode = 'FIXED';
+          frame.resize(100, height); // Temporary width, will adjust to content
+        } else {
+          frame.primaryAxisSizingMode = 'FIXED';
+          frame.resize(100, height);
+        }
+      }
+
+      // Note: Figma's Auto Layout doesn't have a "FILL" mode for sizing
+      // Instead, we use width/height to control fill behavior
+      // For now, we'll keep AUTO (hug) as the default for responsive layouts
+    } else {
+      // No Auto Layout, need explicit size
+      if (hasExplicitWidth && hasExplicitHeight) {
+        frame.resize(width, height);
+      } else {
+        // Default size for non-auto-layout frames
+        frame.resize(
+          hasExplicitWidth ? width : 200,
+          hasExplicitHeight ? height : 200
+        );
+      }
+    }
   }
 
   // 7. Recursively convert children
   for (const child of node.children) {
     try {
-      const childNode = await convertNodeToFigma(child, htmlComponentMap, figmaComponentMap);
+      const childNode = await convertNodeToFigma(child, htmlComponentMap, figmaComponentMap, false);
       frame.appendChild(childNode);
     } catch (error) {
       console.warn(`  ⚠️  Failed to create child node:`, error);
     }
+  }
+
+  // 8. Final size validation - ensure frame is visible
+  if (frame.width === 0 || frame.height === 0) {
+    console.warn(`  ⚠️  Frame "${frame.name}" has zero dimensions, applying minimum size`);
+    frame.resize(
+      Math.max(100, frame.width),
+      Math.max(100, frame.height)
+    );
   }
 
   return frame;
