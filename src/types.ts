@@ -10,7 +10,8 @@ export type MessageType =
   | 'iterate-design-variation'
   | 'iterate-design-variation-mvp' // MVP iteration pipeline
   | 'iteration-mvp-complete' // MVP iteration completion callback
-  | 'mvp-call-railway' // Request UI to call Railway (plugin can't make HTTP requests)
+  | 'mvp-call-railway' // DEPRECATED: Old HTML/CSS pipeline
+  | 'mvp-call-railway-json' // NEW: Direct Figma JSON generation pipeline
   | 'mvp-railway-response' // Railway response from UI back to plugin
   | 'get-design-system'
   | 'design-system-scan-progress' // Progress updates during scanning

@@ -21,6 +21,82 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
+// ============================================================================
+// NEW ENDPOINT: Direct Figma JSON Generation
+// ============================================================================
+
+app.post('/api/iterate-figma-json', async (req, res) => {
+  try {
+    const { extractedStyle, imagePNG, instructions, model, previousErrors } = req.body;
+
+    // Validate request
+    if (!extractedStyle || !imagePNG || !instructions || !model) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['extractedStyle', 'imagePNG', 'instructions', 'model']
+      });
+    }
+
+    console.log(`📊 Received Figma JSON iteration request:`);
+    console.log(`  Instructions: ${instructions}`);
+    console.log(`  Model: ${model}`);
+    console.log(`  Image size: ${Math.round(imagePNG.length / 1024)} KB`);
+    console.log(`  Style: ${extractedStyle.colors.primary}, font sizes: ${extractedStyle.typography.sizes.join(', ')}`);
+    if (previousErrors) {
+      console.log(`  ⚠️  Previous errors detected - retry with corrections`);
+    }
+
+    // Build prompt based on model
+    const prompt = model === 'gemini-3-pro'
+      ? buildGeminiFigmaJsonPrompt(extractedStyle, instructions, previousErrors)
+      : buildClaudeFigmaJsonPrompt(extractedStyle, instructions, previousErrors);
+
+    // Call LLM
+    const rawResponse = await callLLM(model, prompt, imagePNG);
+
+    // Parse JSON
+    let parsed;
+    try {
+      // Remove markdown code blocks if present
+      const cleaned = rawResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      parsed = JSON.parse(cleaned);
+    } catch (parseError) {
+      return res.status(500).json({
+        error: 'Failed to parse JSON response',
+        message: parseError.message,
+        rawResponse: rawResponse.substring(0, 500) // Return first 500 chars for debugging
+      });
+    }
+
+    // Basic validation for Figma JSON output
+    if (!parsed.figmaJson) {
+      return res.status(500).json({
+        error: 'Response missing required field: figmaJson'
+      });
+    }
+
+    if (parsed.figmaJson.type !== 'FRAME') {
+      return res.status(500).json({
+        error: 'Root node must be type "FRAME"'
+      });
+    }
+
+    console.log(`✅ Successfully generated Figma JSON`);
+
+    return res.json({
+      figmaJson: parsed.figmaJson,
+      reasoning: parsed.reasoning
+    });
+
+  } catch (error) {
+    console.error('Error in iterate-figma-json:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
 // MVP iteration endpoint
 app.post('/api/iterate-mvp', async (req, res) => {
   try {
@@ -114,7 +190,217 @@ app.post('/api/iterate-mvp', async (req, res) => {
 });
 
 // ============================================================================
-// PROMPT BUILDERS
+// PROMPT BUILDERS - Direct Figma JSON Generation
+// ============================================================================
+
+function buildGeminiFigmaJsonPrompt(extractedStyle, instructions, previousErrors) {
+  const errorContext = previousErrors ? `
+## PREVIOUS ATTEMPT ERRORS
+
+Your last attempt had validation errors. Please fix them:
+
+**Errors:**
+${previousErrors.errors.map(e => `- ${e}`).join('\n')}
+
+**Suggestions:**
+${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
+
+` : '';
+
+  return `You are a Figma design expert. Create a new layout variation based on the visual style of the selected frame.
+
+${errorContext}
+## EXTRACTED VISUAL STYLE
+
+Use this style as your design reference:
+
+**Colors:**
+- Primary: ${extractedStyle.colors.primary}
+- Secondary: ${extractedStyle.colors.secondary}
+- Text: ${extractedStyle.colors.text}
+- Background: ${extractedStyle.colors.background}
+
+**Typography:**
+- Font sizes: ${extractedStyle.typography.sizes.join(', ')}px
+- Font weights: ${extractedStyle.typography.weights.join(', ')}
+- Font families: ${extractedStyle.typography.families.join(', ')}
+
+**Spacing:**
+- Padding values: ${extractedStyle.spacing.padding.join(', ')}px
+- Gap values: ${extractedStyle.spacing.gaps.join(', ')}px
+
+**Layout:**
+- Container widths: ${extractedStyle.layout.containerWidths.join(', ')}px
+- Common layouts: ${extractedStyle.layout.commonLayouts.join(', ')}
+
+## USER INSTRUCTIONS
+
+${instructions}
+
+## OUTPUT FORMAT
+
+Return ONLY valid JSON with this structure:
+
+\`\`\`json
+{
+  "reasoning": "Brief 1-2 sentence explanation of what you changed",
+  "figmaJson": {
+    "type": "FRAME",
+    "name": "Root",
+    "layoutMode": "VERTICAL",
+    "primaryAxisSizingMode": "AUTO",
+    "counterAxisSizingMode": "FIXED",
+    "width": 1200,
+    "height": 800,
+    "itemSpacing": 24,
+    "paddingTop": 48,
+    "paddingRight": 48,
+    "paddingBottom": 48,
+    "paddingLeft": 48,
+    "primaryAxisAlignItems": "MIN",
+    "counterAxisAlignItems": "MIN",
+    "fills": [{ "type": "SOLID", "color": { "r": 0.96, "g": 0.96, "b": 0.96 } }],
+    "cornerRadius": 0,
+    "children": [
+      {
+        "type": "TEXT",
+        "characters": "Welcome",
+        "fontSize": 48,
+        "fontFamily": "Inter",
+        "fontWeight": "bold",
+        "fills": [{ "type": "SOLID", "color": { "r": 0, "g": 0, "b": 0 } }],
+        "textAlignHorizontal": "LEFT"
+      }
+    ]
+  }
+}
+\`\`\`
+
+## CRITICAL RULES
+
+1. **RGB colors MUST be 0-1 range** (NOT 0-255). Example: red = {r: 1, g: 0, b: 0}
+2. **Root must be type "FRAME"**
+3. **Valid layoutMode values:** "HORIZONTAL", "VERTICAL", "NONE"
+4. **Valid sizingMode values:** "FIXED", "AUTO"
+5. **Valid fontWeight values:** "normal", "medium", "semibold", "bold"
+6. **Valid textAlignHorizontal:** "LEFT", "CENTER", "RIGHT"
+7. **Valid primaryAxisAlignItems:** "MIN", "CENTER", "MAX", "SPACE_BETWEEN"
+8. **Valid counterAxisAlignItems:** "MIN", "CENTER", "MAX"
+9. **Use extracted style values** - colors, font sizes, spacing from the style guide above
+10. **Include actual text content** in TEXT nodes (characters field is required)
+
+Return your response now.`;
+}
+
+function buildClaudeFigmaJsonPrompt(extractedStyle, instructions, previousErrors) {
+  const errorContext = previousErrors ? `
+# Previous Attempt Errors
+
+Your last attempt had validation errors. Please fix them:
+
+<errors>
+${previousErrors.errors.map(e => `- ${e}`).join('\n')}
+</errors>
+
+<suggestions>
+${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
+</suggestions>
+
+` : '';
+
+  return `You are a Figma design expert creating layout variations while preserving visual consistency.
+
+${errorContext}
+# Extracted Visual Style
+
+Use this style guide as your design reference:
+
+<style_guide>
+Colors:
+- Primary: ${extractedStyle.colors.primary}
+- Secondary: ${extractedStyle.colors.secondary}
+- Text: ${extractedStyle.colors.text}
+- Background: ${extractedStyle.colors.background}
+
+Typography:
+- Font sizes: ${extractedStyle.typography.sizes.join(', ')}px
+- Font weights: ${extractedStyle.typography.weights.join(', ')}
+- Font families: ${extractedStyle.typography.families.join(', ')}
+
+Spacing:
+- Padding: ${extractedStyle.spacing.padding.join(', ')}px
+- Gaps: ${extractedStyle.spacing.gaps.join(', ')}px
+
+Layout:
+- Container widths: ${extractedStyle.layout.containerWidths.join(', ')}px
+- Common layouts: ${extractedStyle.layout.commonLayouts.join(', ')}
+</style_guide>
+
+# User Instructions
+
+<instructions>
+${instructions}
+</instructions>
+
+# Output Format
+
+Return ONLY valid JSON with this structure:
+
+\`\`\`json
+{
+  "reasoning": "Brief 1-2 sentence explanation",
+  "figmaJson": {
+    "type": "FRAME",
+    "name": "Root",
+    "layoutMode": "VERTICAL",
+    "primaryAxisSizingMode": "AUTO",
+    "counterAxisSizingMode": "FIXED",
+    "width": 1200,
+    "height": 800,
+    "itemSpacing": 24,
+    "paddingTop": 48,
+    "paddingRight": 48,
+    "paddingBottom": 48,
+    "paddingLeft": 48,
+    "primaryAxisAlignItems": "MIN",
+    "counterAxisAlignItems": "MIN",
+    "fills": [{ "type": "SOLID", "color": { "r": 0.96, "g": 0.96, "b": 0.96 } }],
+    "cornerRadius": 0,
+    "children": [
+      {
+        "type": "TEXT",
+        "characters": "Welcome",
+        "fontSize": 48,
+        "fontFamily": "Inter",
+        "fontWeight": "bold",
+        "fills": [{ "type": "SOLID", "color": { "r": 0, "g": 0, "b": 0 } }],
+        "textAlignHorizontal": "LEFT"
+      }
+    ]
+  }
+}
+\`\`\`
+
+# Critical Requirements
+
+1. **RGB colors MUST be 0-1 range** (NOT 0-255): red = {r: 1, g: 0, b: 0}
+2. **Root must be type "FRAME"**
+3. **Enum values:**
+   - layoutMode: "HORIZONTAL", "VERTICAL", "NONE"
+   - sizingMode: "FIXED", "AUTO"
+   - fontWeight: "normal", "medium", "semibold", "bold"
+   - textAlignHorizontal: "LEFT", "CENTER", "RIGHT"
+   - primaryAxisAlignItems: "MIN", "CENTER", "MAX", "SPACE_BETWEEN"
+   - counterAxisAlignItems: "MIN", "CENTER", "MAX"
+4. **Use extracted style values** from the style guide above
+5. **TEXT nodes require "characters" field** with actual text content
+6. **FRAME nodes with children should use Auto Layout** (layoutMode, itemSpacing, padding, alignment)
+
+Return your response now.`;
+}
+
+// ============================================================================
+// PROMPT BUILDERS - HTML/CSS (DEPRECATED)
 // ============================================================================
 
 function buildGeminiPrompt(frameSnapshot, designPalette, instructions) {

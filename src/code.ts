@@ -13,10 +13,15 @@ import {
 } from './types';
 import { expandSimplifiedLayout } from './schemaExpander';
 import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
-// MVP iteration pipeline
+// MVP iteration pipeline (DEPRECATED - replaced with direct Figma JSON generation)
 import { buildFrameSnapshot, extractFrameScopedPalette, convertDesignSystemToMVPPalette } from './mvpUtils';
 import { reconstructVariationMVP } from './mvpReconstruction';
 import { IterationRequestMVP, IterationResponseMVP } from './mvpTypes';
+// New direct Figma JSON pipeline
+import { validateFrameForExtraction, extractStyleFromFrame, ExtractedStyle } from './styleExtractor';
+import { validateFigmaJson, ValidationResult } from './validator/schemaValidator';
+import { generateFigmaNodes } from './generator/figmaNodeGenerator';
+import { FigmaNode } from './types/figma-schema';
 
 // Debug mode - set to false for production to reduce console noise
 const DEBUG_MODE = true;
@@ -2354,7 +2359,8 @@ async function applyIterationToChild(parent: FrameNode, updatedChild: any, child
 // ============================================================================
 
 /**
- * Handles iteration variation using the new MVP pipeline with frame-scoped components
+ * Handles iteration variation using direct Figma JSON generation pipeline
+ * with error recovery and retry logic
  */
 async function handleIterateDesignVariationMVP(payload: any) {
   const { instructions, frameId, variationIndex, totalVariations, model } = payload;
@@ -2392,7 +2398,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
     }
 
     // Send status update: designing
-    console.log(`✨ Creating variation ${variationIndex + 1} using MVP pipeline...`);
+    console.log(`✨ Creating variation ${variationIndex + 1} using direct Figma JSON pipeline...`);
     figma.ui.postMessage({
       type: 'variation-status-update',
       payload: {
@@ -2402,68 +2408,128 @@ async function handleIterateDesignVariationMVP(payload: any) {
       },
     });
 
-    // 1. Build frame snapshot (structural understanding)
-    console.log("📸 Building frame snapshot...");
-    const frameSnapshot = await buildFrameSnapshot(frameNode, 5);
-    console.log(`  → ${frameSnapshot.children.length} top-level nodes captured`);
-
-    // 2. Get full design system and convert to MVP palette
-    console.log("🎨 Preparing design palette...");
-
-    // Ensure design system is cached
-    if (!cachedDesignSystem) {
-      console.log("  → Design system not cached, extracting...");
-      await handleGetDesignSystem();
+    // 1. Validate and extract style from selected frame
+    console.log("🎨 Extracting visual style from frame...");
+    const validation = validateFrameForExtraction(frameNode);
+    if (!validation.valid) {
+      throw new Error(validation.error);
     }
 
-    // Convert full design system to MVP palette (ALL components available)
-    const designPalette = await convertDesignSystemToMVPPalette(cachedDesignSystem!, frameNode);
-    console.log(`  → ${designPalette.components.length} total components in palette`);
+    const extractedStyle = extractStyleFromFrame(frameNode);
+    console.log(`  → Extracted colors: ${extractedStyle.colors.primary}, ${extractedStyle.colors.secondary}`);
+    console.log(`  → Typography sizes: ${extractedStyle.typography.sizes.join(', ')}`);
+    console.log(`  → Spacing: padding ${extractedStyle.spacing.padding.join(', ')}, gaps ${extractedStyle.spacing.gaps.join(', ')}`);
 
-    // 3. Export frame as PNG
+    // 2. Export frame as PNG for visual reference
     console.log("🖼️  Exporting frame to PNG...");
     const pngBytes = await frameNode.exportAsync({
       format: "PNG",
       constraint: { type: "SCALE", value: 1 }, // 1x scale for speed
     });
-    // Convert bytes to base64 (btoa not available in Figma plugin sandbox)
     const imagePNG = uint8ArrayToBase64(pngBytes);
     console.log(`  → ${Math.round(imagePNG.length / 1024)} KB`);
 
-    // 4. Send to UI for Railway call (plugin sandbox can't make HTTP requests)
-    console.log(`🚀 Sending to ${model}...`);
+    // 3. Send to Railway backend with retry logic (max 3 attempts)
+    const MAX_RETRIES = 3;
+    let attempt = 0;
+    let lastError: Error | null = null;
+    let validationResult: ValidationResult | null = null;
+    let figmaJson: FigmaNode | null = null;
 
-    // Send request to UI (store promise resolver in module-level map)
-    figma.ui.postMessage({
-      type: 'mvp-call-railway',
-      payload: {
-        frameSnapshot,
-        designPalette,
-        imagePNG,
-        instructions: instructions || "Create a variation of this design",
-        model: model || "claude",
-        variationIndex,
-      },
-    });
+    while (attempt < MAX_RETRIES) {
+      attempt++;
+      console.log(`🔄 Attempt ${attempt}/${MAX_RETRIES}...`);
 
-    // Wait for UI to respond with Railway result (response handled in main message handler)
-    const result: IterationResponseMVP = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        mvpRailwayCallbacks.delete(variationIndex);
-        reject(new Error('Railway request timeout'));
-      }, 120000); // 2 min timeout
+      // Update status with retry info
+      if (attempt > 1) {
+        figma.ui.postMessage({
+          type: 'variation-status-update',
+          payload: {
+            variationIndex,
+            status: 'designing',
+            statusText: `Retrying (${attempt}/${MAX_RETRIES})`,
+          },
+        });
+      }
 
-      mvpRailwayCallbacks.set(variationIndex, { resolve, reject, timeout });
-    });
+      try {
+        // Send request to UI for Railway call (include previous errors for self-correction)
+        figma.ui.postMessage({
+          type: 'mvp-call-railway-json',
+          payload: {
+            extractedStyle,
+            imagePNG,
+            instructions: instructions || "Create a variation of this design",
+            model: model || "claude",
+            variationIndex,
+            previousErrors: validationResult ? {
+              errors: validationResult.errors,
+              suggestions: validationResult.suggestions,
+            } : undefined,
+            attemptNumber: attempt,
+          },
+        });
 
-    console.log(`✅ Received response: ${result.reasoning}`);
+        // Wait for Railway response
+        const rawResponse: any = await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            mvpRailwayCallbacks.delete(variationIndex);
+            reject(new Error('Railway request timeout'));
+          }, 120000); // 2 min timeout
 
-    // 5. Convert HTML/CSS to Figma
-    console.log("🔨 Converting HTML/CSS to Figma...");
-    const newFrame = await reconstructVariationMVP(
-      result.htmlLayout,
-      designPalette
-    );
+          mvpRailwayCallbacks.set(variationIndex, { resolve, reject, timeout });
+        });
+
+        console.log(`✅ Received raw response from ${model}`);
+
+        // Parse the figmaJson from response
+        figmaJson = rawResponse.figmaJson as FigmaNode;
+
+        // 4. Validate Figma JSON
+        console.log("🔍 Validating Figma JSON...");
+        validationResult = validateFigmaJson(figmaJson);
+
+        if (validationResult.valid) {
+          console.log("✅ Validation passed!");
+          break; // Success - exit retry loop
+        } else {
+          // Validation failed - prepare for retry
+          console.warn(`⚠️  Validation failed (attempt ${attempt}):`, validationResult.errors);
+          if (validationResult.suggestions.length > 0) {
+            console.log("   Suggestions:", validationResult.suggestions);
+          }
+
+          lastError = new Error(`Validation failed: ${validationResult.errors.join(', ')}`);
+
+          if (attempt >= MAX_RETRIES) {
+            throw lastError; // Max retries exceeded
+          }
+
+          // Continue to next retry iteration
+          continue;
+        }
+
+      } catch (error) {
+        console.error(`❌ Attempt ${attempt} failed:`, error);
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+
+        if (attempt >= MAX_RETRIES) {
+          throw lastError; // Max retries exceeded
+        }
+
+        // Continue to next retry iteration
+        continue;
+      }
+    }
+
+    // If we got here and figmaJson is still null, all retries failed
+    if (!figmaJson || !validationResult?.valid) {
+      throw new Error(`Failed after ${MAX_RETRIES} attempts: ${lastError?.message}`);
+    }
+
+    // 5. Generate Figma nodes from validated JSON
+    console.log("🏗️  Generating Figma nodes from JSON...");
+    const newFrame = await generateFigmaNodes(figmaJson);
 
     newFrame.name = `${frameNode.name} (Iteration ${variationIndex + 1})`;
 
@@ -2491,7 +2557,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
         variationIndex,
         status: 'complete',
         statusText: 'Iteration Complete',
-        reasoning: result.reasoning || undefined,
+        reasoning: (figmaJson as any).reasoning || undefined,
         createdNodeId: newFrame.id,
       },
     });
@@ -2502,7 +2568,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
       payload: {
         variationIndex,
         success: true,
-        reasoning: result.reasoning,
+        reasoning: (figmaJson as any).reasoning,
       },
     });
 
@@ -2531,7 +2597,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
       payload: {
         variationIndex,
         status: 'error',
-        statusText: 'Error when trying to create the design',
+        statusText: 'Failed after 3 attempts',
         error: error instanceof Error ? error.message : 'Failed to create iteration variation',
       },
     });

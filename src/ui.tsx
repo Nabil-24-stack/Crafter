@@ -90,10 +90,15 @@ const App = () => {
   const [userEmail, setUserEmail] = React.useState<string>('');
   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
 
-  // Design system state
-  const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [showSuccess, setShowSuccess] = React.useState(false);
+  // Design system state (DISABLED - keep code for future use)
+  // const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
+  // const [isScanning, setIsScanning] = React.useState(false);
+  // const [showSuccess, setShowSuccess] = React.useState(false);
+
+  // Skip design system scanning - go straight to chat
+  const designSystem = {} as DesignSystemData; // Dummy value to bypass scan screen
+  const isScanning = false;
+  const showSuccess = false;
 
   // Chat state
   const [chat, setChat] = React.useState<Chat>({
@@ -162,20 +167,21 @@ const App = () => {
           }
           break;
 
-        case 'design-system-data':
-          // Show success screen for 1 second before showing chat
-          setShowSuccess(true);
-          setTimeout(() => {
-            setDesignSystem(msg.payload);
-            setIsScanning(false);
-            setShowSuccess(false);
-          }, 1000);
-          console.log('Design system received:', {
-            components: msg.payload?.components?.length,
-            colors: msg.payload?.colors?.length,
-            textStyles: msg.payload?.textStyles?.length,
-          });
-          break;
+        // DISABLED: Design system scanning
+        // case 'design-system-data':
+        //   // Show success screen for 1 second before showing chat
+        //   setShowSuccess(true);
+        //   setTimeout(() => {
+        //     setDesignSystem(msg.payload);
+        //     setIsScanning(false);
+        //     setShowSuccess(false);
+        //   }, 1000);
+        //   console.log('Design system received:', {
+        //     components: msg.payload?.components?.length,
+        //     colors: msg.payload?.colors?.length,
+        //     textStyles: msg.payload?.textStyles?.length,
+        //   });
+        //   break;
 
         case 'selected-frame-data':
           console.log('Payload received:', JSON.stringify(msg.payload));
@@ -255,6 +261,7 @@ const App = () => {
 
         case 'mvp-call-railway':
           // Plugin is requesting UI to call Railway (plugin can't make HTTP requests)
+          // DEPRECATED: Old HTML/CSS pipeline
           (async () => {
             try {
               const { frameSnapshot, designPalette, imagePNG, instructions, model, variationIndex } = msg.payload;
@@ -279,6 +286,59 @@ const App = () => {
 
               const result = await response.json();
               console.log(`✅ Railway responded for variation ${variationIndex}`);
+
+              // Send result back to plugin
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'mvp-railway-response',
+                  payload: {
+                    variationIndex,
+                    result,
+                  },
+                },
+              }, '*');
+            } catch (error) {
+              console.error('Railway call failed:', error);
+              // Send error back to plugin
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'mvp-railway-response',
+                  payload: {
+                    variationIndex: msg.payload.variationIndex,
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                  },
+                },
+              }, '*');
+            }
+          })();
+          break;
+
+        case 'mvp-call-railway-json':
+          // NEW: Direct Figma JSON generation pipeline
+          (async () => {
+            try {
+              const { extractedStyle, imagePNG, instructions, model, variationIndex, previousErrors, attemptNumber } = msg.payload;
+              console.log(`UI calling Railway for Figma JSON (attempt ${attemptNumber}) variation ${variationIndex}...`);
+
+              const response = await fetch('https://crafter-production-6da6.up.railway.app/api/iterate-figma-json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  extractedStyle,
+                  imagePNG,
+                  instructions,
+                  model,
+                  previousErrors,
+                }),
+              });
+
+              if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Railway error ${response.status}: ${errorText}`);
+              }
+
+              const result = await response.json();
+              console.log(`✅ Railway responded with Figma JSON for variation ${variationIndex}`);
 
               // Send result back to plugin
               parent.postMessage({
@@ -424,11 +484,11 @@ const App = () => {
     }, 2000); // Poll every 2 seconds
   };
 
-  // Scan design system
-  const handleScanDesignSystem = () => {
-    setIsScanning(true);
-    parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
-  };
+  // DISABLED: Scan design system
+  // const handleScanDesignSystem = () => {
+  //   setIsScanning(true);
+  //   parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
+  // };
 
   // Handle new chat
   const handleNewChat = () => {
@@ -449,8 +509,8 @@ const App = () => {
     setIsAuthenticated(false);
     setAuthToken(null);
     setUserEmail('');
-    // Reset design system to take user back to welcome screen
-    setDesignSystem(null);
+    // DISABLED: Design system scanning
+    // setDesignSystem(null);
     // Reset chat
     setChat({
       id: generateId(),
@@ -1132,12 +1192,14 @@ const App = () => {
             <p className="welcome-subtitle">This may take time depending on how large you file is.</p>
           </div>
           <div className="initial-buttons">
-            <button
+            {/* DISABLED: Design system scanning */}
+            {/* <button
               className="button scan-button"
               onClick={handleScanDesignSystem}
             >
               Start Scan
-            </button>
+            </button> */}
+            <p style={{color: '#666'}}>Design system scanning disabled. Plugin will use selected frame style.</p>
           </div>
         </div>
       </div>
