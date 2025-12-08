@@ -3,6 +3,41 @@
 // ============================================================================
 
 /**
+ * Structural element in the frame
+ */
+export interface StructuralElement {
+  type: 'navigation' | 'header' | 'sidebar' | 'main-content' | 'footer' | 'card' | 'form' | 'unknown';
+  name: string;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  children: number;
+  hasText: boolean;
+  isAutoLayout: boolean;
+}
+
+/**
+ * Structural context of the frame
+ */
+export interface StructuralContext {
+  elements: StructuralElement[];
+  layout: {
+    type: 'sidebar-layout' | 'header-layout' | 'dashboard' | 'single-page' | 'unknown';
+    hasNavigation: boolean;
+    hasHeader: boolean;
+    hasSidebar: boolean;
+    hasFooter: boolean;
+  };
+  hierarchy: {
+    topLevel: string[]; // Names of top-level sections
+    contentArea: string | null; // Name of main content area
+  };
+}
+
+/**
  * Extracted style guide from a frame
  */
 export interface ExtractedStyle {
@@ -25,6 +60,7 @@ export interface ExtractedStyle {
     containerWidths: number[];
     commonLayouts: string[];
   };
+  structure?: StructuralContext; // NEW: Structural context
 }
 
 /**
@@ -199,6 +235,142 @@ function detectCommonLayouts(frame: FrameNode): string[] {
 }
 
 /**
+ * Identify the type of a structural element based on its name and position
+ */
+function identifyElementType(node: SceneNode, parentFrame: FrameNode): StructuralElement['type'] {
+  const name = node.name.toLowerCase();
+  const x = 'x' in node ? node.x : 0;
+  const y = 'y' in node ? node.y : 0;
+  const width = 'width' in node ? node.width : 0;
+  const height = 'height' in node ? node.height : 0;
+
+  // Check name patterns
+  if (name.includes('nav') || name.includes('sidebar') || name.includes('menu')) {
+    return x < parentFrame.width / 3 ? 'sidebar' : 'navigation';
+  }
+  if (name.includes('header') || name.includes('toolbar') || name.includes('topbar')) {
+    return 'header';
+  }
+  if (name.includes('footer') || name.includes('bottom')) {
+    return 'footer';
+  }
+  if (name.includes('main') || name.includes('content') || name.includes('body')) {
+    return 'main-content';
+  }
+  if (name.includes('card') || name.includes('tile')) {
+    return 'card';
+  }
+  if (name.includes('form') || name.includes('input')) {
+    return 'form';
+  }
+
+  // Check position patterns
+  if (y < 100 && width >= parentFrame.width * 0.8) {
+    return 'header';
+  }
+  if (x < 300 && height >= parentFrame.height * 0.7) {
+    return 'sidebar';
+  }
+  if (y > parentFrame.height - 200 && width >= parentFrame.width * 0.8) {
+    return 'footer';
+  }
+
+  // Check if it's likely main content (large central area)
+  if (width > parentFrame.width * 0.5 && height > parentFrame.height * 0.5) {
+    return 'main-content';
+  }
+
+  return 'unknown';
+}
+
+/**
+ * Extract structural context from a frame
+ */
+export function extractStructuralContext(frame: FrameNode): StructuralContext {
+  const elements: StructuralElement[] = [];
+  const topLevelNames: string[] = [];
+  let hasSidebar = false;
+  let hasHeader = false;
+  let hasFooter = false;
+  let hasNavigation = false;
+  let mainContentArea: string | null = null;
+
+  // Analyze only top-level children for main structure
+  frame.children.forEach((child, index) => {
+    if (child.type === 'FRAME' || child.type === 'GROUP' || child.type === 'INSTANCE') {
+      const elementType = identifyElementType(child, frame);
+
+      const element: StructuralElement = {
+        type: elementType,
+        name: child.name,
+        bounds: {
+          x: 'x' in child ? child.x : 0,
+          y: 'y' in child ? child.y : 0,
+          width: 'width' in child ? child.width : 0,
+          height: 'height' in child ? child.height : 0,
+        },
+        children: 'children' in child ? child.children.length : 0,
+        hasText: 'children' in child ? child.children.some(c => c.type === 'TEXT') : false,
+        isAutoLayout: child.type === 'FRAME' && child.layoutMode !== 'NONE',
+      };
+
+      elements.push(element);
+      topLevelNames.push(child.name);
+
+      // Update flags
+      if (elementType === 'sidebar') hasSidebar = true;
+      if (elementType === 'header') hasHeader = true;
+      if (elementType === 'footer') hasFooter = true;
+      if (elementType === 'navigation') hasNavigation = true;
+      if (elementType === 'main-content' && !mainContentArea) {
+        mainContentArea = child.name;
+      }
+    }
+  });
+
+  // Determine overall layout type
+  let layoutType: StructuralContext['layout']['type'] = 'unknown';
+  if (hasSidebar && hasHeader) {
+    layoutType = 'dashboard';
+  } else if (hasSidebar) {
+    layoutType = 'sidebar-layout';
+  } else if (hasHeader) {
+    layoutType = 'header-layout';
+  } else if (topLevelNames.length === 1) {
+    layoutType = 'single-page';
+  }
+
+  // If no explicit main content area found, try to identify it
+  if (!mainContentArea && elements.length > 0) {
+    // Find the largest element that's not navigation/header/footer
+    const contentElements = elements.filter(e =>
+      !['navigation', 'header', 'footer', 'sidebar'].includes(e.type)
+    );
+    if (contentElements.length > 0) {
+      const largest = contentElements.reduce((prev, curr) =>
+        (curr.bounds.width * curr.bounds.height) > (prev.bounds.width * prev.bounds.height) ? curr : prev
+      );
+      mainContentArea = largest.name;
+    }
+  }
+
+  return {
+    elements,
+    layout: {
+      type: layoutType,
+      hasNavigation: hasNavigation || hasSidebar,
+      hasHeader,
+      hasSidebar,
+      hasFooter,
+    },
+    hierarchy: {
+      topLevel: topLevelNames,
+      contentArea: mainContentArea,
+    },
+  };
+}
+
+/**
  * Extract style from a frame
  */
 export function extractStyleFromFrame(frame: FrameNode): ExtractedStyle {
@@ -283,6 +455,9 @@ export function extractStyleFromFrame(frame: FrameNode): ExtractedStyle {
       return DEFAULT_STYLE;
     }
 
+    // Extract structural context
+    const structuralContext = extractStructuralContext(frame);
+
     // Build extracted style with fallbacks
     return {
       colors: {
@@ -315,7 +490,8 @@ export function extractStyleFromFrame(frame: FrameNode): ExtractedStyle {
           ? [Math.round(frame.width)]
           : DEFAULT_STYLE.layout.containerWidths,
         commonLayouts: detectCommonLayouts(frame),
-      }
+      },
+      structure: structuralContext, // NEW: Include structural context
     };
 
   } catch (error) {

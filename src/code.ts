@@ -2420,6 +2420,14 @@ async function handleIterateDesignVariationMVP(payload: any) {
     console.log(`  → Typography sizes: ${extractedStyle.typography.sizes.join(', ')}`);
     console.log(`  → Spacing: padding ${extractedStyle.spacing.padding.join(', ')}, gaps ${extractedStyle.spacing.gaps.join(', ')}`);
 
+    // Log structural context if available
+    if (extractedStyle.structure) {
+      console.log(`  → Layout type: ${extractedStyle.structure.layout.type}`);
+      console.log(`  → Has sidebar: ${extractedStyle.structure.layout.hasSidebar}, Has header: ${extractedStyle.structure.layout.hasHeader}`);
+      console.log(`  → Content area: ${extractedStyle.structure.hierarchy.contentArea || 'not identified'}`);
+      console.log(`  → Top-level sections: ${extractedStyle.structure.hierarchy.topLevel.join(', ')}`);
+    }
+
     // 2. Export frame as PNG for visual reference
     console.log("🖼️  Exporting frame to PNG...");
     const pngBytes = await frameNode.exportAsync({

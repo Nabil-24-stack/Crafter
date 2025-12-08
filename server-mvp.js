@@ -207,9 +207,36 @@ ${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
 
 ` : '';
 
-  return `You are a Figma design expert. Create a new layout variation based on the visual style of the selected frame.
+  // Build structural context section
+  let structuralContext = '';
+  if (extractedStyle.structure) {
+    const { structure } = extractedStyle;
+    structuralContext = `
+## CURRENT FRAME STRUCTURE
 
-${errorContext}
+The selected frame has a **${structure.layout.type}** layout with these components:
+
+**Identified Sections:**
+${structure.elements.map(e => `- **${e.name}** (${e.type}): ${e.bounds.width}×${e.bounds.height}px at position (${e.bounds.x}, ${e.bounds.y})`).join('\n')}
+
+**Layout Analysis:**
+- Has Sidebar: ${structure.layout.hasSidebar ? 'Yes' : 'No'}
+- Has Header: ${structure.layout.hasHeader ? 'Yes' : 'No'}
+- Has Footer: ${structure.layout.hasFooter ? 'Yes' : 'No'}
+- Main Content Area: ${structure.hierarchy.contentArea || 'Center'}
+
+**IMPORTANT PRESERVATION RULES:**
+1. ${structure.layout.hasSidebar ? '**PRESERVE the sidebar** - Keep its position, width, and navigation elements intact' : ''}
+2. ${structure.layout.hasHeader ? '**PRESERVE the header** - Keep its position, height, and branding elements intact' : ''}
+3. **MODIFY ONLY the content area** named "${structure.hierarchy.contentArea || 'main content'}" based on user instructions
+4. **MAINTAIN the overall layout structure** - Don't change from ${structure.layout.type} to something else
+
+`;
+  }
+
+  return `You are a Figma design expert. Create a new layout variation that preserves key UI elements while creatively modifying the content area.
+
+${errorContext}${structuralContext}
 ## EXTRACTED VISUAL STYLE
 
 Use this style as your design reference:
@@ -276,7 +303,14 @@ Return ONLY valid JSON with this structure:
 }
 \`\`\`
 
-## CRITICAL RULES
+## DESIGN PRINCIPLES
+
+1. **Preserve Brand Consistency** - Keep navigation, headers, and key brand elements unchanged
+2. **Focus on Content Area** - Apply creative changes only to the main content area
+3. **Maintain Visual Hierarchy** - Respect the established hierarchy and information architecture
+4. **Use Consistent Spacing** - Apply the extracted spacing values throughout
+
+## TECHNICAL RULES
 
 1. **RGB colors MUST be 0-1 range** (NOT 0-255). Example: red = {r: 1, g: 0, b: 0}
 2. **Root must be type "FRAME"**
@@ -309,9 +343,38 @@ ${previousErrors.suggestions.map(s => `- ${s}`).join('\n')}
 
 ` : '';
 
-  return `You are a Figma design expert creating layout variations while preserving visual consistency.
+  // Build structural context section
+  let structuralContext = '';
+  if (extractedStyle.structure) {
+    const { structure } = extractedStyle;
+    structuralContext = `
+# Current Frame Structure
 
-${errorContext}
+<layout_analysis>
+Layout Type: ${structure.layout.type}
+Has Sidebar: ${structure.layout.hasSidebar ? 'Yes' : 'No'}
+Has Header: ${structure.layout.hasHeader ? 'Yes' : 'No'}
+Has Footer: ${structure.layout.hasFooter ? 'Yes' : 'No'}
+Main Content Area: ${structure.hierarchy.contentArea || 'Center'}
+</layout_analysis>
+
+<identified_sections>
+${structure.elements.map(e => `- ${e.name} (${e.type}): ${e.bounds.width}×${e.bounds.height}px at (${e.bounds.x}, ${e.bounds.y})`).join('\n')}
+</identified_sections>
+
+<preservation_rules>
+1. ${structure.layout.hasSidebar ? 'PRESERVE the sidebar - Keep its position, width, and navigation elements intact' : ''}
+2. ${structure.layout.hasHeader ? 'PRESERVE the header - Keep its position, height, and branding elements intact' : ''}
+3. MODIFY ONLY the content area named "${structure.hierarchy.contentArea || 'main content'}"
+4. MAINTAIN the overall ${structure.layout.type} layout structure
+</preservation_rules>
+
+`;
+  }
+
+  return `You are a Figma design expert creating layout variations while preserving key UI elements and brand consistency.
+
+${errorContext}${structuralContext}
 # Extracted Visual Style
 
 Use this style guide as your design reference:
@@ -382,7 +445,15 @@ Return ONLY valid JSON with this structure:
 }
 \`\`\`
 
-# Critical Requirements
+# Design Principles
+
+1. **Preserve Brand Consistency** - Keep navigation, headers, and key brand elements unchanged
+2. **Focus on Content Area** - Apply creative changes only to the main content area
+3. **Maintain Visual Hierarchy** - Respect the established hierarchy and information architecture
+4. **Use Consistent Spacing** - Apply the extracted spacing values throughout
+5. **Keep Original Structure** - Don't remove or relocate navigation elements
+
+# Technical Requirements
 
 1. **RGB colors MUST be 0-1 range** (NOT 0-255): red = {r: 1, g: 0, b: 0}
 2. **Root must be type "FRAME"**
