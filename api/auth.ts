@@ -136,7 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.log('User already exists, fetching existing user...');
           // Get existing user by email
           const { data: existingUsers } = await supabase.auth.admin.listUsers();
-          const existingUser = existingUsers?.users?.find(u => u.email === figmaUser.email);
+          const existingUser = existingUsers?.users?.find((u: any) => u.email === figmaUser.email);
 
           if (existingUser) {
             userId = existingUser.id;
