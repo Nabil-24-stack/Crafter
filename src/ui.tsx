@@ -12,6 +12,7 @@ import {
   VariationStatus,
 } from './types';
 import { ChatInterface } from './components/ChatInterface';
+import { generateLayout, iterateLayout } from './claudeService';
 import './ui.css';
 // @ts-ignore
 import crafterLogo from '../Logo/crafter_logo.png';
@@ -90,15 +91,10 @@ const App = () => {
   const [userEmail, setUserEmail] = React.useState<string>('');
   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
 
-  // Design system state (DISABLED - keep code for future use)
-  // const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
-  // const [isScanning, setIsScanning] = React.useState(false);
-  // const [showSuccess, setShowSuccess] = React.useState(false);
-
-  // Skip design system scanning - go straight to chat
-  const designSystem = {} as DesignSystemData; // Dummy value to bypass scan screen
-  const isScanning = false;
-  const showSuccess = false;
+  // Design system state
+  const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
+  const [isScanning, setIsScanning] = React.useState(false);
+  const [showSuccess, setShowSuccess] = React.useState(false);
 
   // Chat state
   const [chat, setChat] = React.useState<Chat>({
@@ -167,21 +163,20 @@ const App = () => {
           }
           break;
 
-        // DISABLED: Design system scanning
-        // case 'design-system-data':
-        //   // Show success screen for 1 second before showing chat
-        //   setShowSuccess(true);
-        //   setTimeout(() => {
-        //     setDesignSystem(msg.payload);
-        //     setIsScanning(false);
-        //     setShowSuccess(false);
-        //   }, 1000);
-        //   console.log('Design system received:', {
-        //     components: msg.payload?.components?.length,
-        //     colors: msg.payload?.colors?.length,
-        //     textStyles: msg.payload?.textStyles?.length,
-        //   });
-        //   break;
+        case 'design-system-data':
+          // Show success screen for 1 second before showing chat
+          setShowSuccess(true);
+          setTimeout(() => {
+            setDesignSystem(msg.payload);
+            setIsScanning(false);
+            setShowSuccess(false);
+          }, 1000);
+          console.log('Design system received:', {
+            components: msg.payload?.components?.length,
+            colors: msg.payload?.colors?.length,
+            textStyles: msg.payload?.textStyles?.length,
+          });
+          break;
 
         case 'selected-frame-data':
           console.log('Payload received:', JSON.stringify(msg.payload));
@@ -484,11 +479,11 @@ const App = () => {
     }, 2000); // Poll every 2 seconds
   };
 
-  // DISABLED: Scan design system
-  // const handleScanDesignSystem = () => {
-  //   setIsScanning(true);
-  //   parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
-  // };
+  // Scan design system
+  const handleScanDesignSystem = () => {
+    setIsScanning(true);
+    parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
+  };
 
   // Handle new chat
   const handleNewChat = () => {
@@ -733,44 +728,61 @@ const App = () => {
       const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds, model);
       console.log('Generated variation prompts:', variationPrompts);
 
-      // Update variations with sub-prompts (commented out - we show reasoning instead)
-      // updateVariationsWithPrompts(variationPrompts);
-
       // Build chat history for context
       const chatHistory = buildChatHistory();
 
-      // Start all iteration variations in TRUE PARALLEL
-      // Use Promise.all() to ensure all jobs start simultaneously
+      // Start all iteration variations using the pure SVG pipeline
       const variationPromises = variationPrompts.map(async (varPrompt, index) => {
         try {
           // Update status: designing
           updateVariationStatus(index, 'designing', 'AI is designing');
 
-          // Use MVP handler - send message to plugin code which handles everything
-          // This bypasses the old Supabase job queue system entirely
-          console.log(`Starting MVP iteration for variation ${index + 1}`);
+          console.log(`Starting pure SVG generation for variation ${index + 1}`);
 
-          // Send to plugin for MVP iteration (plugin code handles Railway call + rendering)
-          parent.postMessage(
-            {
-              pluginMessage: {
-                type: 'iterate-design-variation-mvp',
-                payload: {
-                  instructions: varPrompt,
-                  frameId: fid,
-                  variationIndex: index,
-                  totalVariations: variations,
-                  model: model,
-                },
-              },
-            },
-            '*'
+          // Use claudeService to generate SVG through Vercel/Supabase/Railway pipeline
+          const result = await iterateLayout(
+            imageData,
+            structuralHints,
+            varPrompt,
+            ds,
+            model,
+            chatHistory,
+            (jobId) => {
+              // Callback when job starts - could be used for realtime updates
+              console.log(`Job ${jobId} started for variation ${index + 1}`);
+              updateVariationStatus(index, 'designing', 'Generating SVG design', undefined);
+            }
           );
 
-          // Update status: complete
-          // Note: The plugin code will handle the actual rendering
-          // We'll get a callback when it's done
-          updateVariationStatus(index, 'complete', 'Iteration Complete', 'MVP iteration sent to plugin')
+          // Send SVG to plugin for rendering
+          if (result.svg) {
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: 'generate-single-variation',
+                  payload: {
+                    variation: {
+                      svg: result.svg,
+                      reasoning: result.reasoning,
+                    },
+                    variationIndex: index,
+                    totalVariations: variations,
+                  },
+                },
+              },
+              '*'
+            );
+
+            // Update status: complete
+            updateVariationStatus(
+              index,
+              'complete',
+              'Iteration Complete',
+              result.reasoning || 'SVG design generated successfully'
+            );
+          } else {
+            throw new Error('No SVG returned from generation');
+          }
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
           updateVariationStatus(
@@ -784,7 +796,6 @@ const App = () => {
       });
 
       // Wait for all variations to complete (or fail)
-      // This ensures true parallel execution
       await Promise.allSettled(variationPromises);
       console.log('✅ All variation jobs completed');
 
@@ -1192,14 +1203,12 @@ const App = () => {
             <p className="welcome-subtitle">This may take time depending on how large you file is.</p>
           </div>
           <div className="initial-buttons">
-            {/* DISABLED: Design system scanning */}
-            {/* <button
+            <button
               className="button scan-button"
               onClick={handleScanDesignSystem}
             >
               Start Scan
-            </button> */}
-            <p style={{color: '#666'}}>Design system scanning disabled. Plugin will use selected frame style.</p>
+            </button>
           </div>
         </div>
       </div>
