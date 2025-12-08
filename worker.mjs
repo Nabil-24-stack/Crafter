@@ -1322,27 +1322,48 @@ async function processIterateJob(job) {
 
 User wants: "${prompt}"
 
+CRITICAL: Your response must be ONLY the SVG code. No explanations, no markdown, no text before or after the SVG.
+
 ITERATION RULES:
 1. Analyze the existing design in the image
 2. Make the changes the user requested while maintaining visual consistency
 3. Use the design system's visual language (colors, typography, shadows, etc.)
 4. Include realistic text labels on ALL elements
-5. Return ONLY pure SVG markup (no markdown, no explanations)
+5. Start your response immediately with <svg and end with </svg>
 
-Generate a complete SVG mockup that fulfills this request.`;
+Generate a complete SVG mockup now:`;
 
-  // Call the selected AI model with vision
-  const aiResponse = selectedModel === 'gemini'
-    ? await callGeminiWithVision(systemPrompt, userPrompt, imageData)
-    : await callClaudeWithVision(systemPrompt, userPrompt, imageData);
+  // Try up to 2 times to get valid SVG
+  let svg = null;
+  let responseText = '';
 
-  const responseText = aiResponse.content[0]?.text || '';
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    console.log(`🔄 Attempt ${attempt} to generate SVG...`);
 
-  // Extract SVG from response
-  let svg = extractSVG(responseText);
+    // Call the selected AI model with vision
+    const aiResponse = selectedModel === 'gemini'
+      ? await callGeminiWithVision(systemPrompt, userPrompt, imageData)
+      : await callClaudeWithVision(systemPrompt, userPrompt, imageData);
 
-  if (!svg || !svg.includes('<svg')) {
-    throw new Error('Failed to extract valid SVG from AI response');
+    responseText = aiResponse.content[0]?.text || '';
+
+    // Log response for debugging
+    console.log(`📝 AI response length: ${responseText.length} characters`);
+    console.log(`📝 Response preview (first 500 chars): ${responseText.substring(0, 500)}`);
+
+    // Extract SVG from response
+    svg = extractSVG(responseText);
+
+    if (svg && svg.includes('<svg')) {
+      console.log(`✅ Valid SVG extracted on attempt ${attempt}`);
+      break;
+    } else {
+      console.warn(`⚠️  Attempt ${attempt} failed to extract valid SVG`);
+      if (attempt === 2) {
+        console.error('❌ Failed to extract SVG after 2 attempts. Last response:', responseText.substring(0, 2000));
+        throw new Error('Failed to extract valid SVG from AI response after 2 attempts');
+      }
+    }
   }
 
   // Sanitize SVG to remove Figma-unsupported features
