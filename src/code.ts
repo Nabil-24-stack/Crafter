@@ -2437,12 +2437,22 @@ async function handleIterateDesignVariationMVP(payload: any) {
     const imagePNG = uint8ArrayToBase64(pngBytes);
     console.log(`  → ${Math.round(imagePNG.length / 1024)} KB`);
 
-    // 3. Send to Railway backend with retry logic (max 3 attempts)
+    // 3. Build frame snapshot and design palette for HTML/CSS pipeline
+    console.log("📸 Building frame snapshot for HTML/CSS pipeline...");
+    const frameSnapshot = await buildFrameSnapshot(frameNode, 5);
+    console.log(`  → ${frameSnapshot.children.length} top-level nodes captured`);
+
+    console.log("🎨 Extracting design palette...");
+    const designPalette = await extractFrameScopedPalette(frameNode);
+    console.log(`  → ${designPalette.components.length} components in palette`);
+
+    // 4. Send to Railway backend with retry logic (max 3 attempts)
     const MAX_RETRIES = 3;
     let attempt = 0;
     let lastError: Error | null = null;
     let validationResult: ValidationResult | null = null;
-    let figmaJson: FigmaNode | null = null;
+    let htmlLayout: any = null;
+    let reasoning: string = '';
 
     while (attempt < MAX_RETRIES) {
       attempt++;
@@ -2461,20 +2471,16 @@ async function handleIterateDesignVariationMVP(payload: any) {
       }
 
       try {
-        // Send request to UI for Railway call (include previous errors for self-correction)
+        // Send request to UI for Railway call (HTML/CSS pipeline for SVG generation)
         figma.ui.postMessage({
-          type: 'mvp-call-railway-json',
+          type: 'mvp-call-railway',  // Changed back to HTML/CSS pipeline
           payload: {
-            extractedStyle,
+            frameSnapshot,
+            designPalette,
             imagePNG,
             instructions: instructions || "Create a variation of this design",
             model: model || "claude",
             variationIndex,
-            previousErrors: validationResult ? {
-              errors: validationResult.errors,
-              suggestions: validationResult.suggestions,
-            } : undefined,
-            attemptNumber: attempt,
           },
         });
 
@@ -2490,32 +2496,19 @@ async function handleIterateDesignVariationMVP(payload: any) {
 
         console.log(`✅ Received raw response from ${model}`);
 
-        // Parse the figmaJson from response
-        figmaJson = rawResponse.figmaJson as FigmaNode;
+        // Parse the HTML/CSS from response
+        htmlLayout = rawResponse.htmlLayout;
+        reasoning = rawResponse.reasoning;
 
-        // 4. Validate Figma JSON
-        console.log("🔍 Validating Figma JSON...");
-        validationResult = validateFigmaJson(figmaJson);
-
-        if (validationResult.valid) {
-          console.log("✅ Validation passed!");
-          break; // Success - exit retry loop
-        } else {
-          // Validation failed - prepare for retry
-          console.warn(`⚠️  Validation failed (attempt ${attempt}):`, validationResult.errors);
-          if (validationResult.suggestions.length > 0) {
-            console.log("   Suggestions:", validationResult.suggestions);
-          }
-
-          lastError = new Error(`Validation failed: ${validationResult.errors.join(', ')}`);
-
-          if (attempt >= MAX_RETRIES) {
-            throw lastError; // Max retries exceeded
-          }
-
-          // Continue to next retry iteration
-          continue;
+        if (!htmlLayout || !htmlLayout.html || !htmlLayout.css) {
+          throw new Error("Invalid response: missing HTML/CSS layout");
         }
+
+        console.log("✅ Received HTML/CSS layout");
+
+        // Success - exit retry loop
+        validationResult = { valid: true, errors: [], suggestions: [], warnings: [] };
+        break;
 
       } catch (error) {
         console.error(`❌ Attempt ${attempt} failed:`, error);
@@ -2530,14 +2523,14 @@ async function handleIterateDesignVariationMVP(payload: any) {
       }
     }
 
-    // If we got here and figmaJson is still null, all retries failed
-    if (!figmaJson || !validationResult?.valid) {
+    // If we got here and the frame wasn't created, all retries failed
+    if (!validationResult?.valid) {
       throw new Error(`Failed after ${MAX_RETRIES} attempts: ${lastError?.message}`);
     }
 
-    // 5. Generate Figma nodes from validated JSON
-    console.log("🏗️  Generating Figma nodes from JSON...");
-    const newFrame = await generateFigmaNodes(figmaJson);
+    // Convert HTML/CSS to Figma frame
+    console.log("🏗️  Converting HTML/CSS to Figma nodes...");
+    const newFrame = await reconstructVariationMVP(htmlLayout, designPalette);
 
     newFrame.name = `${frameNode.name} (Iteration ${variationIndex + 1})`;
 
@@ -2565,7 +2558,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
         variationIndex,
         status: 'complete',
         statusText: 'Iteration Complete',
-        reasoning: (figmaJson as any).reasoning || undefined,
+        reasoning: reasoning || undefined,
         createdNodeId: newFrame.id,
       },
     });
@@ -2576,7 +2569,7 @@ async function handleIterateDesignVariationMVP(payload: any) {
       payload: {
         variationIndex,
         success: true,
-        reasoning: (figmaJson as any).reasoning,
+        reasoning: reasoning,
       },
     });
 
