@@ -172,8 +172,8 @@ Return a JSON object with HTML/CSS layout structure:
 {
   "reasoning": "Brief explanation of what you changed and why (1-2 sentences)",
   "htmlLayout": {
-    "html": "<div class=\\"screen\\">\\n  <div class=\\"app-logo\\"></div>\\n  <div class=\\"login-form\\"></div>\\n  <section class=\\"pricing\\">\\n    <div class=\\"card-starter\\"></div>\\n    <div class=\\"card-pro\\"></div>\\n  </section>\\n</div>",
-    "css": ".screen { display: flex; flex-direction: column; gap: 48px; padding: 80px; }\\n.pricing { display: flex; flex-direction: row; gap: 24px; }\\n.card-starter, .card-pro { width: 320px; }",
+    "html": "<div class=\\"screen\\">\\n  <div class=\\"login-side\\">\\n    <div class=\\"app-logo\\"></div>\\n    <div class=\\"login-form\\"></div>\\n  </div>\\n  <div class=\\"pricing-side\\">\\n    <h1>Choose Your Plan</h1>\\n    <div class=\\"pricing-cards\\">\\n      <div class=\\"card\\">\\n        <h2>Starter</h2>\\n        <p class=\\"price\\">$29/mo</p>\\n        <p>Perfect for small teams</p>\\n      </div>\\n      <div class=\\"card\\">\\n        <h2>Pro</h2>\\n        <p class=\\"price\\">$99/mo</p>\\n        <p>For growing businesses</p>\\n      </div>\\n    </div>\\n  </div>\\n</div>",
+    "css": ".screen { display: flex; flex-direction: row; gap: 0; background-color: #f5f5f5; }\\n.login-side { display: flex; flex-direction: column; gap: 48px; padding: 80px; width: 50%; }\\n.pricing-side { display: flex; flex-direction: column; gap: 32px; padding: 80px; width: 50%; background-color: #ffffff; }\\nh1 { font-size: 48px; font-weight: bold; color: #000000; }\\n.pricing-cards { display: flex; flex-direction: row; gap: 24px; }\\n.card { display: flex; flex-direction: column; gap: 16px; padding: 32px; background-color: #f9f9f9; border-radius: 12px; width: 280px; }\\nh2 { font-size: 32px; font-weight: bold; color: #333333; }\\n.price { font-size: 24px; color: #000000; font-weight: bold; }\\np { font-size: 16px; color: #666666; }",
     "componentMap": {
       "app-logo": {
         "componentKey": "9181c660...",
@@ -182,10 +182,6 @@ Return a JSON object with HTML/CSS layout structure:
       "login-form": {
         "componentKey": "248d7d71...",
         "componentName": "Login Form"
-      },
-      "card-starter": {
-        "componentKey": "abc123...",
-        "componentName": "Pricing Card - Starter"
       }
     }
   }
@@ -193,22 +189,27 @@ Return a JSON object with HTML/CSS layout structure:
 \`\`\`
 
 ### HTML RULES:
-- Use semantic tags (<div>, <section>, <header>, etc.)
+- **CRITICAL**: Include actual text content for headings, paragraphs, labels, and buttons
+- Use semantic tags: <h1>, <h2>, <p>, <section>, <div>, <header>, <span>
+- For text elements like headings and pricing, write the actual text: <h1>Choose Your Plan</h1>, <p>$29/mo</p>
+- For design system components, use empty divs with class names mapped in componentMap
 - Use descriptive class names for each element
-- For design system components, use class names and map them in componentMap
 - Keep HTML structure simple and clean
 
 ### CSS RULES:
-- Use Flexbox for all layouts (display: flex)
+- **CRITICAL**: Use Flexbox for ALL layouts (display: flex)
 - Use flex-direction: column or row
 - Use gap for spacing between children
 - Use padding for container spacing
-- Specify width/height for components when needed
-- Use simple property: value format
+- **Specify background-color for visual sections** (e.g., cards, panels, containers)
+- Specify width/height when needed for proper layout
+- Include text styles: font-size, font-weight, color for h1, h2, p, etc.
+- Use border-radius for rounded corners on cards/containers
 
 ### COMPONENT MAPPING:
-- Map each component class name to its Figma componentKey
-- This allows us to create actual Figma component instances
+- Map ONLY design system components (from the available components list)
+- For custom UI elements (pricing cards, headers, text), create them in HTML/CSS directly
+- Example: app-logo → maps to Logo component, but pricing cards → created as HTML/CSS divs with text
 
 Now create the new layout variation based on the user's instructions.`;
 }
@@ -267,34 +268,36 @@ Return ONLY a valid JSON object with HTML/CSS structure:
 {
   "reasoning": "1-2 sentence explanation of changes",
   "htmlLayout": {
-    "html": "<div class=\\"container\\">...</div>",
-    "css": ".container { display: flex; flex-direction: column; gap: 24px; padding: 32px; }",
+    "html": "<div class=\\"screen\\">\\n  <div class=\\"login-side\\">\\n    <div class=\\"app-logo\\"></div>\\n    <div class=\\"login-form\\"></div>\\n  </div>\\n  <div class=\\"pricing-side\\">\\n    <h1>Choose Your Plan</h1>\\n    <div class=\\"pricing-cards\\">\\n      <div class=\\"card\\">\\n        <h2>Starter</h2>\\n        <p class=\\"price\\">$29/mo</p>\\n        <p>Perfect for small teams</p>\\n      </div>\\n      <div class=\\"card\\">\\n        <h2>Pro</h2>\\n        <p class=\\"price\\">$99/mo</p>\\n        <p>For growing businesses</p>\\n      </div>\\n    </div>\\n  </div>\\n</div>",
+    "css": ".screen { display: flex; flex-direction: row; gap: 0; background-color: #f5f5f5; }\\n.login-side { display: flex; flex-direction: column; gap: 48px; padding: 80px; width: 50%; }\\n.pricing-side { display: flex; flex-direction: column; gap: 32px; padding: 80px; width: 50%; background-color: #ffffff; }\\nh1 { font-size: 48px; font-weight: bold; color: #000000; }\\n.pricing-cards { display: flex; flex-direction: row; gap: 24px; }\\n.card { display: flex; flex-direction: column; gap: 16px; padding: 32px; background-color: #f9f9f9; border-radius: 12px; width: 280px; }\\nh2 { font-size: 32px; font-weight: bold; color: #333333; }\\n.price { font-size: 24px; color: #000000; font-weight: bold; }\\np { font-size: 16px; color: #666666; }",
     "componentMap": {
-      "class-name": {
-        "componentKey": "component-key-here",
-        "componentName": "Component Name"
-      }
+      "app-logo": { "componentKey": "9181c660...", "componentName": "App Logo" },
+      "login-form": { "componentKey": "248d7d71...", "componentName": "Login Form" }
     }
   }
 }
 \`\`\`
 
 ### HTML Requirements:
-- Use semantic HTML5 tags
+- **CRITICAL**: Include actual text content for headings, paragraphs, labels, and buttons
+- Use semantic HTML5 tags: <h1>, <h2>, <p>, <section>, <div>, <header>
+- For text elements, write the actual text: <h1>Choose Your Plan</h1>, <p>$29/mo</p>
+- For design system components, use empty divs with class names mapped in componentMap
 - Use descriptive class names
-- Map component classes in componentMap
 - Keep structure simple
 
 ### CSS Requirements:
-- Use Flexbox (display: flex, flex-direction, gap, padding)
-- Avoid absolute positioning
+- **CRITICAL**: Use Flexbox for ALL layouts (display: flex, flex-direction, gap, padding)
+- **Specify background-color for visual sections** (cards, panels, containers)
+- Include text styles: font-size, font-weight, color for h1, h2, p, etc.
+- Use border-radius for rounded corners
 - Use px units for dimensions
-- Keep it minimal and focused on layout
+- Avoid absolute positioning
 
 ### Component Mapping:
-- For each design system component, assign a class name
-- Map that class to the componentKey in componentMap
-- Example: "app-logo" → { componentKey: "9181c660...", componentName: "App Logo" }
+- Map ONLY design system components (from available components list)
+- For custom UI (pricing cards, headers, text), create them in HTML/CSS directly
+- Example: app-logo → Logo component, but pricing cards → HTML/CSS divs with text
 
 Return your response now.`;
 }

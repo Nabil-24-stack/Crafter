@@ -12,6 +12,7 @@ export interface ParsedNode {
   tagName: string;
   className: string;
   attributes: Record<string, string>;
+  textContent?: string;  // Direct text content of this node
   children: ParsedNode[];
   styles: ComputedStyles;
 }
@@ -37,6 +38,13 @@ export interface ComputedStyles {
   alignItems?: string;
   flexGrow?: string;
   flexShrink?: string;
+  // Text styles
+  color?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  fontFamily?: string;
+  textAlign?: string;
+  lineHeight?: string;
 }
 
 /**
@@ -146,6 +154,24 @@ export function parseHTMLWithStyles(html: string, css: string): ParsedNode {
     // Compute styles for this element
     const styles = computeStyles(element, cssRules);
 
+    // Extract direct text content (not including children's text)
+    let textContent: string | undefined;
+    if (element.childNodes) {
+      // Get only the direct text nodes, not nested element text
+      const directTextNodes = element.childNodes.filter(
+        node => node.nodeType === 3 // Text node
+      );
+      if (directTextNodes.length > 0) {
+        textContent = directTextNodes
+          .map(node => node.text || '')
+          .join('')
+          .trim();
+        if (textContent === '') {
+          textContent = undefined;
+        }
+      }
+    }
+
     // Recursively traverse children
     const children: ParsedNode[] = [];
     if (element.childNodes) {
@@ -160,6 +186,7 @@ export function parseHTMLWithStyles(html: string, css: string): ParsedNode {
       tagName: tagName.toLowerCase(),
       className,
       attributes,
+      textContent,
       styles,
       children
     };
@@ -392,6 +419,72 @@ export function parseColor(cssColor: string | undefined): { r: number; g: number
 }
 
 // ============================================================================
+// TEXT NODE CREATION
+// ============================================================================
+
+/**
+ * Create a Figma text node from HTML text content and CSS styles
+ */
+async function createTextNode(
+  textContent: string,
+  styles: ComputedStyles,
+  nodeName: string
+): Promise<TextNode> {
+  const text = figma.createText();
+  text.name = nodeName;
+
+  // Load font before setting characters
+  const fontFamily = styles.fontFamily?.replace(/['"]/g, '').split(',')[0].trim() || 'Inter';
+  const fontWeight = styles.fontWeight === 'bold' || parseInt(styles.fontWeight || '400') >= 700 ? '700' : '400';
+
+  try {
+    await figma.loadFontAsync({ family: fontFamily, style: 'Regular' });
+  } catch {
+    // Fallback to Inter if custom font not available
+    await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+  }
+
+  text.characters = textContent;
+
+  // Apply font size
+  const fontSize = parseCSSUnit(styles.fontSize);
+  if (fontSize > 0) {
+    text.fontSize = fontSize;
+  } else {
+    text.fontSize = 16; // Default
+  }
+
+  // Apply color
+  const textColor = parseColor(styles.color);
+  if (textColor) {
+    text.fills = [{ type: 'SOLID', color: textColor }];
+  }
+
+  // Apply text alignment
+  if (styles.textAlign) {
+    switch (styles.textAlign) {
+      case 'left':
+        text.textAlignHorizontal = 'LEFT';
+        break;
+      case 'center':
+        text.textAlignHorizontal = 'CENTER';
+        break;
+      case 'right':
+        text.textAlignHorizontal = 'RIGHT';
+        break;
+    }
+  }
+
+  // Apply line height
+  const lineHeight = parseCSSUnit(styles.lineHeight);
+  if (lineHeight > 0) {
+    text.lineHeight = { value: lineHeight, unit: 'PIXELS' };
+  }
+
+  return text;
+}
+
+// ============================================================================
 // MAIN CONVERSION FUNCTION: HTML/CSS → Figma Nodes
 // ============================================================================
 
@@ -458,11 +551,23 @@ async function convertNodeToFigma(
     }
   }
 
-  // 2. Not a component - create a frame (container)
+  // 2. Check if this is a text-only node (h1, h2, p, span with text content)
+  const textOnlyTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'label', 'a'];
+  if (textOnlyTags.includes(node.tagName) && node.textContent && node.children.length === 0) {
+    console.log(`  📝 Creating text node: ${node.textContent.substring(0, 30)}...`);
+    const textNode = await createTextNode(
+      node.textContent,
+      node.styles,
+      node.className || node.tagName
+    );
+    return textNode;
+  }
+
+  // 3. Not a component or text-only - create a frame (container)
   const frame = figma.createFrame();
   frame.name = node.className || node.tagName;
 
-  // 3. Apply CSS layout → Figma Auto Layout
+  // 4. Apply CSS layout → Figma Auto Layout
   const layout = cssToFigmaLayout(node.styles);
 
   if (layout.layoutMode !== 'NONE') {
@@ -481,19 +586,22 @@ async function convertNodeToFigma(
     }
   }
 
-  // 4. Apply background color
+  // 5. Apply background color
   const bgColor = parseColor(node.styles.backgroundColor);
   if (bgColor) {
     frame.fills = [{ type: 'SOLID', color: bgColor }];
+  } else {
+    // No explicit background - make frame transparent (visible in Figma but no fill)
+    frame.fills = [];
   }
 
-  // 5. Apply border radius
+  // 6. Apply border radius
   const borderRadius = parseCSSUnit(node.styles.borderRadius);
   if (borderRadius) {
     frame.cornerRadius = borderRadius;
   }
 
-  // 6. Determine frame sizing based on CSS
+  // 7. Determine frame sizing based on CSS
   const width = parseCSSUnit(node.styles.width);
   const height = parseCSSUnit(node.styles.height);
   const hasExplicitWidth = width > 0;
@@ -570,7 +678,23 @@ async function convertNodeToFigma(
     }
   }
 
-  // 7. Recursively convert children
+  // 7. Add direct text content if present (before children)
+  if (node.textContent && node.children.length > 0) {
+    // Frame has both text content and child elements
+    // Create a text node for the direct text
+    try {
+      const textNode = await createTextNode(
+        node.textContent,
+        node.styles,
+        `${node.className || node.tagName}-text`
+      );
+      frame.appendChild(textNode);
+    } catch (error) {
+      console.warn(`  ⚠️  Failed to create text node for "${node.textContent}":`, error);
+    }
+  }
+
+  // 8. Recursively convert children
   for (const child of node.children) {
     try {
       const childNode = await convertNodeToFigma(child, htmlComponentMap, figmaComponentMap, false);
@@ -580,7 +704,7 @@ async function convertNodeToFigma(
     }
   }
 
-  // 8. Final size validation - ensure frame is visible
+  // 9. Final size validation - ensure frame is visible
   if (frame.width === 0 || frame.height === 0) {
     console.warn(`  ⚠️  Frame "${frame.name}" has zero dimensions, applying minimum size`);
     frame.resize(
