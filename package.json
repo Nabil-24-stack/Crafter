@@ -26,6 +26,8 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
     "@figma/eslint-plugin-figma-plugins": "*",
     "@figma/plugin-typings": "*",
     "@types/css-tree": "^2.3.11",
@@ -34,6 +36,7 @@
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
+    "babel-loader": "^10.0.0",
     "css-loader": "^6.8.1",
     "eslint": "^8.54.0",
     "html-inline-script-webpack-plugin": "^3.2.1",

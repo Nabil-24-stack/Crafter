@@ -15,11 +15,44 @@ module.exports = (env, argv) => ({
 
   module: {
     rules: [
-      // TypeScript loader
+      // TypeScript + Babel loader (for ES5 compatibility)
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                ['@babel/preset-env', {
+                  targets: {
+                    // Figma plugin sandbox is ES5-like
+                    ie: '11'
+                  },
+                  modules: false
+                }]
+              ]
+            }
+          },
+          'ts-loader'
+        ],
         exclude: /node_modules/,
+      },
+      // Babel loader for node_modules (transpile dependencies)
+      {
+        test: /\.js$/,
+        include: /node_modules\/(node-html-parser|css-tree)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              ['@babel/preset-env', {
+                targets: {
+                  ie: '11'
+                }
+              }]
+            ]
+          }
+        }
       },
       // CSS loader
       {
