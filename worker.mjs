@@ -1301,175 +1301,59 @@ Remember: Every button, card, header, and UI element MUST have visible text labe
 
 
 /**
- * Process an iterate job - EDITABLE LAYOUT MODE with STREAMING
- * Uses PNG screenshot + structural hints + design system to generate Figma JSON
- * Streams reasoning tokens in real-time to the database
- * Auto-retries once on parse/schema errors
+ * Process an iterate job - SVG MODE with image context
+ * Uses PNG screenshot + design system to generate pure SVG
  */
 async function processIterateJob(job) {
-  const { prompt, imageData, designSystem, model, chatHistory, structuralHints } = job.input;
+  const { prompt, imageData, designSystem, model, chatHistory } = job.input;
 
   const selectedModel = model || 'claude';
-  console.log(`🎨 Editable Layout Mode (STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image + structural hints`);
+  console.log(`🎨 SVG Mode (Iteration): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image context for SVG generation`);
 
-  const systemPrompt = buildLayoutSystemPrompt(designSystem);
+  const systemPrompt = buildSVGSystemPrompt(designSystem);
 
-  // Build user prompt with structural hints and context
+  // Build user prompt with chat history context
   let contextSection = '';
   if (chatHistory && chatHistory.trim()) {
     contextSection = `\n${chatHistory}\n\nNow, using this context from previous iterations, `;
   }
 
-  let structuralHintsSection = '';
-  if (structuralHints) {
-    structuralHintsSection = `\n\nCURRENT STRUCTURE (semantic hints about the existing design):
-${JSON.stringify(structuralHints, null, 2)}
-
-${structuralHints.usesAutoLayout ? 'This frame uses Auto Layout.' : 'This frame does NOT use Auto Layout yet - consider adding Auto Layout structure in your output.'}
-`;
-  }
-
-  const baseUserPrompt = `You are looking at an existing design (see image).${contextSection}${structuralHintsSection}
+  const userPrompt = `You are looking at an existing design (see the image).${contextSection}
 
 User wants: "${prompt}"
 
-Think in HTML/CSS Flexbox, output Figma JSON.
-
 ITERATION RULES:
-1. Preserve all content and structure unless user explicitly requests changes
-2. Make ONLY the changes the user requested
-3. Use components from the design system when appropriate
-4. Maintain visual consistency with the existing design
-5. Output complete Figma JSON structure in \`\`\`json block`;
+1. Analyze the existing design in the image
+2. Make the changes the user requested while maintaining visual consistency
+3. Use the design system's visual language (colors, typography, shadows, etc.)
+4. Include realistic text labels on ALL elements
+5. Return ONLY pure SVG markup (no markdown, no explanations)
 
-  // Track streaming state
-  let reasoningBuffer = '';
-  let chunkIndex = 0;
-  let jsonStarted = false;
-  let jsonContent = '';
-  const CHUNK_SIZE = 120; // Insert chunks every ~120 characters
-  const CHUNK_DELAY_MS = 3000; // 3 second delay between chunks
+Generate a complete SVG mockup that fulfills this request.`;
 
-  // Callback for processing streaming tokens
-  const onToken = async (token, fullText) => {
-    // Check if we've reached the JSON content (stop streaming reasoning)
-    if (!jsonStarted && (fullText.includes('```json') || fullText.includes('"version"'))) {
-      jsonStarted = true;
+  // Call the selected AI model with vision
+  const aiResponse = selectedModel === 'gemini'
+    ? await callGeminiWithVision(systemPrompt, userPrompt, imageData)
+    : await callClaudeWithVision(systemPrompt, userPrompt, imageData);
 
-      // Send any remaining reasoning buffer
-      if (reasoningBuffer.trim() && job.id) {
-        await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
-        reasoningBuffer = '';
-      }
+  const responseText = aiResponse.content[0]?.text || '';
 
-      // Initial JSON progress indicator
-      if (job.id) {
-        await insertReasoningChunk(job.id, 'Generating structure...', chunkIndex++);
-      }
-    }
+  // Extract SVG from response
+  let svg = extractSVG(responseText);
 
-    // Only accumulate reasoning (before JSON starts)
-    if (!jsonStarted) {
-      reasoningBuffer += token;
-
-      // Insert chunk when buffer reaches threshold
-      if (reasoningBuffer.length >= CHUNK_SIZE && job.id) {
-        await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
-        console.log(`📝 Streamed reasoning chunk ${chunkIndex} (${reasoningBuffer.length} chars)`);
-        reasoningBuffer = '';
-        await new Promise(resolve => setTimeout(resolve, CHUNK_DELAY_MS));
-      }
-    } else {
-      jsonContent += token;
-    }
-  };
-
-  // Auto-retry logic (up to 2 attempts)
-  let attempt = 0;
-  let lastError = null;
-  let invalidJSON = null;
-  let userPrompt = baseUserPrompt;
-
-  while (attempt < 2) {
-    attempt++;
-
-    // Send retry notification on second attempt
-    if (attempt === 2 && job.id) {
-      await insertReasoningChunk(job.id, '⚠️ First attempt failed, retrying...', chunkIndex++);
-      console.log('⚠️ Retry attempt 2/2');
-      userPrompt = buildRetryPrompt(baseUserPrompt, lastError, invalidJSON);
-      // Reset streaming state for retry
-      reasoningBuffer = '';
-      jsonStarted = false;
-      jsonContent = '';
-    }
-
-    try {
-      // Call the selected AI model with STREAMING
-      const aiResponse = selectedModel === 'gemini'
-        ? await callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken)
-        : await callClaudeWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken);
-
-      const responseText = aiResponse.content[0]?.text || '';
-
-      // Send any remaining reasoning buffer (final chunk)
-      if (reasoningBuffer.trim() && job.id) {
-        await insertReasoningChunk(job.id, reasoningBuffer, chunkIndex++);
-        console.log(`📝 Streamed final reasoning chunk ${chunkIndex}`);
-      }
-
-      console.log(`✅ Streaming complete: ${chunkIndex} chunks sent`);
-
-      // Extract and validate JSON
-      console.log('📝 Response text length:', responseText.length);
-      console.log('📝 Response preview:', responseText.substring(0, 500));
-      const json = extractFigmaJSON(responseText);
-      console.log('📦 Extracted JSON keys:', Object.keys(json));
-      console.log('📦 Has figmaStructure:', !!json.figmaStructure);
-      const validation = validateFigmaStructure(json, designSystem);
-
-      if (!validation.valid && validation.type === 'SCHEMA_ERROR') {
-        // Schema error - retry
-        lastError = validation;
-        invalidJSON = responseText;
-        console.error('Schema validation failed:', validation);
-        continue;
-      }
-
-      // Success! Extract reasoning
-      let reasoning = '';
-      const jsonBlockMatch = responseText.match(/```json/);
-      if (jsonBlockMatch) {
-        reasoning = responseText.substring(0, jsonBlockMatch.index).trim();
-      } else {
-        const versionMatch = responseText.match(/\{\s*"version"/);
-        if (versionMatch) {
-          reasoning = responseText.substring(0, versionMatch.index).trim();
-        } else {
-          reasoning = json.reasoning || '';
-        }
-      }
-
-      console.log('✅ Editable layout iteration complete');
-      console.log('📦 Returning figmaStructure:', JSON.stringify(json.figmaStructure, null, 2).substring(0, 300));
-
-      return {
-        figmaStructure: json.figmaStructure,
-        reasoning: reasoning || json.reasoning || `Layout modified with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'}`,
-        warnings: validation.warnings
-      };
-
-    } catch (parseError) {
-      // Parse error - retry
-      lastError = { message: parseError.message };
-      invalidJSON = responseText || 'No response received';
-      console.error('Parse error:', parseError);
-      continue;
-    }
+  if (!svg || !svg.includes('<svg')) {
+    throw new Error('Failed to extract valid SVG from AI response');
   }
 
-  // Both attempts failed
-  throw new Error(`Failed after 2 attempts: ${lastError?.message || 'Unknown error'}`);
+  // Sanitize SVG to remove Figma-unsupported features
+  svg = sanitizeSVG(svg);
+
+  console.log('✅ SVG generated successfully for iteration');
+
+  return {
+    svg,
+    reasoning: `SVG mockup iterated with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'}`
+  };
 }
 
 /**
