@@ -9,6 +9,7 @@ import {
   FrameSnapshotMVP,
   SnapshotNodeMVP,
 } from './mvpTypes';
+import { DesignSystemData } from './types';
 
 /**
  * SINGLE SOURCE OF TRUTH for component key resolution.
@@ -240,4 +241,64 @@ export async function preloadFonts() {
   );
 
   console.log("✅ Fonts preloaded");
+}
+
+/**
+ * Convert full DesignSystemData to MVP palette format
+ * Uses ALL components from design system (not frame-scoped)
+ * This allows LLM to use any component, not just ones already in the frame
+ */
+export async function convertDesignSystemToMVPPalette(
+  designSystem: DesignSystemData,
+  frame: FrameNode
+): Promise<DesignPaletteMVP> {
+  console.log(`🔄 Converting full design system (${designSystem.components.length} components) to MVP palette...`);
+
+  // Get usage counts from frame for priority ordering
+  const usageCounts = new Map<string, number>();
+
+  async function traverse(node: SceneNode): Promise<void> {
+    if (node.type === "INSTANCE") {
+      try {
+        const key = await getComponentKey(node as InstanceNode);
+        usageCounts.set(key, (usageCounts.get(key) || 0) + 1);
+      } catch (error) {
+        // Skip instances without valid components
+      }
+    }
+
+    if ("children" in node) {
+      await Promise.all(node.children.map(child => traverse(child)));
+    }
+  }
+
+  await traverse(frame);
+
+  console.log(`📊 Found ${usageCounts.size} unique components used in frame`);
+
+  // Convert ComponentData[] to DesignSystemComponentSummaryMVP[]
+  const components: DesignSystemComponentSummaryMVP[] = designSystem.components.map(comp => ({
+    key: comp.key,
+    name: comp.name,
+    role: inferComponentRole(comp.name),
+    usageCount: usageCounts.get(comp.key) || 0, // 0 if not in current frame
+    size: {
+      w: comp.width || 100,
+      h: comp.height || 40
+    },
+    // Simplified variant handling - just indicate if it's a component set
+    variants: comp.type === 'COMPONENT_SET' ? ['default'] : undefined
+  }));
+
+  // Sort: frame-scoped components first (usageCount > 0), then by name
+  components.sort((a, b) => {
+    if (a.usageCount > 0 && b.usageCount === 0) return -1;
+    if (a.usageCount === 0 && b.usageCount > 0) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const usedCount = components.filter(c => c.usageCount > 0).length;
+  console.log(`✅ Converted ${components.length} total components (${usedCount} in frame, ${components.length - usedCount} available)`);
+
+  return { components };
 }

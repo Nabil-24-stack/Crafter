@@ -126,7 +126,9 @@ ${JSON.stringify(frameSnapshot, null, 2)}
 
 ## AVAILABLE DESIGN SYSTEM COMPONENTS
 
-You have access to these components (ONLY use components from this list):
+You have access to the ENTIRE design system (${designPalette.components.length} components).
+Components with usageCount > 0 are currently in the frame.
+You can use ANY component to create high-fidelity designs:
 
 ${designPalette.components.map(c =>
   `- **${c.name}** (key: \`${c.key}\`, role: ${c.role})
@@ -152,7 +154,7 @@ ${instructions}
 
 3. **Preserve the shell/skeleton.** Unless explicitly instructed otherwise, keep navigation/headers identical.
 
-4. **Only use componentKey values from the AVAILABLE DESIGN SYSTEM COMPONENTS list above.**
+4. **You can use ANY componentKey from the list above.** Components with usageCount=0 are available but not currently used - feel free to use them to enhance the design (e.g., pricing cards, charts, tables, badges).
 
 5. **Output valid JSON only.** The root must be a FRAME.
 
@@ -198,7 +200,9 @@ ${JSON.stringify(frameSnapshot, null, 2)}
 
 # Available Components
 
-You may ONLY use components from this list:
+You have access to the ENTIRE design system (${designPalette.components.length} components).
+Components with usageCount > 0 are currently in the frame.
+You can use ANY component to create high-fidelity designs:
 
 <design_palette>
 ${designPalette.components.map(c => `
@@ -224,6 +228,8 @@ ${instructions}
 When a component instance exists in the current structure, you MUST preserve it by referencing its componentKey.
 
 **DO NOT** rebuild components from rectangles, text, and other primitives. **REUSE THE COMPONENT.**
+
+You can use ANY component from the design palette above. Components with usageCount=0 are available but not currently in the frame - feel free to use them to enhance the design (e.g., pricing cards, charts, tables, badges).
 
 ## 2. Auto Layout Properties
 

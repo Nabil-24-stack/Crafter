@@ -14,7 +14,7 @@ import {
 import { expandSimplifiedLayout } from './schemaExpander';
 import { analyzeComponentVisuals, generateVisualLanguageDescription } from './visualAnalyzer';
 // MVP iteration pipeline
-import { buildFrameSnapshot, extractFrameScopedPalette } from './mvpUtils';
+import { buildFrameSnapshot, extractFrameScopedPalette, convertDesignSystemToMVPPalette } from './mvpUtils';
 import { reconstructVariationMVP } from './mvpReconstruction';
 import { IterationRequestMVP, IterationResponseMVP } from './mvpTypes';
 
@@ -2407,10 +2407,18 @@ async function handleIterateDesignVariationMVP(payload: any) {
     const frameSnapshot = await buildFrameSnapshot(frameNode, 5);
     console.log(`  → ${frameSnapshot.children.length} top-level nodes captured`);
 
-    // 2. Extract frame-scoped design palette
-    console.log("🎨 Extracting design palette...");
-    const designPalette = await extractFrameScopedPalette(frameNode);
-    console.log(`  → ${designPalette.components.length} components in palette`);
+    // 2. Get full design system and convert to MVP palette
+    console.log("🎨 Preparing design palette...");
+
+    // Ensure design system is cached
+    if (!cachedDesignSystem) {
+      console.log("  → Design system not cached, extracting...");
+      await handleGetDesignSystem();
+    }
+
+    // Convert full design system to MVP palette (ALL components available)
+    const designPalette = await convertDesignSystemToMVPPalette(cachedDesignSystem!, frameNode);
+    console.log(`  → ${designPalette.components.length} total components in palette`);
 
     // 3. Export frame as PNG
     console.log("🖼️  Exporting frame to PNG...");
