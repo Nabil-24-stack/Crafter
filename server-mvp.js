@@ -288,6 +288,7 @@ Return ONLY valid JSON with this structure:
 8. **Valid counterAxisAlignItems:** "MIN", "CENTER", "MAX"
 9. **Use extracted style values** - colors, font sizes, spacing from the style guide above
 10. **Include actual text content** in TEXT nodes (characters field is required)
+11. **Keep JSON concise** - avoid deeply nested structures (max 3-4 levels deep)
 
 Return your response now.`;
 }
@@ -395,6 +396,7 @@ Return ONLY valid JSON with this structure:
 4. **Use extracted style values** from the style guide above
 5. **TEXT nodes require "characters" field** with actual text content
 6. **FRAME nodes with children should use Auto Layout** (layoutMode, itemSpacing, padding, alignment)
+7. **Keep JSON concise** - avoid deeply nested structures (max 3-4 levels deep)
 
 Return your response now.`;
 }
@@ -618,7 +620,7 @@ async function callLLM(model, prompt, imagePNGBase64) {
           }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 16384, // Increased from 8192 to handle larger JSON structures
           }
         })
       }
