@@ -817,23 +817,31 @@ async function handleGenerateSingleVariation(payload: {
     // Initialize session on first variation
     if (currentVariationsSession === null || currentVariationsSession.totalVariations !== totalVariations) {
       // Calculate base position for first variation
-      const nodes = figma.currentPage.children;
       let baseX: number;
       let baseY: number;
 
-      if (nodes.length > 0) {
-        // Position to the right of existing content
-        const rightmostNode = nodes.reduce((rightmost, node) => {
-          const nodeRight = node.x + node.width;
-          const rightmostRight = rightmost.x + rightmost.width;
-          return nodeRight > rightmostRight ? node : rightmost;
-        });
-        baseX = rightmostNode.x + rightmostNode.width + 100;
-        baseY = rightmostNode.y;
+      // Try to use the selected frame that was being iterated on
+      const selectedFrame = lastSelectedFrameId ? figma.getNodeById(lastSelectedFrameId) as SceneNode | null : null;
+
+      if (selectedFrame && 'x' in selectedFrame && 'y' in selectedFrame && 'width' in selectedFrame) {
+        // Position to the right of the selected frame
+        baseX = selectedFrame.x + selectedFrame.width + 100;
+        baseY = selectedFrame.y;
+        console.log(`Positioning variations next to selected frame: ${selectedFrame.name}`);
       } else {
-        // Center in viewport
-        baseX = figma.viewport.center.x - 600; // Offset to account for multiple variations
-        baseY = figma.viewport.center.y - 400;
+        // Fallback: try current selection
+        const selection = figma.currentPage.selection;
+        if (selection.length > 0 && 'x' in selection[0] && 'y' in selection[0] && 'width' in selection[0]) {
+          const refNode = selection[0] as SceneNode & { x: number; y: number; width: number };
+          baseX = refNode.x + refNode.width + 100;
+          baseY = refNode.y;
+          console.log(`Positioning variations next to current selection: ${refNode.name}`);
+        } else {
+          // Final fallback: center in viewport
+          baseX = figma.viewport.center.x - 600;
+          baseY = figma.viewport.center.y - 400;
+          console.log('Positioning variations in viewport center');
+        }
       }
 
       currentVariationsSession = {
