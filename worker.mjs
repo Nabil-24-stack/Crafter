@@ -1308,7 +1308,7 @@ async function processIterateJob(job) {
   const { prompt, imageData, designSystem, model, chatHistory } = job.input;
 
   const selectedModel = model || 'claude';
-  console.log(`🎨 SVG Mode (Iteration): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image context for SVG generation`);
+  console.log(`🎨 SVG Mode (Iteration - STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image context and live reasoning`);
 
   const systemPrompt = buildSVGSystemPrompt(designSystem);
 
@@ -1322,82 +1322,103 @@ async function processIterateJob(job) {
 
 User wants: "${prompt}"
 
-RESPONSE FORMAT - Return your response in this exact structure:
+RESPONSE FORMAT - Think through your approach first, then generate the SVG:
 
-REASONING:
-[1-2 sentences explaining your design approach and key changes]
+THINKING:
+First, explain your design thinking step-by-step:
+- What design principles are you applying?
+- What specific changes will improve the design?
+- How does this align with the user's request?
+
+Write 3-5 sentences explaining your reasoning.
 
 SVG:
-[Complete SVG markup starting with <svg and ending with </svg>]
+After your thinking, generate the complete SVG markup starting with <svg and ending with </svg>
 
 ITERATION RULES:
 1. Analyze the existing design in the image
 2. Make the changes the user requested while maintaining visual consistency
 3. Use the design system's visual language (colors, typography, shadows, etc.)
 4. Include realistic text labels on ALL elements
-5. Provide brief reasoning, then the complete SVG
+5. Think step-by-step, then generate the SVG
 
-Generate your response now:`;
+Begin with your thinking:`;
 
-  // Try up to 2 times to get valid SVG
-  let svg = null;
-  let responseText = '';
+  // Stream the AI response and capture reasoning chunks
+  let chunkIndex = 0;
+  let fullText = '';
+  let thinkingText = '';
+  let isInThinkingSection = true;
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    console.log(`🔄 Attempt ${attempt} to generate SVG...`);
+  console.log(`🌊 Starting streaming generation for job ${job.id}...`);
 
-    // Call the selected AI model with vision
-    const aiResponse = selectedModel === 'gemini'
-      ? await callGeminiWithVision(systemPrompt, userPrompt, imageData)
-      : await callClaudeWithVision(systemPrompt, userPrompt, imageData);
+  // Callback to process each token
+  const onToken = async (token, accumulatedText) => {
+    fullText = accumulatedText;
 
-    responseText = aiResponse.content[0]?.text || '';
+    // Check if we're still in the thinking section (before SVG starts)
+    if (isInThinkingSection && !accumulatedText.includes('<svg')) {
+      // Accumulate thinking text
+      thinkingText += token;
 
-    // Log response for debugging
-    console.log(`📝 AI response length: ${responseText.length} characters`);
-    console.log(`📝 Response preview (first 500 chars): ${responseText.substring(0, 500)}`);
-
-    // Extract reasoning from response
-    let reasoning = '';
-    const reasoningMatch = responseText.match(/REASONING:\s*\n?(.*?)(?=\n\s*SVG:|$)/is);
-    if (reasoningMatch && reasoningMatch[1]) {
-      reasoning = reasoningMatch[1].trim();
-      console.log(`💭 Extracted reasoning: ${reasoning.substring(0, 200)}`);
-    }
-
-    // Extract SVG from response
-    svg = extractSVG(responseText);
-
-    if (svg && svg.includes('<svg')) {
-      console.log(`✅ Valid SVG extracted on attempt ${attempt}`);
-      // Store reasoning for return
-      if (!reasoning) {
-        reasoning = `Redesigned using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with focus on: ${prompt.substring(0, 100)}`;
+      // Every 20-30 characters, insert a reasoning chunk for live streaming
+      if (thinkingText.length >= 30 || token.includes('.') || token.includes('\n')) {
+        await insertReasoningChunk(job.id, thinkingText, chunkIndex);
+        chunkIndex++;
+        thinkingText = ''; // Reset for next chunk
       }
-      break;
-    } else {
-      console.warn(`⚠️  Attempt ${attempt} failed to extract valid SVG`);
-      if (attempt === 2) {
-        console.error('❌ Failed to extract SVG after 2 attempts. Last response:', responseText.substring(0, 2000));
-        throw new Error('Failed to extract valid SVG from AI response after 2 attempts');
+    } else if (isInThinkingSection) {
+      // We've hit the SVG section
+      isInThinkingSection = false;
+      // Insert any remaining thinking text
+      if (thinkingText.length > 0) {
+        await insertReasoningChunk(job.id, thinkingText, chunkIndex);
+        chunkIndex++;
       }
+      console.log(`💭 Finished streaming ${chunkIndex} reasoning chunks`);
     }
+  };
+
+  // Call streaming API with the callback
+  let aiResponse;
+  try {
+    aiResponse = selectedModel === 'gemini'
+      ? await callGeminiWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken)
+      : await callClaudeWithVisionStreaming(systemPrompt, userPrompt, imageData, onToken);
+  } catch (error) {
+    console.error('❌ Streaming API error:', error);
+    throw error;
   }
+
+  const responseText = aiResponse.content[0]?.text || fullText;
+
+  console.log(`📝 AI response length: ${responseText.length} characters`);
+  console.log(`📝 Response preview (first 500 chars): ${responseText.substring(0, 500)}`);
+
+  // Extract SVG from response
+  let svg = extractSVG(responseText);
+
+  if (!svg || !svg.includes('<svg')) {
+    console.error('❌ Failed to extract valid SVG. Full response:', responseText.substring(0, 2000));
+    throw new Error('Failed to extract valid SVG from AI response');
+  }
+
+  console.log(`✅ Valid SVG extracted from streaming response`);
 
   // Sanitize SVG to remove Figma-unsupported features
   svg = sanitizeSVG(svg);
 
-  console.log('✅ SVG generated successfully for iteration');
+  console.log('✅ SVG generated successfully with live streaming reasoning');
 
-  // Extract final reasoning if not already extracted
+  // Extract final reasoning summary (for job completion)
   let finalReasoning = '';
-  const finalReasoningMatch = responseText.match(/REASONING:\s*\n?(.*?)(?=\n\s*SVG:|$)/is);
-  if (finalReasoningMatch && finalReasoningMatch[1]) {
-    finalReasoning = finalReasoningMatch[1].trim();
+  const thinkingMatch = responseText.match(/THINKING:\s*\n?(.*?)(?=\n\s*SVG:|$)/is);
+  if (thinkingMatch && thinkingMatch[1]) {
+    finalReasoning = thinkingMatch[1].trim();
   }
 
   if (!finalReasoning) {
-    finalReasoning = `Redesigned with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} focusing on the user's request: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`;
+    finalReasoning = `Redesigned with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} - reasoning was streamed live to the UI`;
   }
 
   return {

@@ -13,6 +13,8 @@ import {
 } from './types';
 import { ChatInterface } from './components/ChatInterface';
 import { generateLayout, iterateLayout } from './claudeService';
+import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks } from './supabaseClient';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import './ui.css';
 // @ts-ignore
 import crafterLogo from '../Logo/crafter_logo.png';
@@ -114,7 +116,8 @@ const App = () => {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [activeJobIds, setActiveJobIds] = React.useState<string[]>([]);
 
-  // Note: activeJobIdsRef and realtimeChannelsRef removed - not needed for MVP direct Railway calls
+  // Realtime channels for reasoning chunk streaming
+  const reasoningChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
 
   // Generate unique ID
   function generateId(): string {
@@ -748,9 +751,25 @@ const App = () => {
             model,
             chatHistory,
             (jobId) => {
-              // Callback when job starts - could be used for realtime updates
+              // Callback when job starts - subscribe to live reasoning chunks
               console.log(`Job ${jobId} started for variation ${index + 1}`);
-              updateVariationStatus(index, 'designing', 'Generating SVG design', undefined);
+              updateVariationStatus(index, 'designing', 'AI is thinking...', undefined);
+
+              // Subscribe to reasoning chunks for live streaming
+              const channel = subscribeToReasoningChunks(
+                jobId,
+                (chunk) => {
+                  // Update the variation with the new reasoning chunk
+                  console.log(`Received chunk ${chunk.chunk_index}: ${chunk.chunk_text}`);
+                  updateStreamingReasoning(index, chunk.chunk_text, true);
+                },
+                (error) => {
+                  console.error(`Subscription error for job ${jobId}:`, error);
+                }
+              );
+
+              // Store the channel so we can unsubscribe later
+              reasoningChannelsRef.current.set(jobId, channel);
             }
           );
 
@@ -773,18 +792,32 @@ const App = () => {
               '*'
             );
 
-            // Update status: complete
+            // Update status: complete and stop live streaming indicator
+            updateStreamingReasoning(index, '', false); // Stop the live indicator
             updateVariationStatus(
               index,
               'complete',
               'Iteration Complete',
               result.reasoning || 'SVG design generated successfully'
             );
+
+            // Unsubscribe from reasoning chunks
+            if (result.job_id && reasoningChannelsRef.current.has(result.job_id)) {
+              const channel = reasoningChannelsRef.current.get(result.job_id);
+              if (channel) {
+                await unsubscribeFromReasoningChunks(channel);
+                reasoningChannelsRef.current.delete(result.job_id);
+              }
+            }
           } else {
             throw new Error('No SVG returned from generation');
           }
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
+
+          // Stop the live streaming indicator on error
+          updateStreamingReasoning(index, '', false);
+
           updateVariationStatus(
             index,
             'error',
@@ -792,6 +825,9 @@ const App = () => {
             undefined,
             err instanceof Error ? err.message : 'Unknown error'
           );
+
+          // Clean up subscription on error (if result was partially available)
+          // Note: We don't have result.job_id here in catch block, channels will be cleaned up on component unmount
         }
       });
 
