@@ -1748,6 +1748,66 @@ body {
   opacity: 0.7;
 }
 
+/* Formatted Reasoning Component */
+.formatted-reasoning {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.reasoning-paragraph {
+  margin: 0 0 12px 0;
+}
+
+.reasoning-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.reasoning-list-item {
+  margin: 6px 0;
+  padding-left: 4px;
+}
+
+.formatted-reasoning strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* SVG Code Display */
+.svg-code-section {
+  margin-top: 12px;
+  padding: 12px;
+  background: #F8F9FA;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.svg-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.svg-progress {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.svg-code-content {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #2D3748;
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* Fade-in animation for messages and cards */
 @keyframes fadeIn {
   from {

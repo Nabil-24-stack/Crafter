@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import { VariationStatus } from '../types';
+import { FormattedReasoning } from './FormattedReasoning';
 
 interface VariationCardProps {
   variation: VariationStatus;
@@ -62,11 +63,11 @@ export const VariationCard: React.FC<VariationCardProps> = ({
                   <span className="live-badge">● LIVE</span>
                 )}
               </div>
-              <div className="detail-value reasoning-text">
-                {variation.streamingReasoning || variation.reasoning}
-                {variation.isStreamingLive && (
-                  <span className="typing-cursor">▌</span>
-                )}
+              <div className="detail-value">
+                <FormattedReasoning
+                  text={variation.streamingReasoning || variation.reasoning || ''}
+                  isStreaming={variation.isStreamingLive}
+                />
               </div>
             </div>
           )}
@@ -77,6 +78,26 @@ export const VariationCard: React.FC<VariationCardProps> = ({
               <div className="detail-label">AI Reasoning:</div>
               <div className="detail-value placeholder-text">
                 Showing AI reasoning in a moment...
+              </div>
+            </div>
+          )}
+
+          {/* Show SVG code streaming */}
+          {variation.streamingSVG && (
+            <div className="svg-code-section">
+              <div className="svg-code-header">
+                <span>
+                  Generating Design Code
+                  {variation.isSVGStreaming && <span className="live-badge">● LIVE</span>}
+                </span>
+                <span className="svg-progress">
+                  {variation.streamingSVG.length} characters
+                  {variation.isSVGStreaming && ' (streaming...)'}
+                </span>
+              </div>
+              <div className="svg-code-content">
+                {variation.streamingSVG}
+                {variation.isSVGStreaming && <span className="typing-cursor">▌</span>}
               </div>
             </div>
           )}

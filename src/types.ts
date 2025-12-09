@@ -250,6 +250,8 @@ export interface VariationStatus {
   reasoning?: string; // From LLM response
   streamingReasoning?: string; // Live streaming reasoning (accumulated chunks)
   isStreamingLive?: boolean; // Whether reasoning is currently streaming
+  streamingSVG?: string; // Live streaming SVG code (accumulated chunks)
+  isSVGStreaming?: boolean; // Whether SVG is currently being generated
   createdNodeId?: string; // Figma node ID if successfully created
   isExpanded?: boolean; // UI state for expand/collapse
   jobId?: string; // Job ID for realtime subscription

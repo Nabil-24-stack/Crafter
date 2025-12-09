@@ -99,6 +99,26 @@ async function insertReasoningChunk(jobId, chunkText, chunkIndex) {
   }
 }
 
+/**
+ * Insert an SVG chunk into the database for live streaming
+ */
+async function insertSVGChunk(jobId, chunkText, chunkIndex) {
+  const { error} = await supabase
+    .from('svg_chunks')
+    .insert({
+      job_id: jobId,
+      chunk_text: chunkText,
+      chunk_index: chunkIndex,
+    });
+
+  if (error) {
+    console.error('Error inserting SVG chunk:', error);
+    // Don't throw - we don't want to fail the whole job if chunk insertion fails
+  } else {
+    console.log(`🎨 Inserted SVG chunk ${chunkIndex} for job ${jobId}`);
+  }
+}
+
 
 
 /**
@@ -1344,10 +1364,12 @@ ITERATION RULES:
 
 Begin with your thinking:`;
 
-  // Stream the AI response and capture reasoning chunks
-  let chunkIndex = 0;
+  // Stream the AI response and capture reasoning + SVG chunks
+  let reasoningChunkIndex = 0;
+  let svgChunkIndex = 0;
   let fullText = '';
   let thinkingText = '';
+  let svgText = '';
   let isInThinkingSection = true;
 
   console.log(`🌊 Starting streaming generation for job ${job.id}...`);
@@ -1363,19 +1385,33 @@ Begin with your thinking:`;
 
       // Every 20-30 characters, insert a reasoning chunk for live streaming
       if (thinkingText.length >= 30 || token.includes('.') || token.includes('\n')) {
-        await insertReasoningChunk(job.id, thinkingText, chunkIndex);
-        chunkIndex++;
+        await insertReasoningChunk(job.id, thinkingText, reasoningChunkIndex);
+        reasoningChunkIndex++;
         thinkingText = ''; // Reset for next chunk
       }
     } else if (isInThinkingSection) {
-      // We've hit the SVG section
+      // We've hit the SVG section - finish reasoning and start SVG streaming
       isInThinkingSection = false;
       // Insert any remaining thinking text
       if (thinkingText.length > 0) {
-        await insertReasoningChunk(job.id, thinkingText, chunkIndex);
-        chunkIndex++;
+        await insertReasoningChunk(job.id, thinkingText, reasoningChunkIndex);
+        reasoningChunkIndex++;
       }
-      console.log(`💭 Finished streaming ${chunkIndex} reasoning chunks`);
+      console.log(`💭 Finished streaming ${reasoningChunkIndex} reasoning chunks`);
+      console.log(`🎨 Starting SVG code streaming...`);
+
+      // Start accumulating SVG
+      svgText = token;
+    } else {
+      // We're in the SVG section - stream SVG code
+      svgText += token;
+
+      // Every 100 characters, insert an SVG chunk
+      if (svgText.length >= 100 || token.includes('>')) {
+        await insertSVGChunk(job.id, svgText, svgChunkIndex);
+        svgChunkIndex++;
+        svgText = ''; // Reset for next chunk
+      }
     }
   };
 
@@ -1392,8 +1428,15 @@ Begin with your thinking:`;
 
   const responseText = aiResponse.content[0]?.text || fullText;
 
+  // Insert any remaining SVG text that wasn't chunked
+  if (svgText.length > 0) {
+    await insertSVGChunk(job.id, svgText, svgChunkIndex);
+    svgChunkIndex++;
+  }
+
   console.log(`📝 AI response length: ${responseText.length} characters`);
   console.log(`📝 Response preview (first 500 chars): ${responseText.substring(0, 500)}`);
+  console.log(`🎨 Finished streaming ${svgChunkIndex} SVG chunks`);
 
   // Extract SVG from response
   let svg = extractSVG(responseText);

@@ -13,7 +13,7 @@ import {
 } from './types';
 import { ChatInterface } from './components/ChatInterface';
 import { generateLayout, iterateLayout } from './claudeService';
-import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks } from './supabaseClient';
+import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks, subscribeToSVGChunks, unsubscribeFromSVGChunks } from './supabaseClient';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import './ui.css';
 // @ts-ignore
@@ -118,6 +118,7 @@ const App = () => {
 
   // Realtime channels for reasoning chunk streaming
   const reasoningChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
+  const svgChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
 
   // Generate unique ID
   function generateId(): string {
@@ -756,20 +757,34 @@ const App = () => {
               updateVariationStatus(index, 'designing', 'AI is thinking...', undefined);
 
               // Subscribe to reasoning chunks for live streaming
-              const channel = subscribeToReasoningChunks(
+              const reasoningChannel = subscribeToReasoningChunks(
                 jobId,
                 (chunk) => {
                   // Update the variation with the new reasoning chunk
-                  console.log(`Received chunk ${chunk.chunk_index}: ${chunk.chunk_text}`);
+                  console.log(`Received reasoning chunk ${chunk.chunk_index}: ${chunk.chunk_text}`);
                   updateStreamingReasoning(index, chunk.chunk_text, true);
                 },
                 (error) => {
-                  console.error(`Subscription error for job ${jobId}:`, error);
+                  console.error(`Reasoning subscription error for job ${jobId}:`, error);
                 }
               );
 
-              // Store the channel so we can unsubscribe later
-              reasoningChannelsRef.current.set(jobId, channel);
+              // Subscribe to SVG chunks for live streaming
+              const svgChannel = subscribeToSVGChunks(
+                jobId,
+                (chunk) => {
+                  // Update the variation with the new SVG chunk
+                  console.log(`Received SVG chunk ${chunk.chunk_index}: ${chunk.chunk_text}`);
+                  updateStreamingSVG(index, chunk.chunk_text, true);
+                },
+                (error) => {
+                  console.error(`SVG subscription error for job ${jobId}:`, error);
+                }
+              );
+
+              // Store the channels so we can unsubscribe later
+              reasoningChannelsRef.current.set(jobId, reasoningChannel);
+              svgChannelsRef.current.set(jobId, svgChannel);
             }
           );
 
@@ -792,8 +807,9 @@ const App = () => {
               '*'
             );
 
-            // Update status: complete and stop live streaming indicator
+            // Update status: complete and stop live streaming indicators
             updateStreamingReasoning(index, '', false); // Stop the live indicator
+            updateStreamingSVG(index, '', false); // Stop SVG streaming indicator
             updateVariationStatus(
               index,
               'complete',
@@ -809,14 +825,24 @@ const App = () => {
                 reasoningChannelsRef.current.delete(result.job_id);
               }
             }
+
+            // Unsubscribe from SVG chunks
+            if (result.job_id && svgChannelsRef.current.has(result.job_id)) {
+              const channel = svgChannelsRef.current.get(result.job_id);
+              if (channel) {
+                await unsubscribeFromSVGChunks(channel);
+                svgChannelsRef.current.delete(result.job_id);
+              }
+            }
           } else {
             throw new Error('No SVG returned from generation');
           }
         } catch (err) {
           console.error(`Error iterating variation ${index + 1}:`, err);
 
-          // Stop the live streaming indicator on error
+          // Stop the live streaming indicators on error
           updateStreamingReasoning(index, '', false);
+          updateStreamingSVG(index, '', false);
 
           updateVariationStatus(
             index,
@@ -945,6 +971,36 @@ const App = () => {
                         // Keep accumulated text, just update live indicator
                         streamingReasoning: chunk ? (v.streamingReasoning || '') + chunk : v.streamingReasoning,
                         isStreamingLive: isLive,
+                      }
+                    : v
+                ),
+              },
+            }
+          : msg
+      ),
+    }));
+  };
+
+  // Update streaming SVG for a variation
+  const updateStreamingSVG = (index: number, chunk: string, isLive: boolean) => {
+    const messageId = currentMessageRef.current;
+    if (!messageId) return;
+
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId && msg.iterationData
+          ? {
+              ...msg,
+              iterationData: {
+                ...msg.iterationData,
+                variations: msg.iterationData.variations.map((v) =>
+                  v.index === index
+                    ? {
+                        ...v,
+                        // Accumulate SVG chunks
+                        streamingSVG: chunk ? (v.streamingSVG || '') + chunk : v.streamingSVG,
+                        isSVGStreaming: isLive,
                       }
                     : v
                 ),
