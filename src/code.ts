@@ -821,7 +821,7 @@ async function handleGenerateSingleVariation(payload: {
       let baseY: number;
 
       // Try to use the selected frame that was being iterated on
-      const selectedFrame = lastSelectedFrameId ? figma.getNodeById(lastSelectedFrameId) as SceneNode | null : null;
+      const selectedFrame = lastSelectedFrameId ? await figma.getNodeByIdAsync(lastSelectedFrameId) as SceneNode | null : null;
 
       if (selectedFrame && 'x' in selectedFrame && 'y' in selectedFrame && 'width' in selectedFrame) {
         // Position to the right of the selected frame
