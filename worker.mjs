@@ -1322,16 +1322,22 @@ async function processIterateJob(job) {
 
 User wants: "${prompt}"
 
-CRITICAL: Your response must be ONLY the SVG code. No explanations, no markdown, no text before or after the SVG.
+RESPONSE FORMAT - Return your response in this exact structure:
+
+REASONING:
+[1-2 sentences explaining your design approach and key changes]
+
+SVG:
+[Complete SVG markup starting with <svg and ending with </svg>]
 
 ITERATION RULES:
 1. Analyze the existing design in the image
 2. Make the changes the user requested while maintaining visual consistency
 3. Use the design system's visual language (colors, typography, shadows, etc.)
 4. Include realistic text labels on ALL elements
-5. Start your response immediately with <svg and end with </svg>
+5. Provide brief reasoning, then the complete SVG
 
-Generate a complete SVG mockup now:`;
+Generate your response now:`;
 
   // Try up to 2 times to get valid SVG
   let svg = null;
@@ -1351,11 +1357,23 @@ Generate a complete SVG mockup now:`;
     console.log(`📝 AI response length: ${responseText.length} characters`);
     console.log(`📝 Response preview (first 500 chars): ${responseText.substring(0, 500)}`);
 
+    // Extract reasoning from response
+    let reasoning = '';
+    const reasoningMatch = responseText.match(/REASONING:\s*\n?(.*?)(?=\n\s*SVG:|$)/is);
+    if (reasoningMatch && reasoningMatch[1]) {
+      reasoning = reasoningMatch[1].trim();
+      console.log(`💭 Extracted reasoning: ${reasoning.substring(0, 200)}`);
+    }
+
     // Extract SVG from response
     svg = extractSVG(responseText);
 
     if (svg && svg.includes('<svg')) {
       console.log(`✅ Valid SVG extracted on attempt ${attempt}`);
+      // Store reasoning for return
+      if (!reasoning) {
+        reasoning = `Redesigned using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with focus on: ${prompt.substring(0, 100)}`;
+      }
       break;
     } else {
       console.warn(`⚠️  Attempt ${attempt} failed to extract valid SVG`);
@@ -1371,9 +1389,20 @@ Generate a complete SVG mockup now:`;
 
   console.log('✅ SVG generated successfully for iteration');
 
+  // Extract final reasoning if not already extracted
+  let finalReasoning = '';
+  const finalReasoningMatch = responseText.match(/REASONING:\s*\n?(.*?)(?=\n\s*SVG:|$)/is);
+  if (finalReasoningMatch && finalReasoningMatch[1]) {
+    finalReasoning = finalReasoningMatch[1].trim();
+  }
+
+  if (!finalReasoning) {
+    finalReasoning = `Redesigned with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} focusing on the user's request: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`;
+  }
+
   return {
     svg,
-    reasoning: `SVG mockup iterated with ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'}`
+    reasoning: finalReasoning
   };
 }
 
