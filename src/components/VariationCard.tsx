@@ -82,26 +82,6 @@ export const VariationCard: React.FC<VariationCardProps> = ({
             </div>
           )}
 
-          {/* Show SVG code streaming */}
-          {variation.streamingSVG && (
-            <div className="svg-code-section">
-              <div className="svg-code-header">
-                <span>
-                  Generating Design Code
-                  {variation.isSVGStreaming && <span className="live-badge">● LIVE</span>}
-                </span>
-                <span className="svg-progress">
-                  {variation.streamingSVG.length} characters
-                  {variation.isSVGStreaming && ' (streaming...)'}
-                </span>
-              </div>
-              <div className="svg-code-content">
-                {variation.streamingSVG}
-                {variation.isSVGStreaming && <span className="typing-cursor">▌</span>}
-              </div>
-            </div>
-          )}
-
           {/* Only show sub-prompt if no reasoning is available */}
           {!variation.streamingReasoning && !variation.reasoning && variation.subPrompt && (
             <div className="detail-section">
