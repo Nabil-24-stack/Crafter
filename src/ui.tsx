@@ -508,8 +508,8 @@ const App = () => {
     setIsAuthenticated(false);
     setAuthToken(null);
     setUserEmail('');
-    // DISABLED: Design system scanning
-    // setDesignSystem(null);
+    // Clear design system on logout to force re-authentication
+    setDesignSystem(null);
     // Reset chat
     setChat({
       id: generateId(),
