@@ -877,17 +877,37 @@ async function handleGenerateSingleVariation(payload: {
 
       // Check if all variations are complete
       if (currentVariationsSession.completedCount === totalVariations) {
-        const message = `Generated ${totalVariations} design variation${totalVariations > 1 ? 's' : ''}. ${reasoning || ''}`;
+        const successCount = currentVariationsSession.createdNodes.length;
+        const failCount = totalVariations - successCount;
+
+        let message: string;
+        let notifyMessage: string;
+
+        if (successCount === totalVariations) {
+          // All succeeded
+          message = `Generated ${totalVariations} design variation${totalVariations > 1 ? 's' : ''}. ${reasoning || ''}`;
+          notifyMessage = `✨ All ${totalVariations} variation${totalVariations > 1 ? 's' : ''} generated successfully!`;
+        } else if (successCount > 0) {
+          // Partial success
+          message = `Generated ${successCount} of ${totalVariations} variations. ${failCount} failed due to SVG import errors.`;
+          notifyMessage = `⚠️ ${successCount} of ${totalVariations} variations generated (${failCount} failed)`;
+        } else {
+          // All failed
+          message = `All ${totalVariations} variations failed. Please check the error details and try again.`;
+          notifyMessage = `❌ All ${totalVariations} variations failed`;
+        }
 
         figma.ui.postMessage({
           type: 'generation-complete',
           payload: {
-            success: true,
+            success: successCount > 0,
             reasoning: message,
+            successCount,
+            failCount,
           },
         });
 
-        figma.notify(`✨ All ${totalVariations} variation${totalVariations > 1 ? 's' : ''} generated successfully!`);
+        figma.notify(notifyMessage, { error: successCount === 0 });
 
         // Reset session
         currentVariationsSession = null;
@@ -900,9 +920,18 @@ async function handleGenerateSingleVariation(payload: {
     }
   } catch (error) {
     console.error(`Error creating variation ${variationIndex + 1}:`, error);
+
+    // Track failed variation in session
+    if (currentVariationsSession) {
+      currentVariationsSession.completedCount++;
+    }
+
     figma.ui.postMessage({
       type: 'generation-error',
-      payload: { error: error instanceof Error ? error.message : `Failed to create variation ${variationIndex + 1}` },
+      payload: {
+        variationIndex,
+        error: error instanceof Error ? error.message : `Failed to create variation ${variationIndex + 1}`
+      },
     });
     figma.notify(`❌ Failed to generate variation ${variationIndex + 1}`, { error: true });
   }

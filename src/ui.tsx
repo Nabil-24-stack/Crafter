@@ -246,6 +246,23 @@ const App = () => {
           handleVariationError(msg.payload.error);
           break;
 
+        case 'generation-error':
+          console.error('Generation error:', msg.payload);
+          // Extract variation index from error message or payload
+          if (msg.payload.variationIndex !== undefined) {
+            updateVariationStatus(
+              msg.payload.variationIndex,
+              'error',
+              'Failed to create design',
+              undefined,
+              msg.payload.error
+            );
+          } else {
+            // Try to parse from error message
+            handleVariationError(msg.payload.error);
+          }
+          break;
+
         case 'iteration-mvp-complete':
           // Handle MVP iteration completion
           console.log('MVP iteration complete:', msg.payload);
