@@ -1374,6 +1374,15 @@ Begin with your thinking:`;
 
   console.log(`🌊 Starting streaming generation for job ${job.id}...`);
 
+  // Helper to clean markdown artifacts from reasoning text
+  const cleanReasoningText = (text) => {
+    // Remove markdown code fences (```svg, ```, etc.)
+    return text
+      .replace(/```svg\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .trim();
+  };
+
   // Callback to process each token
   const onToken = async (token, accumulatedText) => {
     fullText = accumulatedText;
@@ -1385,8 +1394,12 @@ Begin with your thinking:`;
 
       // Every 20-30 characters, insert a reasoning chunk for live streaming
       if (thinkingText.length >= 30 || token.includes('.') || token.includes('\n')) {
-        await insertReasoningChunk(job.id, thinkingText, reasoningChunkIndex);
-        reasoningChunkIndex++;
+        // Clean markdown artifacts before inserting
+        const cleanedText = cleanReasoningText(thinkingText);
+        if (cleanedText.length > 0) {
+          await insertReasoningChunk(job.id, cleanedText, reasoningChunkIndex);
+          reasoningChunkIndex++;
+        }
         thinkingText = ''; // Reset for next chunk
       }
     } else if (isInThinkingSection) {
@@ -1394,8 +1407,11 @@ Begin with your thinking:`;
       isInThinkingSection = false;
       // Insert any remaining thinking text
       if (thinkingText.length > 0) {
-        await insertReasoningChunk(job.id, thinkingText, reasoningChunkIndex);
-        reasoningChunkIndex++;
+        const cleanedText = cleanReasoningText(thinkingText);
+        if (cleanedText.length > 0) {
+          await insertReasoningChunk(job.id, cleanedText, reasoningChunkIndex);
+          reasoningChunkIndex++;
+        }
       }
       console.log(`💭 Finished streaming ${reasoningChunkIndex} reasoning chunks`);
       console.log(`🎨 Starting SVG code streaming...`);
@@ -1437,6 +1453,12 @@ Begin with your thinking:`;
   console.log(`📝 AI response length: ${responseText.length} characters`);
   console.log(`📝 Response preview (first 500 chars): ${responseText.substring(0, 500)}`);
   console.log(`🎨 Finished streaming ${svgChunkIndex} SVG chunks`);
+
+  // CRITICAL: Wait for Supabase to propagate all chunks to realtime subscribers
+  // Without this delay, the job completes and UI unsubscribes before chunks are delivered
+  console.log(`⏳ Waiting for chunk propagation to realtime subscribers...`);
+  await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay
+  console.log(`✅ Chunk propagation complete - safe to mark job as done`);
 
   // Extract SVG from response
   let svg = extractSVG(responseText);
