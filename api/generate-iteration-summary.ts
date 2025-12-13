@@ -33,15 +33,19 @@ export default async function handler(
   }
 
   try {
-    const { masterPrompt, variations } = req.body as {
+    const { masterPrompt, variations, model } = req.body as {
       masterPrompt: string;
       variations: VariationResult[];
+      model?: 'claude' | 'gemini';
     };
+
+    const selectedModel = model || 'claude';
 
     console.log('Received summary request:', {
       hasMasterPrompt: !!masterPrompt,
       hasVariations: !!variations,
       numVariations: variations?.length,
+      model: selectedModel,
     });
 
     if (!masterPrompt || !variations || !Array.isArray(variations)) {
@@ -58,49 +62,92 @@ export default async function handler(
       return;
     }
 
-    // Get API key
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      console.error('ANTHROPIC_API_KEY not configured');
-      res.status(500).json({
-        error: 'Server configuration error: API key not found',
-      });
-      return;
-    }
-
     // Build the prompt
     const systemPrompt = buildSummarySystemPrompt();
     const userPrompt = buildSummaryUserPrompt(masterPrompt, variations);
 
-    console.log('Calling Claude API to generate iteration summary...');
+    console.log(`Calling ${selectedModel === 'gemini' ? 'Gemini' : 'Claude'} API to generate iteration summary...`);
 
-    // Call Claude API
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 512, // Summaries should be concise
-        messages: [
-          {
-            role: 'user',
-            content: `${systemPrompt}\n\n${userPrompt}`,
+    let summary = '';
+
+    if (selectedModel === 'gemini') {
+      // Call Gemini API
+      const geminiApiKey = process.env.GEMINI_API_KEY;
+      if (!geminiApiKey) {
+        console.error('GEMINI_API_KEY not configured');
+        res.status(500).json({
+          error: 'Server configuration error: Gemini API key not found',
+        });
+        return;
+      }
+
+      const geminiResponse = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiApiKey,
           },
-        ],
-      }),
-    });
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `${systemPrompt}\n\n${userPrompt}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
 
-    if (!claudeResponse.ok) {
-      const errorText = await claudeResponse.text();
-      throw new Error(`Claude API error ${claudeResponse.status}: ${errorText}`);
+      if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text();
+        throw new Error(`Gemini API error ${geminiResponse.status}: ${errorText}`);
+      }
+
+      const geminiData = await geminiResponse.json() as any;
+      summary = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else {
+      // Call Claude API
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) {
+        console.error('ANTHROPIC_API_KEY not configured');
+        res.status(500).json({
+          error: 'Server configuration error: Claude API key not found',
+        });
+        return;
+      }
+
+      const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 512, // Summaries should be concise
+          messages: [
+            {
+              role: 'user',
+              content: `${systemPrompt}\n\n${userPrompt}`,
+            },
+          ],
+        }),
+      });
+
+      if (!claudeResponse.ok) {
+        const errorText = await claudeResponse.text();
+        throw new Error(`Claude API error ${claudeResponse.status}: ${errorText}`);
+      }
+
+      const data = await claudeResponse.json() as any;
+      summary = data.content?.[0]?.text || '';
     }
-
-    const data = await claudeResponse.json() as any;
-    const summary = data.content?.[0]?.text || '';
 
     console.log('Summary generated successfully');
 

@@ -1345,12 +1345,27 @@ User wants: "${prompt}"
 RESPONSE FORMAT - Think through your approach first, then generate the SVG:
 
 THINKING:
-First, explain your design thinking step-by-step:
-- What design principles are you applying?
-- What specific changes will improve the design?
-- How does this align with the user's request?
+Explain your design thinking in a well-structured, easy-to-read format:
 
-Write 3-5 sentences explaining your reasoning.
+**Structure your reasoning with clear paragraphs:**
+- Start with the overall design approach and principles you're applying
+- Break down specific changes you're making in separate paragraphs
+- Explain how each change addresses the user's request
+- Use paragraph breaks (double newlines) between distinct ideas
+- Write in a conversational, professional tone
+
+**Format requirements:**
+- 3-5 distinct paragraphs with clear breaks between them
+- Each paragraph should focus on one key aspect (layout, color, hierarchy, interaction, etc.)
+- Use natural language with proper punctuation
+- Avoid single long paragraphs - structure your thoughts for readability
+
+**Example format:**
+I'm redesigning the dashboard to improve data visualization and user engagement. The new approach uses...
+
+For the layout, I've implemented a card-based grid system that...
+
+The color scheme leverages the design system's primary palette to...
 
 SVG:
 After your thinking, generate the complete SVG markup starting with <svg and ending with </svg>

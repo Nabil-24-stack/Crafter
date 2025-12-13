@@ -1114,17 +1114,21 @@ const App = () => {
       error: v.error,
     }));
 
+    // Get the model that was used for generation
+    const selectedModel = iterationData.model || 'claude';
+
     let summary = '';
 
     try {
-      // Generate summary using LLM
-      console.log('Calling summary API...');
+      // Generate summary using the same model that generated the variations
+      console.log(`Calling summary API with ${selectedModel}...`);
       const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-iteration-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           masterPrompt: userPrompt,
           variations: variationResults,
+          model: selectedModel, // Pass the model to the summary API
         }),
       });
 
