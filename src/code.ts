@@ -866,19 +866,29 @@ async function handleGenerateSingleVariation(payload: {
 
       // Name is already set in importSVGToFigma()
 
-      // Position based on variation index - dynamically calculate based on previous node widths
-      if (variationIndex === 0) {
+      // Position based on existing variations - find the rightmost one
+      // Variations complete async/out-of-order, so we can't rely on array indices
+      if (currentVariationsSession.createdNodes.length === 0) {
         // First variation: position at base position
         rootNode.x = currentVariationsSession.basePosition.x;
         rootNode.y = currentVariationsSession.basePosition.y;
       } else {
-        // Subsequent variations: position to the right of the previous variation
-        const previousNode = currentVariationsSession.createdNodes[variationIndex - 1];
-        if (previousNode && 'x' in previousNode && 'width' in previousNode) {
-          rootNode.x = previousNode.x + previousNode.width + GAP_BETWEEN_VARIATIONS;
+        // Find the rightmost node among all created variations so far
+        const rightmostNode = currentVariationsSession.createdNodes.reduce((rightmost, node) => {
+          if ('x' in node && 'width' in node && 'x' in rightmost && 'width' in rightmost) {
+            const nodeRight = node.x + node.width;
+            const rightmostRight = rightmost.x + rightmost.width;
+            return nodeRight > rightmostRight ? node : rightmost;
+          }
+          return rightmost;
+        });
+
+        // Position to the right of the rightmost variation
+        if (rightmostNode && 'x' in rightmostNode && 'width' in rightmostNode) {
+          rootNode.x = rightmostNode.x + rightmostNode.width + GAP_BETWEEN_VARIATIONS;
           rootNode.y = currentVariationsSession.basePosition.y;
         } else {
-          // Fallback if previous node doesn't have position/width
+          // Fallback if rightmost node doesn't have position/width
           rootNode.x = currentVariationsSession.basePosition.x;
           rootNode.y = currentVariationsSession.basePosition.y;
         }
