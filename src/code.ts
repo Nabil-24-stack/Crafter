@@ -831,6 +831,8 @@ async function handleGenerateSingleVariation(payload: {
         baseY = selectedFrame.y;
         originalFrameName = selectedFrame.name;
         console.log(`Positioning variations next to selected frame: ${selectedFrame.name}`);
+        console.log(`  Original frame position: x=${selectedFrame.x}, y=${selectedFrame.y}, width=${selectedFrame.width}`);
+        console.log(`  Base position for variations: x=${baseX}, y=${baseY}`);
       } else {
         // Fallback: try current selection
         const selection = figma.currentPage.selection;
@@ -861,17 +863,14 @@ async function handleGenerateSingleVariation(payload: {
     const rootNode = await importSVGToFigma(svg, `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`);
 
     if (rootNode) {
-      // Add to current page
-      figma.currentPage.appendChild(rootNode);
-
-      // Name is already set in importSVGToFigma()
-
       // Position based on existing variations - find the rightmost one
       // Variations complete async/out-of-order, so we can't rely on array indices
+      // IMPORTANT: Set position BEFORE appending to page to avoid default positioning
       if (currentVariationsSession.createdNodes.length === 0) {
         // First variation: position at base position
         rootNode.x = currentVariationsSession.basePosition.x;
         rootNode.y = currentVariationsSession.basePosition.y;
+        console.log(`  Variation ${variationIndex + 1} (FIRST): positioned at x=${rootNode.x}, y=${rootNode.y}`);
       } else {
         // Find the rightmost node among all created variations so far
         const rightmostNode = currentVariationsSession.createdNodes.reduce((rightmost, node) => {
@@ -887,12 +886,17 @@ async function handleGenerateSingleVariation(payload: {
         if (rightmostNode && 'x' in rightmostNode && 'width' in rightmostNode) {
           rootNode.x = rightmostNode.x + rightmostNode.width + GAP_BETWEEN_VARIATIONS;
           rootNode.y = currentVariationsSession.basePosition.y;
+          console.log(`  Variation ${variationIndex + 1}: positioned at x=${rootNode.x}, y=${rootNode.y} (right of node at x=${rightmostNode.x})`);
         } else {
           // Fallback if rightmost node doesn't have position/width
           rootNode.x = currentVariationsSession.basePosition.x;
           rootNode.y = currentVariationsSession.basePosition.y;
+          console.log(`  Variation ${variationIndex + 1} (FALLBACK): positioned at x=${rootNode.x}, y=${rootNode.y}`);
         }
       }
+
+      // Add to current page AFTER setting position
+      figma.currentPage.appendChild(rootNode);
 
       // Track the created node
       currentVariationsSession.createdNodes.push(rootNode);
