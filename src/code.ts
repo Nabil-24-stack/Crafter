@@ -807,10 +807,11 @@ async function handleGenerateSingleVariation(payload: {
   variation: { svg: string; reasoning?: string };
   variationIndex: number;
   totalVariations: number;
+  frameId?: string; // ID of the original frame being iterated on
 }) {
   console.log(`Generating variation ${payload.variationIndex + 1} of ${payload.totalVariations} on canvas...`);
 
-  const { variation, variationIndex, totalVariations } = payload;
+  const { variation, variationIndex, totalVariations, frameId } = payload;
   const { svg, reasoning } = variation;
   const GAP_BETWEEN_VARIATIONS = 100; // Gap between variations
 
@@ -822,31 +823,40 @@ async function handleGenerateSingleVariation(payload: {
       let baseY: number;
       let originalFrameName = 'Design';
 
-      // Try to use the selected frame that was being iterated on
-      const selectedFrame = lastSelectedFrameId ? await figma.getNodeByIdAsync(lastSelectedFrameId) as SceneNode | null : null;
+      // Try to use the frame ID from the payload (passed from UI)
+      const selectedFrame = frameId ? await figma.getNodeByIdAsync(frameId) as SceneNode | null : null;
 
       if (selectedFrame && 'x' in selectedFrame && 'y' in selectedFrame && 'width' in selectedFrame) {
         // Position to the right of the selected frame
         baseX = selectedFrame.x + selectedFrame.width + 100;
         baseY = selectedFrame.y;
         originalFrameName = selectedFrame.name;
-        console.log(`Positioning variations next to selected frame: ${selectedFrame.name}`);
+        console.log(`✅ Positioning variations next to original frame: ${selectedFrame.name} (ID: ${frameId})`);
         console.log(`  Original frame position: x=${selectedFrame.x}, y=${selectedFrame.y}, width=${selectedFrame.width}`);
         console.log(`  Base position for variations: x=${baseX}, y=${baseY}`);
       } else {
-        // Fallback: try current selection
-        const selection = figma.currentPage.selection;
-        if (selection.length > 0 && 'x' in selection[0] && 'y' in selection[0] && 'width' in selection[0]) {
-          const refNode = selection[0] as SceneNode & { x: number; y: number; width: number };
-          baseX = refNode.x + refNode.width + 100;
-          baseY = refNode.y;
-          originalFrameName = refNode.name;
-          console.log(`Positioning variations next to current selection: ${refNode.name}`);
+        // Fallback 1: try lastSelectedFrameId (in case frameId wasn't passed)
+        const fallbackFrame = lastSelectedFrameId ? await figma.getNodeByIdAsync(lastSelectedFrameId) as SceneNode | null : null;
+        if (fallbackFrame && 'x' in fallbackFrame && 'y' in fallbackFrame && 'width' in fallbackFrame) {
+          baseX = fallbackFrame.x + fallbackFrame.width + 100;
+          baseY = fallbackFrame.y;
+          originalFrameName = fallbackFrame.name;
+          console.log(`⚠️ Using fallback frame (lastSelectedFrameId): ${fallbackFrame.name}`);
         } else {
-          // Final fallback: center in viewport
-          baseX = figma.viewport.center.x - 600;
-          baseY = figma.viewport.center.y - 400;
-          console.log('Positioning variations in viewport center');
+          // Fallback 2: try current selection
+          const selection = figma.currentPage.selection;
+          if (selection.length > 0 && 'x' in selection[0] && 'y' in selection[0] && 'width' in selection[0]) {
+            const refNode = selection[0] as SceneNode & { x: number; y: number; width: number };
+            baseX = refNode.x + refNode.width + 100;
+            baseY = refNode.y;
+            originalFrameName = refNode.name;
+            console.log(`⚠️ Using current selection as fallback: ${refNode.name}`);
+          } else {
+            // Final fallback: center in viewport
+            baseX = figma.viewport.center.x - 600;
+            baseY = figma.viewport.center.y - 400;
+            console.log('❌ No frame found - positioning variations in viewport center');
+          }
         }
       }
 

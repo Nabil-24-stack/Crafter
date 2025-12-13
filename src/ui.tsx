@@ -866,6 +866,7 @@ const App = () => {
                     },
                     variationIndex: index,
                     totalVariations: variations,
+                    frameId: fid, // Pass the original frame ID for positioning
                   },
                 },
               },
