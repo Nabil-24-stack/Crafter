@@ -1361,9 +1361,10 @@ async function handleExportFramePNG(payload: any) {
     }
 
     // Export frame as PNG
+    // Using 1x scale to reduce database storage (was 2x = ~340KB, now 1x = ~85-120KB)
     const pngData = await (frameNode as FrameNode).exportAsync({
       format: 'PNG',
-      constraint: { type: 'SCALE', value: 2 }, // 2x for better quality
+      constraint: { type: 'SCALE', value: 1 },
     });
 
     // Convert Uint8Array to base64
