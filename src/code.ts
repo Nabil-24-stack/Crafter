@@ -113,6 +113,14 @@ function sanitizeSvgForFigma(svgString: string): string {
   //  Remove stroke-dasharray with empty values or zeros
   cleaned = cleaned.replace(/\s+stroke-dasharray="0(,0)*"/g, '');
 
+  // FIX: Remove italic and oblique font styles - force all text to normal
+  // This fixes the issue where AI-generated SVGs often have italic text
+  // Handles both CSS style attributes and direct font-style attributes
+  cleaned = cleaned.replace(/font-style\s*:\s*italic/gi, 'font-style: normal');
+  cleaned = cleaned.replace(/font-style="italic"/gi, 'font-style="normal"');
+  cleaned = cleaned.replace(/font-style\s*:\s*oblique/gi, 'font-style: normal');
+  cleaned = cleaned.replace(/font-style="oblique"/gi, 'font-style="normal"');
+
   return cleaned;
 }
 
@@ -988,8 +996,11 @@ async function importSVGToFigma(svgString: string, name: string = 'SVG Mockup'):
     console.log('Importing SVG to Figma:', name);
     console.log('SVG length:', svgString.length, 'characters');
 
+    // Sanitize SVG to fix common issues (gradients, fonts, italic text, etc.)
+    const sanitized = sanitizeSvgForFigma(svgString);
+
     // Use Figma's built-in SVG import
-    const svgNode = figma.createNodeFromSvg(svgString);
+    const svgNode = figma.createNodeFromSvg(sanitized);
 
     if (!svgNode) {
       throw new Error('figma.createNodeFromSvg() returned null');
@@ -1989,7 +2000,8 @@ async function handleIterateDesign(payload: any) {
       // Create new frame next to selected frame
       console.log('Creating new frame next to selected...');
 
-      const svgNode = figma.createNodeFromSvg(svg);
+      const sanitized = sanitizeSvgForFigma(svg);
+      const svgNode = figma.createNodeFromSvg(sanitized);
 
       // Create new frame to hold the SVG
       const newFrame = figma.createFrame();
@@ -2025,7 +2037,8 @@ async function handleIterateDesign(payload: any) {
       frameNode.children.forEach(child => child.remove());
 
       console.log('Importing new SVG...');
-      const svgNode = figma.createNodeFromSvg(svg);
+      const sanitized = sanitizeSvgForFigma(svg);
+      const svgNode = figma.createNodeFromSvg(sanitized);
       frameNode.appendChild(svgNode);
 
       // Restore frame properties
