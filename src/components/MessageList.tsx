@@ -20,9 +20,9 @@ export const MessageList: React.FC<MessageListProps> = ({
   onPromptClick,
 }) => {
   const examplePrompts = [
-    'Design what the empty state should look like.',
-    'Rethink this whole page to improve the visual hierarchy.',
-    'Make the important information stand out more clearly.',
+    'Design what the empty state could look like.',
+    'What are the different error states that this screen would need?',
+    'What are alternative ways to design this screen?',
   ];
 
   if (messages.length === 0) {

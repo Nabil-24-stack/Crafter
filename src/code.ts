@@ -127,6 +127,7 @@ let currentVariationsSession: {
   createdNodes: SceneNode[];
   totalVariations: number;
   completedCount: number;
+  originalFrameName: string;
 } | null = null;
 
 // Global state for tracking iteration variations in current session
@@ -811,7 +812,7 @@ async function handleGenerateSingleVariation(payload: {
 
   const { variation, variationIndex, totalVariations } = payload;
   const { svg, reasoning } = variation;
-  const VARIATION_SPACING = 1200;
+  const GAP_BETWEEN_VARIATIONS = 100; // Gap between variations
 
   try {
     // Initialize session on first variation
@@ -819,6 +820,7 @@ async function handleGenerateSingleVariation(payload: {
       // Calculate base position for first variation
       let baseX: number;
       let baseY: number;
+      let originalFrameName = 'Design';
 
       // Try to use the selected frame that was being iterated on
       const selectedFrame = lastSelectedFrameId ? await figma.getNodeByIdAsync(lastSelectedFrameId) as SceneNode | null : null;
@@ -827,6 +829,7 @@ async function handleGenerateSingleVariation(payload: {
         // Position to the right of the selected frame
         baseX = selectedFrame.x + selectedFrame.width + 100;
         baseY = selectedFrame.y;
+        originalFrameName = selectedFrame.name;
         console.log(`Positioning variations next to selected frame: ${selectedFrame.name}`);
       } else {
         // Fallback: try current selection
@@ -835,6 +838,7 @@ async function handleGenerateSingleVariation(payload: {
           const refNode = selection[0] as SceneNode & { x: number; y: number; width: number };
           baseX = refNode.x + refNode.width + 100;
           baseY = refNode.y;
+          originalFrameName = refNode.name;
           console.log(`Positioning variations next to current selection: ${refNode.name}`);
         } else {
           // Final fallback: center in viewport
@@ -849,11 +853,12 @@ async function handleGenerateSingleVariation(payload: {
         createdNodes: [],
         totalVariations,
         completedCount: 0,
+        originalFrameName,
       };
     }
 
     // Import SVG as Figma node
-    const rootNode = await importSVGToFigma(svg, `SVG Mockup - Variation ${variationIndex + 1}`);
+    const rootNode = await importSVGToFigma(svg, `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`);
 
     if (rootNode) {
       // Add to current page
@@ -861,9 +866,23 @@ async function handleGenerateSingleVariation(payload: {
 
       // Name is already set in importSVGToFigma()
 
-      // Position based on variation index
-      rootNode.x = currentVariationsSession.basePosition.x + (variationIndex * VARIATION_SPACING);
-      rootNode.y = currentVariationsSession.basePosition.y;
+      // Position based on variation index - dynamically calculate based on previous node widths
+      if (variationIndex === 0) {
+        // First variation: position at base position
+        rootNode.x = currentVariationsSession.basePosition.x;
+        rootNode.y = currentVariationsSession.basePosition.y;
+      } else {
+        // Subsequent variations: position to the right of the previous variation
+        const previousNode = currentVariationsSession.createdNodes[variationIndex - 1];
+        if (previousNode && 'x' in previousNode && 'width' in previousNode) {
+          rootNode.x = previousNode.x + previousNode.width + GAP_BETWEEN_VARIATIONS;
+          rootNode.y = currentVariationsSession.basePosition.y;
+        } else {
+          // Fallback if previous node doesn't have position/width
+          rootNode.x = currentVariationsSession.basePosition.x;
+          rootNode.y = currentVariationsSession.basePosition.y;
+        }
+      }
 
       // Track the created node
       currentVariationsSession.createdNodes.push(rootNode);
