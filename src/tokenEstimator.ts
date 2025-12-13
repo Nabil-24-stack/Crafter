@@ -42,5 +42,5 @@ export function estimateChatTokens(messages: ChatMessage[]): number {
 
 export function shouldShowChatWarning(messages: ChatMessage[]): boolean {
   const totalTokens = estimateChatTokens(messages);
-  return totalTokens > 8000;
+  return totalTokens > 50000; // ~25% of Claude 3.5 Sonnet's 200K context window
 }

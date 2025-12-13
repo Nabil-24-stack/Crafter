@@ -1,5 +1,5 @@
 /**
- * ChatWarningBanner - Warning banner shown when chat gets too long (>8000 tokens)
+ * ChatWarningBanner - Warning banner shown when chat gets too long (>50000 tokens)
  */
 
 import * as React from 'react';
