@@ -74,9 +74,9 @@ export default async function handler(
       return;
     }
 
-    if (numVariations < 1 || numVariations > 5) {
+    if (numVariations < 1 || numVariations > 10) {
       res.status(400).json({
-        error: 'numVariations must be between 1 and 5',
+        error: 'numVariations must be between 1 and 10',
       });
       return;
     }
@@ -227,6 +227,9 @@ RULES:
 - Make them specific and actionable (not vague like "different style")
 - Ensure they're contextually appropriate for the user's request
 - Each should feel distinct from the others
+- QUALITY OVER QUANTITY: Only generate meaningful variations
+- Each variation must serve a clear purpose and add value
+- Don't create filler variations just to reach the requested count
 
 Good examples:
 - "Create a dashboard — Grid-based, data-dense, analytics-focused"
@@ -280,6 +283,11 @@ function parseVariationPromptsResponse(
       'More whitespace, simplified hierarchy',
       'Bold typography, strong visual hierarchy',
       'Minimal approach, focus on content',
+      'Card-based layout, modular structure',
+      'Dense information display, data-focused',
+      'Asymmetrical design, dynamic composition',
+      'Split-screen layout, dual focus areas',
+      'Progressive disclosure, layered information',
     ];
 
     while (validPrompts.length < expectedCount) {
@@ -301,6 +309,11 @@ function parseVariationPromptsResponse(
       'More whitespace, simplified hierarchy',
       'Bold typography, strong visual hierarchy',
       'Minimal approach, focus on content',
+      'Card-based layout, modular structure',
+      'Dense information display, data-focused',
+      'Asymmetrical design, dynamic composition',
+      'Split-screen layout, dual focus areas',
+      'Progressive disclosure, layered information',
     ];
 
     return fallbackDirections.slice(0, expectedCount).map(

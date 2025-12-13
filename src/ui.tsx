@@ -535,10 +535,47 @@ const App = () => {
     });
   };
 
+  // Analyze variation needs
+  const analyzeVariationNeeds = async (
+    prompt: string,
+    model: 'claude' | 'gemini'
+  ): Promise<{ variationCount: number; rationale: string; categories: string[] }> => {
+    if (!designSystem) {
+      console.warn('No design system available, using default variation count');
+      return { variationCount: 3, rationale: 'Using default count', categories: ['design alternatives'] };
+    }
+
+    try {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/analyze-variation-needs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          designSystem,
+          frameContext: selectedFrameInfo ? {
+            name: selectedFrameInfo.frameName,
+            type: 'FRAME',
+          } : undefined,
+          model,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze variation needs');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error analyzing variation needs:', error);
+      // Fallback to reasonable default
+      return { variationCount: 3, rationale: 'Using default count due to error', categories: ['design alternatives'] };
+    }
+  };
+
   // Handle send message
   const handleSendMessage = async (
     prompt: string,
-    numVariations: number,
     model: 'claude' | 'gemini'
   ) => {
     if (!selectedFrameInfo || !designSystem) {
@@ -578,21 +615,20 @@ const App = () => {
     // Wait 1 second before showing AI response
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Add assistant message with iteration data
+    // Add assistant message with "analyzing" status
     const assistantMessageId = generateId();
     const assistantMessage: ChatMessage = {
       id: assistantMessageId,
       role: 'assistant',
-      content: `Ok. I'll iterate on this design to create ${numVariations} variation${numVariations > 1 ? 's' : ''} of ${prompt.toLowerCase()}.`,
+      content: `Analyzing your request...`,
       timestamp: Date.now(),
       iterationData: {
         frameId: lockedFrameId,
         frameName: lockedFrameName,
         model,
-        numVariations,
-        status: 'generating-prompts',
+        status: 'analyzing',
         startTime: Date.now(),
-        variations: [], // Start with empty variations, we'll add them with stagger
+        variations: [],
       },
     };
 
@@ -603,8 +639,35 @@ const App = () => {
 
     currentMessageRef.current = assistantMessageId;
 
+    // Analyze how many variations are needed
+    const analysis = await analyzeVariationNeeds(prompt, model);
+    const numVariations = analysis.variationCount;
+
+    // Update message with analysis results
+    setChat((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === assistantMessageId && msg.iterationData
+          ? {
+              ...msg,
+              content: `Generating ${numVariations} variation${numVariations > 1 ? 's' : ''} of ${prompt.toLowerCase()}...`,
+              iterationData: {
+                ...msg.iterationData,
+                status: 'generating',
+                numVariations,
+                analysisRationale: analysis.rationale,
+                variationCategories: analysis.categories,
+              },
+            }
+          : msg
+      ),
+    }));
+
+    // Small delay before showing variation cards
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Add variation cards with staggered animation
-    // Wait 1 second after AI message, then show cards 1 second apart
+    // Show cards 1 second apart
     for (let i = 0; i < numVariations; i++) {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -635,7 +698,7 @@ const App = () => {
     // Store pending iteration and request PNG export
     pendingIterationRef.current = {
       prompt,
-      variations: numVariations,
+      variations: numVariations,  // Now uses the analyzed count
       designSystem,
       frameId: lockedFrameId,
       model,
@@ -1082,8 +1145,9 @@ const App = () => {
         (v) => v.status === 'complete'
       ).length;
 
-      summary = `I've designed ${completedCount} out of ${iterationData.numVariations} variations for your design. ${
-        completedCount < iterationData.numVariations
+      const totalVariations = iterationData.numVariations || iterationData.variations.length;
+      summary = `I've designed ${completedCount} out of ${totalVariations} variations for your design. ${
+        completedCount < totalVariations
           ? 'Some variations encountered errors during generation.'
           : 'Here are the differences in the variations:'
       }`;

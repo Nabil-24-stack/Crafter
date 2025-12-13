@@ -257,13 +257,13 @@ export interface VariationStatus {
   jobId?: string; // Job ID for realtime subscription
 }
 
-export type IterationDataStatus = 'generating-prompts' | 'in-progress' | 'complete' | 'stopped' | 'error';
+export type IterationDataStatus = 'analyzing' | 'generating' | 'generating-prompts' | 'in-progress' | 'complete' | 'stopped' | 'error';
 
 export interface IterationData {
   frameId: string;
   frameName: string;
   model: 'claude' | 'gemini';
-  numVariations: number;
+  numVariations?: number; // Optional - set after analysis
 
   status: IterationDataStatus;
   startTime: number;
@@ -272,6 +272,10 @@ export interface IterationData {
   variations: VariationStatus[];
   summary?: string; // LLM-generated summary after completion
   wasStopped?: boolean; // True if user clicked Stop
+
+  // Analysis results
+  analysisRationale?: string; // Why this variation count was chosen
+  variationCategories?: string[]; // Types of variations being generated
 }
 
 export interface ChatMessage {

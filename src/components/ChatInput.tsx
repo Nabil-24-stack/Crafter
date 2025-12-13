@@ -1,5 +1,5 @@
 /**
- * ChatInput - Input area with variations stepper and model selector
+ * ChatInput - Input area with model selector
  */
 
 import * as React from 'react';
@@ -11,8 +11,6 @@ interface ChatInputProps {
   onChange: (value: string) => void;
   onSend: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
-  numVariations: number;
-  onNumVariationsChange: (num: number) => void;
   model: 'claude' | 'gemini';
   onModelChange: (model: 'claude' | 'gemini') => void;
   isGenerating: boolean;
@@ -26,50 +24,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onChange,
   onSend,
   onKeyPress,
-  numVariations,
-  onNumVariationsChange,
   model,
   onModelChange,
   isGenerating,
   onStop,
 }) => {
-  const handleIncrement = () => {
-    if (numVariations < 5) {
-      onNumVariationsChange(numVariations + 1);
-    }
-  };
-
-  const handleDecrement = () => {
-    if (numVariations > 1) {
-      onNumVariationsChange(numVariations - 1);
-    }
-  };
 
   return (
     <div className="chat-input-container">
-      <div className="variations-control">
-        <label className="variations-label">Number of variations</label>
-        <div className="variations-stepper">
-          <button
-            className="stepper-button"
-            onClick={handleDecrement}
-            disabled={numVariations <= 1 || isGenerating}
-            aria-label="Decrease variations"
-          >
-            −
-          </button>
-          <span className="variations-number">{numVariations}</span>
-          <button
-            className="stepper-button"
-            onClick={handleIncrement}
-            disabled={numVariations >= 5 || isGenerating}
-            aria-label="Increase variations"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
       <textarea
         className="chat-textarea"
         placeholder={placeholder}

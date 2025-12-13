@@ -24,7 +24,7 @@ interface ChatInterfaceProps {
   selectedFrameInfo: { frameId: string; frameName: string } | null;
   isGenerating: boolean;
   isAuthenticated: boolean;
-  onSendMessage: (prompt: string, numVariations: number, model: 'claude' | 'gemini') => void;
+  onSendMessage: (prompt: string, model: 'claude' | 'gemini') => void;
   onStop: () => void;
   onNewChat: () => void;
   onExpandVariation: (messageId: string, variationIndex: number) => void;
@@ -48,10 +48,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onLogout,
 }) => {
   const [inputValue, setInputValue] = React.useState('');
-  const [numVariations, setNumVariations] = React.useState(3);
   const [selectedModel, setSelectedModel] = React.useState<'claude' | 'gemini'>('gemini');
   const [showLoginModal, setShowLoginModal] = React.useState(false);
-  const [pendingPrompt, setPendingPrompt] = React.useState<{ prompt: string; variations: number; model: 'claude' | 'gemini' } | null>(null);
+  const [pendingPrompt, setPendingPrompt] = React.useState<{ prompt: string; model: 'claude' | 'gemini' } | null>(null);
   const prevIsGeneratingRef = React.useRef(isGenerating);
 
   // Clear input field when generation completes (goes from generating to not generating)
@@ -88,14 +87,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       // Store the prompt and show login modal
       setPendingPrompt({
         prompt: inputValue,
-        variations: numVariations,
         model: selectedModel
       });
       setShowLoginModal(true);
       return;
     }
 
-    onSendMessage(inputValue, numVariations, selectedModel);
+    onSendMessage(inputValue, selectedModel);
     setInputValue(''); // Clear input after sending
   };
 
@@ -108,7 +106,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Effect to send pending prompt after successful login
   React.useEffect(() => {
     if (isAuthenticated && pendingPrompt) {
-      onSendMessage(pendingPrompt.prompt, pendingPrompt.variations, pendingPrompt.model);
+      onSendMessage(pendingPrompt.prompt, pendingPrompt.model);
       setInputValue(''); // Clear input
       setPendingPrompt(null);
     }
@@ -131,7 +129,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       // Store the prompt and show login modal
       setPendingPrompt({
         prompt: prompt,
-        variations: numVariations,
         model: selectedModel
       });
       setShowLoginModal(true);
@@ -139,7 +136,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
 
     // Automatically send the prompt (input will be cleared by useEffect when generation completes)
-    onSendMessage(prompt, numVariations, selectedModel);
+    onSendMessage(prompt, selectedModel);
   };
 
   return (
@@ -174,8 +171,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onChange={setInputValue}
         onSend={handleSend}
         onKeyPress={handleKeyPress}
-        numVariations={numVariations}
-        onNumVariationsChange={setNumVariations}
         model={selectedModel}
         onModelChange={setSelectedModel}
         isGenerating={isGenerating}
