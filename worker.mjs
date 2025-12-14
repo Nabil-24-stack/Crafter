@@ -1325,9 +1325,18 @@ Remember: Every button, card, header, and UI element MUST have visible text labe
  * Uses PNG screenshot + design system to generate pure SVG
  */
 async function processIterateJob(job) {
-  const { prompt, imageData, designSystem, model, chatHistory } = job.input;
+  const { prompt, imageData, designSystem, model, chatHistory, frames } = job.input;
 
   const selectedModel = model || 'claude';
+
+  // Check if this is a flow iteration (multiple frames) or single frame
+  const isFlowIteration = frames && Array.isArray(frames) && frames.length > 1;
+
+  if (isFlowIteration) {
+    console.log(`🎨 Flow Mode (${frames.length} frames - STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with flow context`);
+    return processFlowIterateJob(job);
+  }
+
   console.log(`🎨 SVG Mode (Iteration - STREAMING): Using ${selectedModel === 'gemini' ? 'Gemini 3 Pro' : 'Claude 4.5'} with image context and live reasoning`);
 
   const systemPrompt = buildSVGSystemPrompt(designSystem);
@@ -1505,6 +1514,181 @@ Begin with your thinking:`;
     svg,
     reasoning: finalReasoning
   };
+}
+
+/**
+ * Process a flow iterate job - Handle multiple frames as a flow
+ * Uses multiple PNG screenshots to generate contextual improvements
+ */
+async function processFlowIterateJob(job) {
+  const { prompt, frames, designSystem, model, chatHistory } = job.input;
+
+  const selectedModel = model || 'gemini'; // Default to Gemini for flow analysis (better with multiple images)
+  console.log(`🌊 Processing flow iteration with ${frames.length} frames...`);
+
+  const systemPrompt = buildFlowSVGSystemPrompt(designSystem);
+
+  // Build user prompt for flow context
+  let contextSection = '';
+  if (chatHistory && chatHistory.trim()) {
+    contextSection = `\n${chatHistory}\n\nUsing this context from previous iterations, `;
+  }
+
+  const userPrompt = `You are looking at a user flow consisting of ${frames.length} screens (see the images).${contextSection}
+
+The screens are:
+${frames.map((f, i) => `Screen ${i + 1}: ${f.frameName}`).join('\n')}
+
+User wants: "${prompt}"
+
+RESPONSE FORMAT - Analyze the flow, then generate improved design:
+
+FLOW ANALYSIS:
+Provide a comprehensive flow analysis in well-structured paragraphs:
+
+**Current Flow Assessment:**
+- Analyze the user journey across all screens
+- Identify consistency issues and flow bottlenecks
+- Note missing states or transitions
+
+**Improvement Strategy:**
+- Explain your overall approach to improving the flow
+- Detail specific improvements for each screen
+- Describe how changes enhance the user journey
+
+**Implementation Details:**
+- Specify visual consistency improvements
+- Outline navigation and interaction enhancements
+- Explain how the design system is leveraged
+
+SVG:
+After your analysis, generate the complete SVG markup for the PRIMARY screen (first screen)
+that demonstrates the flow improvements. Start with <svg and end with </svg>
+
+FLOW ITERATION RULES:
+1. Consider all screens as a connected journey
+2. Ensure visual and interaction consistency across screens
+3. Improve navigation patterns and user feedback
+4. Address any flow gaps or missing states
+5. Generate SVG that reflects flow-level improvements`;
+
+  // For flow iteration, we'll process the first frame as the primary
+  // In the future, we could generate variations for each frame
+  const primaryFrame = frames[0];
+
+  // Stream the AI response with flow context
+  let reasoningChunkIndex = 0;
+  let svgChunkIndex = 0;
+  let fullText = '';
+  let thinkingText = '';
+  let svgText = '';
+  let isInThinkingSection = true;
+
+  console.log(`🌊 Starting flow streaming generation for job ${job.id}...`);
+
+  const cleanReasoningText = (text) => {
+    return text
+      .replace(/```svg\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .trim();
+  };
+
+  const onToken = async (token, accumulatedText) => {
+    fullText = accumulatedText;
+
+    if (isInThinkingSection && !accumulatedText.includes('<svg')) {
+      thinkingText += token;
+
+      if (thinkingText.length >= 30 || token.includes('.') || token.includes('\n')) {
+        const cleanedText = cleanReasoningText(thinkingText);
+        if (cleanedText.length > 0) {
+          await insertReasoningChunk(job.id, cleanedText, reasoningChunkIndex);
+          reasoningChunkIndex++;
+        }
+        thinkingText = '';
+      }
+    } else if (isInThinkingSection) {
+      isInThinkingSection = false;
+      if (thinkingText.length > 0) {
+        const cleanedText = cleanReasoningText(thinkingText);
+        if (cleanedText.length > 0) {
+          await insertReasoningChunk(job.id, cleanedText, reasoningChunkIndex);
+          reasoningChunkIndex++;
+        }
+      }
+      console.log(`💭 Finished streaming ${reasoningChunkIndex} flow analysis chunks`);
+      console.log(`🎨 Starting SVG code streaming...`);
+      svgText = token;
+    } else {
+      svgText += token;
+
+      if (svgText.length >= 100 || token.includes('>')) {
+        await insertSVGChunk(job.id, svgText, svgChunkIndex);
+        svgChunkIndex++;
+        svgText = '';
+      }
+    }
+  };
+
+  // Call streaming API with flow context (using primary frame for now)
+  let aiResponse;
+  try {
+    aiResponse = selectedModel === 'gemini'
+      ? await callGeminiWithVisionStreaming(systemPrompt, userPrompt, primaryFrame.imageData, onToken)
+      : await callClaudeWithVisionStreaming(systemPrompt, userPrompt, primaryFrame.imageData, onToken);
+  } catch (error) {
+    console.error('❌ Flow streaming API error:', error);
+    throw error;
+  }
+
+  const responseText = aiResponse.content[0]?.text || fullText;
+
+  if (svgText.length > 0) {
+    await insertSVGChunk(job.id, svgText, svgChunkIndex);
+    svgChunkIndex++;
+  }
+
+  console.log(`📝 Flow AI response length: ${responseText.length} characters`);
+  console.log(`🎨 Finished streaming ${svgChunkIndex} SVG chunks for flow`);
+
+  console.log(`⏳ Waiting for flow chunk propagation...`);
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  console.log(`✅ Flow chunk propagation complete`);
+
+  // Extract SVG and reasoning
+  const svgMatch = responseText.match(/<svg[\s\S]*?<\/svg>/i);
+  if (!svgMatch) {
+    throw new Error('No SVG found in flow response');
+  }
+
+  const svg = sanitizeSVGForFigma(svgMatch[0]);
+  const reasoning = responseText.split('<svg')[0].trim()
+    .replace(/^(FLOW ANALYSIS:|THINKING:)/i, '')
+    .replace(/^SVG:?$/gmi, '')
+    .trim();
+
+  return {
+    svg,
+    reasoning: reasoning || 'Flow improvements applied successfully',
+    isFlowVariation: true
+  };
+}
+
+/**
+ * Build system prompt for flow-aware SVG generation
+ */
+function buildFlowSVGSystemPrompt(designSystem) {
+  const basePrompt = buildSVGSystemPrompt(designSystem);
+
+  return `${basePrompt}
+
+ADDITIONAL FLOW-SPECIFIC GUIDELINES:
+- You are designing improvements for a multi-screen user flow
+- Consider the entire user journey, not just individual screens
+- Ensure visual consistency across all screens in the flow
+- Improve navigation patterns and state transitions
+- Address any gaps in the user experience
+- Maintain the design system throughout the flow`;
 }
 
 /**

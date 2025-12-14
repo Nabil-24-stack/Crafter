@@ -106,10 +106,12 @@ const App = () => {
     createdAt: Date.now(),
   });
 
-  // Selected frame state
+  // Selected frame state (single or multiple frames)
   const [selectedFrameInfo, setSelectedFrameInfo] = React.useState<{
     frameId: string;
     frameName: string;
+    isFlow?: boolean;
+    frames?: Array<{ id: string; name: string }>;
   } | null>(null);
 
   // Generation state
@@ -182,16 +184,33 @@ const App = () => {
           break;
 
         case 'selected-frame-data':
-          console.log('Payload received:', JSON.stringify(msg.payload));
+          console.log('Single frame payload received:', JSON.stringify(msg.payload));
           if (msg.payload.frameId && msg.payload.frameName) {
             setSelectedFrameInfo({
               frameId: msg.payload.frameId,
               frameName: msg.payload.frameName,
+              isFlow: false,
             });
             console.log('Frame selected:', msg.payload.frameName);
           } else {
             setSelectedFrameInfo(null);
             console.log('No frame selected - payload:', JSON.stringify(msg.payload));
+          }
+          break;
+
+        case 'selected-frames-data':
+          console.log('Multiple frames payload received:', JSON.stringify(msg.payload));
+          if (msg.payload.frames && msg.payload.frames.length > 0) {
+            setSelectedFrameInfo({
+              frameId: msg.payload.frames[0].id, // Use first frame ID as primary
+              frameName: msg.payload.flowName || `${msg.payload.frames[0].name} flow`,
+              isFlow: true,
+              frames: msg.payload.frames,
+            });
+            console.log('Flow selected:', msg.payload.flowName, 'with', msg.payload.frames.length, 'frames');
+          } else {
+            setSelectedFrameInfo(null);
+            console.log('No frames selected');
           }
           break;
 
@@ -207,6 +226,24 @@ const App = () => {
                 pending.variations,
                 pending.designSystem,
                 pending.frameId,
+                pending.model
+              );
+              pendingIterationRef.current = null;
+            }
+          }
+          break;
+
+        case 'multiple-frames-png-exported':
+          if (msg.payload.frames && msg.payload.frames.length > 0) {
+            // Start flow iteration with multiple exported PNGs
+            const pending = pendingIterationRef.current;
+            if (pending) {
+              startFlowIterationWithPNGs(
+                msg.payload.frames,
+                msg.payload.flowName,
+                pending.prompt,
+                pending.variations,
+                pending.designSystem,
                 pending.model
               );
               pendingIterationRef.current = null;
@@ -704,15 +741,30 @@ const App = () => {
       model,
     };
 
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: 'export-frame-png',
-          payload: { frameId: lockedFrameId },
+    // Check if this is a flow (multiple frames) or single frame
+    if (selectedFrameInfo.isFlow && selectedFrameInfo.frames) {
+      // Export multiple frames for flow iteration
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type: 'export-multiple-frames-png',
+            payload: { frameIds: selectedFrameInfo.frames.map(f => f.id) },
+          },
         },
-      },
-      '*'
-    );
+        '*'
+      );
+    } else {
+      // Export single frame
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type: 'export-frame-png',
+            payload: { frameId: lockedFrameId },
+          },
+        },
+        '*'
+      );
+    }
   };
 
   // Generate variation prompts using LLM
@@ -921,6 +973,155 @@ const App = () => {
     } catch (err) {
       setIsGenerating(false);
       console.error('Iteration error:', err);
+    }
+  };
+
+  // Start flow iteration after multiple PNGs are exported
+  const startFlowIterationWithPNGs = async (
+    frames: Array<{
+      frameId: string;
+      frameName: string;
+      imageData: string;
+      structuralHints: any;
+    }>,
+    flowName: string,
+    iterPrompt: string,
+    variations: number,
+    ds: DesignSystemData,
+    model: 'claude' | 'gemini'
+  ) => {
+    try {
+      console.log('Starting flow iteration with', frames.length, 'frames...');
+
+      // Update status: analyzing flow
+      updateIterationStatus('in-progress');
+
+      // Analyze flow needs using the new API endpoint
+      const flowAnalysis = await analyzeFlowNeeds(frames, flowName, iterPrompt, ds, model);
+      console.log('Flow analysis:', flowAnalysis);
+
+      // For now, use the same variation generation as single frame
+      // In the next phase, we'll implement flow-specific variation logic in worker.mjs
+      const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds, model);
+      console.log('Generated flow variation prompts:', variationPrompts);
+
+      // Build chat history for context
+      const chatHistory = buildChatHistory();
+
+      // Start flow variation generation
+      // TODO: Implement flow-specific generation logic that considers all frames
+      // For now, we'll iterate on the first frame as a placeholder
+      const primaryFrame = frames[0];
+
+      // Start all iteration variations using the pure SVG pipeline
+      const variationPromises = variationPrompts.map(async (varPrompt, index) => {
+        try {
+          // Update status: designing
+          updateVariationStatus(index, 'designing', 'AI is designing flow improvements');
+
+          console.log(`Starting flow variation ${index + 1}`);
+
+          // TODO: In the next phase, modify this to handle multiple frames
+          // For now, use the primary frame
+          const result = await claudeService.generateIterationThroughVercel({
+            imageData: primaryFrame.imageData,
+            prompt: varPrompt,
+            masterPrompt: iterPrompt,
+            designSystem: ds,
+            iterationIndex: index,
+            chatHistory,
+            structuralHints: primaryFrame.structuralHints,
+            model,
+          });
+
+          if (result?.success && result?.svg) {
+            console.log(`Flow variation ${index + 1} generated successfully`);
+
+            // TODO: Modify placement logic for flow variations (below original flow)
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: 'generate-single-variation',
+                  payload: {
+                    svg: result.svg,
+                    index,
+                    reasoning: result.reasoning,
+                    frameId: primaryFrame.frameId, // TODO: Handle multiple frame IDs
+                    isFlowVariation: true,
+                  },
+                },
+              },
+              '*'
+            );
+          } else {
+            throw new Error('No SVG returned from flow generation');
+          }
+        } catch (err) {
+          console.error(`Error in flow variation ${index + 1}:`, err);
+          updateVariationStatus(
+            index,
+            'error',
+            'Error creating flow design',
+            undefined,
+            err instanceof Error ? err.message : 'Unknown error'
+          );
+        }
+      });
+
+      // Wait for all variations to complete
+      await Promise.allSettled(variationPromises);
+      console.log('✅ All flow variations completed');
+
+      checkAllVariationsComplete(variations);
+    } catch (err) {
+      setIsGenerating(false);
+      console.error('Flow iteration error:', err);
+    }
+  };
+
+  // Analyze flow needs using the new API endpoint
+  const analyzeFlowNeeds = async (
+    frames: Array<{
+      frameId: string;
+      frameName: string;
+      imageData: string;
+      structuralHints: any;
+    }>,
+    flowName: string,
+    prompt: string,
+    ds: DesignSystemData,
+    model: 'claude' | 'gemini'
+  ) => {
+    try {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/analyze-flow-needs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          frames,
+          flowName,
+          designSystem: ds,
+          model,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze flow needs');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error analyzing flow needs:', error);
+      // Return default flow analysis
+      return {
+        variationCount: 3,
+        rationale: 'Creating 3 flow variations to explore different approaches',
+        flowImprovements: ['Improve consistency', 'Optimize navigation', 'Add transitions'],
+        frameSpecificNeeds: [],
+      };
     }
   };
 

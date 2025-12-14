@@ -71,7 +71,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
 
     if (!selectedFrameInfo) {
-      return 'Select a frame to iterate on.';
+      return 'Select a frame or multiple frames to iterate on.';
     }
 
     return 'How do you want to iterate this design?';

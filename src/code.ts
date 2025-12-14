@@ -155,8 +155,9 @@ async function initPlugin() {
 // Initialize
 initPlugin();
 
-// Track last selected frame to avoid duplicate messages
+// Track last selected frame(s) to avoid duplicate messages
 let lastSelectedFrameId: string | null = null;
+let lastSelectedFrameIds: string[] = [];
 
 // Listen for selection changes to detect frame selection for iteration
 figma.on('selectionchange', () => {
@@ -167,14 +168,18 @@ figma.on('selectionchange', () => {
 
   const selection = figma.currentPage.selection;
 
-  // If exactly one frame is selected, send frame info to UI (but don't export PNG yet)
-  if (selection.length === 1 && selection[0].type === 'FRAME') {
-    const frame = selection[0] as FrameNode;
+  // Filter to only FRAME nodes
+  const frames = selection.filter(node => node.type === 'FRAME') as FrameNode[];
+
+  // Handle single frame selection (unchanged behavior)
+  if (frames.length === 1) {
+    const frame = frames[0];
 
     // Only send message if frame selection actually changed
     if (frame.id !== lastSelectedFrameId) {
       lastSelectedFrameId = frame.id;
-      console.log('Frame selected:', frame.name, frame.id);
+      lastSelectedFrameIds = [frame.id];
+      console.log('Single frame selected:', frame.name, frame.id);
       figma.ui.postMessage({
         type: 'selected-frame-data',
         payload: {
@@ -184,11 +189,60 @@ figma.on('selectionchange', () => {
         },
       });
     }
-  } else {
-    // No frame selected or not a frame - clear selection
-    if (lastSelectedFrameId !== null) {
+  }
+  // Handle multiple frame selection (2-5 frames)
+  else if (frames.length >= 2 && frames.length <= 5) {
+    const frameIds = frames.map(f => f.id);
+    const frameIdsStr = frameIds.join(',');
+    const lastFrameIdsStr = lastSelectedFrameIds.join(',');
+
+    // Only send message if selection actually changed
+    if (frameIdsStr !== lastFrameIdsStr) {
+      lastSelectedFrameId = null; // Clear single frame tracking
+      lastSelectedFrameIds = frameIds;
+
+      // Sort frames by position (left to right, then top to bottom)
+      const sortedFrames = frames.sort((a, b) => {
+        if (Math.abs(a.y - b.y) < 50) { // Roughly same row
+          return a.x - b.x; // Sort by x position
+        }
+        return a.y - b.y; // Sort by y position
+      });
+
+      console.log(`Multi-frame flow selected: ${frames.length} frames`);
+      console.log('Frames:', sortedFrames.map(f => f.name).join(', '));
+
+      figma.ui.postMessage({
+        type: 'selected-frames-data', // New message type for multiple frames
+        payload: {
+          frames: sortedFrames.map(f => ({
+            id: f.id,
+            name: f.name,
+          })),
+          flowName: `${sortedFrames[0].name} flow`, // Use first frame name for flow
+        },
+      });
+    }
+  }
+  // Handle too many frames
+  else if (frames.length > 5) {
+    console.log(`Too many frames selected (${frames.length}). Maximum is 5.`);
+    figma.notify('⚠️ Please select 1-5 frames. Maximum 5 frames allowed for flow iteration.');
+    // Clear selection
+    lastSelectedFrameId = null;
+    lastSelectedFrameIds = [];
+    figma.ui.postMessage({
+      type: 'selected-frame-data',
+      payload: { frameId: null, frameName: null },
+    });
+  }
+  // No frames selected
+  else {
+    // Clear selection if it changed
+    if (lastSelectedFrameId !== null || lastSelectedFrameIds.length > 0) {
       lastSelectedFrameId = null;
-      console.log('Frame deselected');
+      lastSelectedFrameIds = [];
+      console.log('Frame(s) deselected');
       figma.ui.postMessage({
         type: 'selected-frame-data',
         payload: { frameId: null, frameName: null },
@@ -346,6 +400,10 @@ figma.ui.onmessage = async (msg: Message) => {
 
       case 'export-frame-png':
         await handleExportFramePNG(msg.payload);
+        break;
+
+      case 'export-multiple-frames-png':
+        await handleExportMultipleFramesPNG(msg.payload);
         break;
 
       case 'export-frame-json':
@@ -808,10 +866,11 @@ async function handleGenerateSingleVariation(payload: {
   variationIndex: number;
   totalVariations: number;
   frameId?: string; // ID of the original frame being iterated on
+  isFlowVariation?: boolean; // Whether this is a flow variation (multiple frames)
 }) {
   console.log(`Generating variation ${payload.variationIndex + 1} of ${payload.totalVariations} on canvas...`);
 
-  const { variation, variationIndex, totalVariations, frameId } = payload;
+  const { variation, variationIndex, totalVariations, frameId, isFlowVariation } = payload;
   const { svg, reasoning } = variation;
   const GAP_BETWEEN_VARIATIONS = 100; // Gap between variations
 
@@ -827,13 +886,23 @@ async function handleGenerateSingleVariation(payload: {
       const selectedFrame = frameId ? await figma.getNodeByIdAsync(frameId) as SceneNode | null : null;
 
       if (selectedFrame && 'x' in selectedFrame && 'y' in selectedFrame && 'width' in selectedFrame) {
-        // Position to the right of the selected frame
-        baseX = selectedFrame.x + selectedFrame.width + 100;
-        baseY = selectedFrame.y;
-        originalFrameName = selectedFrame.name;
-        console.log(`✅ Positioning variations next to original frame: ${selectedFrame.name} (ID: ${frameId})`);
-        console.log(`  Original frame position: x=${selectedFrame.x}, y=${selectedFrame.y}, width=${selectedFrame.width}`);
-        console.log(`  Base position for variations: x=${baseX}, y=${baseY}`);
+        if (isFlowVariation) {
+          // For flow variations, position below the original frame
+          baseX = selectedFrame.x;
+          baseY = selectedFrame.y + (selectedFrame as SceneNode & { height: number }).height + 200; // Extra gap for flow variations
+          originalFrameName = selectedFrame.name;
+          console.log(`✅ Positioning flow variations below original frame: ${selectedFrame.name} (ID: ${frameId})`);
+          console.log(`  Original frame position: x=${selectedFrame.x}, y=${selectedFrame.y}, height=${(selectedFrame as any).height}`);
+          console.log(`  Base position for flow variations: x=${baseX}, y=${baseY}`);
+        } else {
+          // Position to the right of the selected frame (default for single frame)
+          baseX = selectedFrame.x + selectedFrame.width + 100;
+          baseY = selectedFrame.y;
+          originalFrameName = selectedFrame.name;
+          console.log(`✅ Positioning variations next to original frame: ${selectedFrame.name} (ID: ${frameId})`);
+          console.log(`  Original frame position: x=${selectedFrame.x}, y=${selectedFrame.y}, width=${selectedFrame.width}`);
+          console.log(`  Base position for variations: x=${baseX}, y=${baseY}`);
+        }
       } else {
         // Fallback 1: try lastSelectedFrameId (in case frameId wasn't passed)
         const fallbackFrame = lastSelectedFrameId ? await figma.getNodeByIdAsync(lastSelectedFrameId) as SceneNode | null : null;
@@ -870,7 +939,10 @@ async function handleGenerateSingleVariation(payload: {
     }
 
     // Import SVG as Figma node
-    const rootNode = await importSVGToFigma(svg, `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`);
+    const frameName = isFlowVariation
+      ? `${currentVariationsSession.originalFrameName} flow (Crafter - Flow Variation ${variationIndex + 1})`
+      : `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`;
+    const rootNode = await importSVGToFigma(svg, frameName);
 
     if (rootNode) {
       // Position based on existing variations - find the rightmost one
@@ -1430,6 +1502,79 @@ async function handleExportFramePNG(payload: any) {
     figma.ui.postMessage({
       type: 'frame-png-exported',
       payload: { error: 'Failed to export frame as PNG' },
+    });
+  }
+}
+
+/**
+ * Exports multiple frames as PNGs for flow iteration (2-5 frames)
+ */
+async function handleExportMultipleFramesPNG(payload: any) {
+  const { frameIds } = payload;
+
+  if (!frameIds || !Array.isArray(frameIds) || frameIds.length < 2 || frameIds.length > 5) {
+    figma.ui.postMessage({
+      type: 'multiple-frames-png-exported',
+      payload: { error: 'Invalid frame IDs provided. Expected 2-5 frame IDs.' },
+    });
+    return;
+  }
+
+  try {
+    const exportedFrames = [];
+
+    // Export each frame
+    for (const frameId of frameIds) {
+      // Find the frame by ID
+      const frameNode = await figma.getNodeByIdAsync(frameId);
+
+      if (!frameNode || frameNode.type !== 'FRAME') {
+        console.warn(`Frame ${frameId} not found or invalid, skipping`);
+        continue;
+      }
+
+      // Export frame as PNG
+      // Using 1x scale to reduce database storage
+      const pngData = await (frameNode as FrameNode).exportAsync({
+        format: 'PNG',
+        constraint: { type: 'SCALE', value: 1 },
+      });
+
+      // Convert Uint8Array to base64
+      const base64 = figma.base64Encode(pngData);
+
+      // Extract structural hints for editable layout system
+      const structuralHints = extractStructuralHints(frameNode as FrameNode);
+
+      exportedFrames.push({
+        frameId: frameNode.id,
+        frameName: frameNode.name,
+        imageData: base64,
+        structuralHints,
+      });
+    }
+
+    if (exportedFrames.length === 0) {
+      figma.ui.postMessage({
+        type: 'multiple-frames-png-exported',
+        payload: { error: 'No valid frames could be exported' },
+      });
+      return;
+    }
+
+    figma.ui.postMessage({
+      type: 'multiple-frames-png-exported',
+      payload: {
+        frames: exportedFrames,
+        flowName: `${exportedFrames[0].frameName} flow`,
+      },
+    });
+
+  } catch (error) {
+    console.error('Error exporting multiple frames PNG:', error);
+    figma.ui.postMessage({
+      type: 'multiple-frames-png-exported',
+      payload: { error: 'Failed to export frames as PNG' },
     });
   }
 }
