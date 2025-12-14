@@ -708,6 +708,11 @@ const App = () => {
     for (let i = 0; i < numVariations; i++) {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // For flow iterations, calculate which frame this variation will iterate on
+      const sourceFrameName = selectedFrameInfo.isFlow && selectedFrameInfo.frames
+        ? selectedFrameInfo.frames[i % selectedFrameInfo.frames.length].name
+        : undefined;
+
       setChat((prev) => ({
         ...prev,
         messages: prev.messages.map((msg) =>
@@ -723,6 +728,7 @@ const App = () => {
                       status: 'thinking',
                       statusText: 'Thinking of approach',
                       isExpanded: false,
+                      sourceFrameName, // Add source frame name for flow variations
                     },
                   ],
                 },

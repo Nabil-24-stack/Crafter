@@ -941,14 +941,11 @@ async function handleGenerateSingleVariation(payload: {
 
     // Import SVG as Figma node
     let frameName: string;
-    if (isFlowVariation && sourceFrameName) {
-      // For flow variations, show: "Flow Variation X - [Frame Name]"
-      frameName = `Flow Variation ${variationIndex + 1} - ${sourceFrameName}`;
-    } else if (isFlowVariation) {
-      // Fallback if sourceFrameName not provided
-      frameName = `${currentVariationsSession.originalFrameName} flow (Crafter - Flow Variation ${variationIndex + 1})`;
+    if (isFlowVariation) {
+      // For flow variations: "[First frame name] flow (Crafter - Variation X)"
+      frameName = `${currentVariationsSession.originalFrameName} flow (Crafter - Variation ${variationIndex + 1})`;
     } else {
-      // Single frame variation
+      // For single frame: "[Original frame name] (Crafter - Variation X)"
       frameName = `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`;
     }
     const rootNode = await importSVGToFigma(svg, frameName);

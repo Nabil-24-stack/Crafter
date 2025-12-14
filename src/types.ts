@@ -258,6 +258,7 @@ export interface VariationStatus {
   createdNodeId?: string; // Figma node ID if successfully created
   isExpanded?: boolean; // UI state for expand/collapse
   jobId?: string; // Job ID for realtime subscription
+  sourceFrameName?: string; // For flow variations: the frame being iterated on
 }
 
 export type IterationDataStatus = 'analyzing' | 'generating' | 'generating-prompts' | 'in-progress' | 'complete' | 'stopped' | 'error';

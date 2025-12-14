@@ -39,7 +39,12 @@ export const VariationCard: React.FC<VariationCardProps> = ({
       <div className="variation-header" onClick={onToggleExpand}>
         {getStatusIcon()}
         <div className="variation-info">
-          <div className="variation-title">Variation {variation.index + 1}</div>
+          <div className="variation-title">
+            {variation.sourceFrameName
+              ? `Variation ${variation.index + 1} - ${variation.sourceFrameName}`
+              : `Variation ${variation.index + 1}`
+            }
+          </div>
           <div className="variation-status-text">{variation.statusText}</div>
         </div>
         <button
