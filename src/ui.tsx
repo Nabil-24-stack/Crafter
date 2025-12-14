@@ -1021,43 +1021,85 @@ const App = () => {
 
           console.log(`Starting flow variation ${index + 1}`);
 
-          // TODO: In the next phase, modify this to handle multiple frames
-          // For now, use the primary frame
-          const result = await claudeService.generateIterationThroughVercel({
-            imageData: primaryFrame.imageData,
-            prompt: varPrompt,
-            masterPrompt: iterPrompt,
-            designSystem: ds,
-            iterationIndex: index,
-            chatHistory,
-            structuralHints: primaryFrame.structuralHints,
+          // Use iterateLayout for flow iterations
+          const result = await iterateLayout(
+            primaryFrame.imageData,
+            primaryFrame.structuralHints,
+            varPrompt,
+            ds,
             model,
-          });
+            chatHistory,
+            (jobId) => {
+              // Callback when job starts - subscribe to live reasoning chunks
+              console.log(`Flow job ${jobId} started for variation ${index + 1}`);
+              updateVariationStatus(index, 'designing', 'AI is thinking about flow improvements...', undefined);
 
-          if (result?.success && result?.svg) {
+              // Subscribe to reasoning chunks for live streaming
+              const reasoningChannel = subscribeToReasoningChunks(
+                jobId,
+                (chunk) => {
+                  console.log(`Flow reasoning chunk ${chunk.chunk_index}: ${chunk.chunk_text}`);
+                  updateStreamingReasoning(index, chunk.chunk_text, true);
+                },
+                (error) => {
+                  console.error(`Flow reasoning subscription error for job ${jobId}:`, error);
+                }
+              );
+
+              // Store the channel so we can unsubscribe later
+              reasoningChannelsRef.current.set(jobId, reasoningChannel);
+            }
+          );
+
+          // Send SVG to plugin for rendering
+          if (result.svg) {
             console.log(`Flow variation ${index + 1} generated successfully`);
 
-            // TODO: Modify placement logic for flow variations (below original flow)
             parent.postMessage(
               {
                 pluginMessage: {
                   type: 'generate-single-variation',
                   payload: {
-                    svg: result.svg,
-                    index,
-                    reasoning: result.reasoning,
-                    frameId: primaryFrame.frameId, // TODO: Handle multiple frame IDs
+                    variation: {
+                      svg: result.svg,
+                      reasoning: result.reasoning,
+                    },
+                    variationIndex: index,
+                    totalVariations: variations,
+                    frameId: primaryFrame.frameId,
                     isFlowVariation: true,
                   },
                 },
               },
               '*'
             );
+
+            // Update status: complete and stop live streaming indicator
+            updateStreamingReasoning(index, '', false);
+            updateVariationStatus(
+              index,
+              'complete',
+              'Flow Iteration Complete',
+              result.reasoning || 'Flow improvements generated successfully'
+            );
+
+            // Unsubscribe from reasoning chunks
+            if (result.job_id && reasoningChannelsRef.current.has(result.job_id)) {
+              const channel = reasoningChannelsRef.current.get(result.job_id);
+              if (channel) {
+                await unsubscribeFromReasoningChunks(channel);
+                reasoningChannelsRef.current.delete(result.job_id);
+              }
+            }
           } else {
             throw new Error('No SVG returned from flow generation');
           }
         } catch (err) {
           console.error(`Error in flow variation ${index + 1}:`, err);
+
+          // Stop the live streaming indicator on error
+          updateStreamingReasoning(index, '', false);
+
           updateVariationStatus(
             index,
             'error',

@@ -38,7 +38,10 @@ export type MessageType =
   | 'logout' // Log out user
   | 'convert-svg-to-png' // Request UI to convert SVG to PNG
   | 'svg-converted-to-png' // Response with PNG bytes
-  | 'svg-conversion-failed'; // Response when conversion fails
+  | 'svg-conversion-failed' // Response when conversion fails
+  | 'export-multiple-frames-png' // Export multiple frames as PNGs for flow iteration
+  | 'selected-frames-data' // Multiple frames selected for flow iteration
+  | 'multiple-frames-png-exported'; // Multiple frames exported as PNGs
 
 export interface Message {
   type: MessageType;
