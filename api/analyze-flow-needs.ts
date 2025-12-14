@@ -353,10 +353,7 @@ function parseFlowAnalysisResponse(responseText: string): FlowAnalysisResponse {
         'Optimize navigation patterns',
         'Add missing states and transitions',
       ],
-      frameSpecificNeeds: parsed.frameSpecificNeeds || frames.map(f => ({
-        frameName: f.frameName,
-        improvements: ['Update to match flow improvements'],
-      })),
+      frameSpecificNeeds: parsed.frameSpecificNeeds || [],
     };
   } catch (error) {
     console.error('Failed to parse flow analysis response:', error);
