@@ -1009,30 +1009,33 @@ const App = () => {
       const chatHistory = buildChatHistory();
 
       // Start flow variation generation
-      // TODO: Implement flow-specific generation logic that considers all frames
-      // For now, we'll iterate on the first frame as a placeholder
-      const primaryFrame = frames[0];
+      // Distribute variations evenly across all frames
+      // Example: 3 frames, 5 variations → Var 0→Frame 0, Var 1→Frame 1, Var 2→Frame 2, Var 3→Frame 0, Var 4→Frame 1
 
       // Start all iteration variations using the pure SVG pipeline
       const variationPromises = variationPrompts.map(async (varPrompt, index) => {
         try {
-          // Update status: designing
-          updateVariationStatus(index, 'designing', 'AI is designing flow improvements');
+          // Calculate which frame this variation should iterate on (even distribution)
+          const frameIndex = index % frames.length;
+          const targetFrame = frames[frameIndex];
 
-          console.log(`Starting flow variation ${index + 1}`);
+          console.log(`Starting flow variation ${index + 1} on frame "${targetFrame.frameName}" (${frameIndex + 1}/${frames.length})`);
+
+          // Update status: designing
+          updateVariationStatus(index, 'designing', `AI is designing flow improvements for ${targetFrame.frameName}`);
 
           // Use iterateLayout for flow iterations
           const result = await iterateLayout(
-            primaryFrame.imageData,
-            primaryFrame.structuralHints,
+            targetFrame.imageData,
+            targetFrame.structuralHints,
             varPrompt,
             ds,
             model,
             chatHistory,
             (jobId) => {
               // Callback when job starts - subscribe to live reasoning chunks
-              console.log(`Flow job ${jobId} started for variation ${index + 1}`);
-              updateVariationStatus(index, 'designing', 'AI is thinking about flow improvements...', undefined);
+              console.log(`Flow job ${jobId} started for variation ${index + 1} on ${targetFrame.frameName}`);
+              updateVariationStatus(index, 'designing', `AI is thinking about ${targetFrame.frameName}...`, undefined);
 
               // Subscribe to reasoning chunks for live streaming
               const reasoningChannel = subscribeToReasoningChunks(
@@ -1066,8 +1069,9 @@ const App = () => {
                     },
                     variationIndex: index,
                     totalVariations: variations,
-                    frameId: primaryFrame.frameId,
+                    frameId: targetFrame.frameId,
                     isFlowVariation: true,
+                    sourceFrameName: targetFrame.frameName, // Add source frame name for display
                   },
                 },
               },

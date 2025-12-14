@@ -867,10 +867,11 @@ async function handleGenerateSingleVariation(payload: {
   totalVariations: number;
   frameId?: string; // ID of the original frame being iterated on
   isFlowVariation?: boolean; // Whether this is a flow variation (multiple frames)
+  sourceFrameName?: string; // Name of the specific frame being iterated (for flow variations)
 }) {
   console.log(`Generating variation ${payload.variationIndex + 1} of ${payload.totalVariations} on canvas...`);
 
-  const { variation, variationIndex, totalVariations, frameId, isFlowVariation } = payload;
+  const { variation, variationIndex, totalVariations, frameId, isFlowVariation, sourceFrameName } = payload;
   const { svg, reasoning } = variation;
   const GAP_BETWEEN_VARIATIONS = 100; // Gap between variations
 
@@ -939,9 +940,17 @@ async function handleGenerateSingleVariation(payload: {
     }
 
     // Import SVG as Figma node
-    const frameName = isFlowVariation
-      ? `${currentVariationsSession.originalFrameName} flow (Crafter - Flow Variation ${variationIndex + 1})`
-      : `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`;
+    let frameName: string;
+    if (isFlowVariation && sourceFrameName) {
+      // For flow variations, show: "Flow Variation X - [Frame Name]"
+      frameName = `Flow Variation ${variationIndex + 1} - ${sourceFrameName}`;
+    } else if (isFlowVariation) {
+      // Fallback if sourceFrameName not provided
+      frameName = `${currentVariationsSession.originalFrameName} flow (Crafter - Flow Variation ${variationIndex + 1})`;
+    } else {
+      // Single frame variation
+      frameName = `${currentVariationsSession.originalFrameName} (Crafter - Variation ${variationIndex + 1})`;
+    }
     const rootNode = await importSVGToFigma(svg, frameName);
 
     if (rootNode) {
