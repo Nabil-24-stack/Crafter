@@ -11,6 +11,9 @@ interface ChatHeaderProps {
   onLogin?: () => void;
   userEmail?: string;
   onLogout?: () => void;
+  planType?: 'free' | 'pro';
+  onUpgradeClick?: () => void;
+  onManageSubscription?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -19,7 +22,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   isAuthenticated,
   onLogin,
   userEmail,
-  onLogout
+  onLogout,
+  planType = 'free',
+  onUpgradeClick,
+  onManageSubscription
 }) => {
   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
   const profileRef = React.useRef<HTMLDivElement>(null);
@@ -80,6 +86,22 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             {showProfileMenu && (
               <div className="profile-menu">
                 <div className="profile-menu-email">{userEmail}</div>
+                {planType === 'free' && onUpgradeClick && (
+                  <button className="profile-menu-item" onClick={() => {
+                    setShowProfileMenu(false);
+                    onUpgradeClick();
+                  }}>
+                    Upgrade
+                  </button>
+                )}
+                {planType === 'pro' && onManageSubscription && (
+                  <button className="profile-menu-item" onClick={() => {
+                    setShowProfileMenu(false);
+                    onManageSubscription();
+                  }}>
+                    Manage subscription
+                  </button>
+                )}
                 <button className="profile-menu-item" onClick={onLogout}>
                   Log out
                 </button>

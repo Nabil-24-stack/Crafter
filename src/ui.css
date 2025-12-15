@@ -2003,3 +2003,57 @@ body {
   background: #F9FAFB;
   border-color: #D1D5DB;
 }
+
+/* ============================================================================
+   Iteration Counter (Bottom of Chat Interface)
+   ============================================================================ */
+
+.iteration-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.iteration-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: #161616;
+}
+
+.upgrade-button {
+  background: transparent;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #161616;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upgrade-button:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+.pro-plan-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
+}
+
+.pro-icon {
+  width: 16px;
+  height: 16px;
+  color: #36E4D8;
+}

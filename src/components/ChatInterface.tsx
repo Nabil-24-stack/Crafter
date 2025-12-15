@@ -17,6 +17,7 @@ import { ChatWarningBanner } from './ChatWarningBanner';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { LoginModal } from './LoginModal';
+import { IterationCounter } from './IterationCounter';
 
 interface ChatInterfaceProps {
   chat: Chat;
@@ -31,6 +32,14 @@ interface ChatInterfaceProps {
   onLogin: () => void;
   userEmail?: string;
   onLogout?: () => void;
+  subscriptionStatus?: {
+    plan_type: 'free' | 'pro';
+    iterations_used: number;
+    iterations_limit: number;
+    total_available: number;
+  } | null;
+  onUpgradeClick?: () => void;
+  onManageSubscription?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -46,6 +55,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onLogin,
   userEmail,
   onLogout,
+  subscriptionStatus,
+  onUpgradeClick,
+  onManageSubscription,
 }) => {
   const [inputValue, setInputValue] = React.useState('');
   const [selectedModel, setSelectedModel] = React.useState<'claude' | 'gemini'>('gemini');
@@ -148,6 +160,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onLogin={onLogin}
         userEmail={userEmail}
         onLogout={onLogout}
+        planType={subscriptionStatus?.plan_type || 'free'}
+        onUpgradeClick={onUpgradeClick}
+        onManageSubscription={onManageSubscription}
       />
 
       {showWarning && (
@@ -182,6 +197,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <LoginModal
           onLogin={handleLoginFromModal}
           onClose={() => setShowLoginModal(false)}
+        />
+      )}
+
+      {/* Iteration Counter - Show if authenticated and subscription status available */}
+      {isAuthenticated && subscriptionStatus && (
+        <IterationCounter
+          iterations_used={subscriptionStatus.iterations_used}
+          iterations_limit={subscriptionStatus.iterations_limit}
+          plan_type={subscriptionStatus.plan_type}
+          onUpgradeClick={onUpgradeClick}
         />
       )}
     </div>

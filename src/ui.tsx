@@ -92,6 +92,18 @@ const App = () => {
   const [authToken, setAuthToken] = React.useState<string | null>(null);
   const [userEmail, setUserEmail] = React.useState<string>('');
   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+  const [userId, setUserId] = React.useState<string | null>(null);
+
+  // Subscription state
+  const [subscriptionStatus, setSubscriptionStatus] = React.useState<{
+    plan_type: 'free' | 'pro';
+    status: string;
+    iterations_used: number;
+    iterations_limit: number;
+    extra_iterations: number;
+    total_available: number;
+    can_iterate: boolean;
+  } | null>(null);
 
   // Design system state
   const [designSystem, setDesignSystem] = React.useState<DesignSystemData | null>(null);
@@ -126,6 +138,112 @@ const App = () => {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  // Fetch subscription status from backend
+  const fetchSubscriptionStatus = async (user_id: string) => {
+    try {
+      console.log('Fetching subscription status for user:', user_id);
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription/check-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch subscription status');
+      }
+
+      const data = await response.json();
+      console.log('Subscription status:', data);
+      setSubscriptionStatus(data);
+    } catch (error) {
+      console.error('Error fetching subscription status:', error);
+      // Set default free plan on error
+      setSubscriptionStatus({
+        plan_type: 'free',
+        status: 'free',
+        iterations_used: 0,
+        iterations_limit: 10,
+        extra_iterations: 0,
+        total_available: 10,
+        can_iterate: true,
+      });
+    }
+  };
+
+  // Record iteration usage
+  const recordIteration = async (): Promise<boolean> => {
+    if (!userId) {
+      console.error('No user ID available');
+      return false;
+    }
+
+    try {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/usage/record-iteration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Limit exceeded
+        if (data.limit_exceeded) {
+          console.log('Iteration limit exceeded');
+          return false;
+        }
+        throw new Error(data.message || 'Failed to record iteration');
+      }
+
+      // Update subscription status with new usage
+      if (subscriptionStatus) {
+        setSubscriptionStatus({
+          ...subscriptionStatus,
+          iterations_used: data.iterations_used,
+          total_available: data.iterations_remaining,
+        });
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error recording iteration:', error);
+      return false;
+    }
+  };
+
+  // Handle upgrade click
+  const handleUpgrade = () => {
+    if (!userId || !userEmail) return;
+
+    // Open payment portal in new tab
+    const portalUrl = `${process.env.PAYMENT_PORTAL_URL || 'https://billing.crafter.ai'}/pricing?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
+    window.open(portalUrl, '_blank');
+  };
+
+  // Handle manage subscription click
+  const handleManageSubscription = async () => {
+    if (!userId) return;
+
+    try {
+      // Create customer portal session
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create portal session');
+      }
+
+      const data = await response.json();
+      window.open(data.portal_url, '_blank');
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      alert('Failed to open subscription management. Please try again.');
+    }
+  };
+
   // Check for stored auth token on mount
   React.useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'check-auth' } }, '*');
@@ -144,11 +262,18 @@ const App = () => {
           if (msg.payload.token) {
             setAuthToken(msg.payload.token);
             setIsAuthenticated(true);
-            // Decode token to get user email
+            // Decode token to get user email and ID
             try {
               const decoded = JSON.parse(atob(msg.payload.token));
               // Handle both old format (email) and new format (user.email)
-              setUserEmail(decoded.user?.email || decoded.email || '');
+              const email = decoded.user?.email || decoded.email || '';
+              const id = decoded.user?.id || decoded.id || null;
+              setUserEmail(email);
+              setUserId(id);
+              // Fetch subscription status after auth
+              if (id) {
+                fetchSubscriptionStatus(id);
+              }
             } catch (e) {
               console.error('Failed to decode token:', e);
             }
@@ -158,11 +283,18 @@ const App = () => {
         case 'auth-complete':
           setAuthToken(msg.payload.token);
           setIsAuthenticated(true);
-          // Decode token to get user email
+          // Decode token to get user email and ID
           try {
             const decoded = JSON.parse(atob(msg.payload.token));
             // Handle both old format (email) and new format (user.email)
-            setUserEmail(decoded.user?.email || decoded.email || '');
+            const email = decoded.user?.email || decoded.email || '';
+            const id = decoded.user?.id || decoded.id || null;
+            setUserEmail(email);
+            setUserId(id);
+            // Fetch subscription status after auth
+            if (id) {
+              fetchSubscriptionStatus(id);
+            }
           } catch (e) {
             console.error('Failed to decode token:', e);
           }
@@ -617,6 +749,34 @@ const App = () => {
   ) => {
     if (!selectedFrameInfo || !designSystem) {
       console.error('No frame selected or design system not loaded');
+      return;
+    }
+
+    // Check usage limit before proceeding
+    if (!subscriptionStatus?.can_iterate) {
+      // Show upgrade modal
+      const shouldUpgrade = confirm(
+        subscriptionStatus?.plan_type === 'free'
+          ? `You've reached your ${subscriptionStatus?.iterations_limit} iteration limit for this month. Upgrade to Pro for 40 iterations/month!`
+          : `You've reached your iteration limit. Purchase more iterations to continue.`
+      );
+
+      if (shouldUpgrade) {
+        if (subscriptionStatus?.plan_type === 'free') {
+          handleUpgrade();
+        } else {
+          // Open buy iterations page
+          const portalUrl = `${process.env.PAYMENT_PORTAL_URL || 'https://billing.crafter.ai'}/buy-iterations?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
+          window.open(portalUrl, '_blank');
+        }
+      }
+      return;
+    }
+
+    // Record the iteration usage
+    const canProceed = await recordIteration();
+    if (!canProceed) {
+      alert('Failed to record iteration. Please try again.');
       return;
     }
 
@@ -1606,6 +1766,9 @@ const App = () => {
         onLogin={handleGoogleLogin}
         userEmail={userEmail}
         onLogout={handleLogout}
+        subscriptionStatus={subscriptionStatus}
+        onUpgradeClick={handleUpgrade}
+        onManageSubscription={handleManageSubscription}
       />
     </div>
   );
