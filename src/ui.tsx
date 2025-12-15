@@ -142,7 +142,7 @@ const App = () => {
   const fetchSubscriptionStatus = async (user_id: string) => {
     try {
       console.log('Fetching subscription status for user:', user_id);
-      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription/check-status', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=check-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id }),
@@ -178,7 +178,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/usage/record-iteration', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=record-iteration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId }),
@@ -226,7 +226,7 @@ const App = () => {
 
     try {
       // Create customer portal session
-      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription/portal', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId }),
