@@ -3,7 +3,7 @@
  * Only logs in development mode to prevent exposing sensitive data
  */
 
-const IS_DEV = process.env.NODE_ENV === 'development';
+const IS_DEV = false; // Browser environment - always use production mode
 
 export const logger = {
   /**

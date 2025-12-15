@@ -216,7 +216,7 @@ const App = () => {
     if (!userId || !userEmail) return;
 
     // Open payment portal in new tab
-    const portalUrl = `${process.env.PAYMENT_PORTAL_URL || 'https://billing.crafter.ai'}/pricing?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
+    const portalUrl = `https://billing.crafter.ai/pricing?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
     window.open(portalUrl, '_blank');
   };
 
@@ -766,7 +766,7 @@ const App = () => {
           handleUpgrade();
         } else {
           // Open buy iterations page
-          const portalUrl = `${process.env.PAYMENT_PORTAL_URL || 'https://billing.crafter.ai'}/buy-iterations?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
+          const portalUrl = `https://billing.crafter.ai/buy-iterations?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
           window.open(portalUrl, '_blank');
         }
       }
