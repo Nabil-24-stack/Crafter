@@ -212,12 +212,83 @@ const App = () => {
   };
 
   // Handle upgrade click
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     if (!userId || !userEmail) return;
 
-    // Open payment portal in new tab
-    const portalUrl = `https://billing.crafter.ai/pricing?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
-    window.open(portalUrl, '_blank');
+    try {
+      // Create Stripe checkout session
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          user_email: userEmail,
+          success_url: 'https://crafter-ai-kappa.vercel.app/success',
+          cancel_url: 'https://crafter-ai-kappa.vercel.app/pricing'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.checkout_url) {
+        // Open Stripe checkout in new tab
+        window.open(data.checkout_url, '_blank');
+      } else {
+        alert('Failed to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      alert('Failed to create checkout session. Please try again.');
+    }
+  };
+
+  // Handle buy iteration pack
+  const handleBuyIterations = async () => {
+    if (!userId || !userEmail) return;
+
+    // Ask user which pack size they want
+    const packChoice = confirm(
+      'Choose iteration pack:\n\n' +
+      'Click OK for 10 iterations ($5 AUD)\n' +
+      'Click Cancel to see more options'
+    );
+
+    let packSize = 10;
+    if (!packChoice) {
+      const largerPack = confirm(
+        'Choose iteration pack:\n\n' +
+        'Click OK for 20 iterations ($9 AUD)\n' +
+        'Click Cancel for 50 iterations ($20 AUD)'
+      );
+      packSize = largerPack ? 20 : 50;
+    }
+
+    try {
+      // Create Stripe checkout session for iteration pack
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=create-pack-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          user_email: userEmail,
+          pack_size: packSize,
+          success_url: 'https://crafter-ai-kappa.vercel.app/success',
+          cancel_url: 'https://crafter-ai-kappa.vercel.app/pricing'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.checkout_url) {
+        // Open Stripe checkout in new tab
+        window.open(data.checkout_url, '_blank');
+      } else {
+        alert('Failed to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating pack checkout:', error);
+      alert('Failed to create checkout session. Please try again.');
+    }
   };
 
   // Handle manage subscription click
@@ -765,9 +836,8 @@ const App = () => {
         if (subscriptionStatus?.plan_type === 'free') {
           handleUpgrade();
         } else {
-          // Open buy iterations page
-          const portalUrl = `https://billing.crafter.ai/buy-iterations?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
-          window.open(portalUrl, '_blank');
+          // Buy iteration pack
+          handleBuyIterations();
         }
       }
       return;
