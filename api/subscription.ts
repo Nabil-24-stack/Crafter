@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import { buffer } from 'micro';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2024-12-18.acacia' as any,
 });
 
 const supabase = createClient(
@@ -52,19 +52,26 @@ export default async function handler(
   try {
     switch (action) {
       case 'check-status':
-        return await handleCheckStatus(req, res);
+        await handleCheckStatus(req, res);
+        return;
       case 'create-checkout':
-        return await handleCreateCheckout(req, res);
+        await handleCreateCheckout(req, res);
+        return;
       case 'create-pack-checkout':
-        return await handleCreatePackCheckout(req, res);
+        await handleCreatePackCheckout(req, res);
+        return;
       case 'portal':
-        return await handlePortal(req, res);
+        await handlePortal(req, res);
+        return;
       case 'webhook':
-        return await handleWebhook(req, res);
+        await handleWebhook(req, res);
+        return;
       case 'record-iteration':
-        return await handleRecordIteration(req, res);
+        await handleRecordIteration(req, res);
+        return;
       default:
         res.status(400).json({ error: 'Invalid action. Use: check-status, create-checkout, create-pack-checkout, portal, webhook, record-iteration' });
+        return;
     }
   } catch (error) {
     console.error('Subscription API error:', error);
@@ -478,8 +485,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     stripe_subscription_id: subscription.id,
     status,
     plan_type,
-    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+    current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
+    current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
     cancel_at_period_end: subscription.cancel_at_period_end,
   }, { onConflict: 'user_id' });
 }
@@ -492,14 +499,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  if (invoice.subscription) {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+  const subscriptionId = (invoice as any).subscription;
+  if (subscriptionId) {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
     await handleSubscriptionUpdated(subscription);
   }
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const subscription_id = invoice.subscription as string;
+  const subscription_id = (invoice as any).subscription as string;
   if (!subscription_id) return;
 
   const subscription = await stripe.subscriptions.retrieve(subscription_id);
