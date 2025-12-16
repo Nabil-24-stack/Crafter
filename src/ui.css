@@ -2020,10 +2020,33 @@ body {
   z-index: 10;
 }
 
+.iteration-count-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .iteration-count {
   font-size: 14px;
   font-weight: 500;
   color: #161616;
+}
+
+.buy-more-button {
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #36E4D8;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.buy-more-button:hover {
+  color: #2BC9BE;
 }
 
 .upgrade-button {

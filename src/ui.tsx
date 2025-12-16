@@ -225,7 +225,17 @@ const App = () => {
     if (!userId || !userEmail) return;
 
     // Open pricing page (shows iteration packs section)
-    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}#iteration-packs`;
+    window.open(pricingUrl, '_blank');
+  };
+
+  // Handle buy more iterations (from counter button)
+  const handleBuyMore = () => {
+    if (!userId || !userEmail) return;
+
+    // Open pricing page scrolled to iteration packs
+    const planType = subscriptionStatus?.plan_type || 'free';
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}#iteration-packs`;
     window.open(pricingUrl, '_blank');
   };
 
@@ -1763,6 +1773,7 @@ const App = () => {
         subscriptionStatus={subscriptionStatus}
         onUpgradeClick={handleUpgrade}
         onManageSubscription={handleManageSubscription}
+        onBuyMoreClick={handleBuyMore}
       />
     </div>
   );

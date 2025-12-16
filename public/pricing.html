@@ -199,7 +199,7 @@
     </div>
 
     <!-- Iteration Packs -->
-    <div class="max-w-5xl mx-auto">
+    <div id="iteration-packs" class="max-w-5xl mx-auto">
       <div class="bg-secondary border border-border rounded-xl p-8 md:p-10">
         <div class="text-center mb-10">
           <h2 class="text-3xl md:text-4xl font-bold mb-3">Need More Iterations?</h2>
@@ -285,7 +285,7 @@
         // User is on Pro plan
         freeBtn.textContent = 'Downgrade to Free';
         freeBtn.disabled = false;
-        freeBtn.className = 'w-full py-3 px-6 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-medium transition-all cursor-pointer';
+        freeBtn.className = 'w-full py-3 px-6 rounded-lg border border-border bg-background hover:bg-muted text-foreground font-medium transition-all cursor-pointer';
         freeBtn.onclick = downgradeToFree;
 
         proBtn.textContent = 'Current Plan';

@@ -40,6 +40,7 @@ interface ChatInterfaceProps {
   } | null;
   onUpgradeClick?: () => void;
   onManageSubscription?: () => void;
+  onBuyMoreClick?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -58,6 +59,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   subscriptionStatus,
   onUpgradeClick,
   onManageSubscription,
+  onBuyMoreClick,
 }) => {
   const [inputValue, setInputValue] = React.useState('');
   const [selectedModel, setSelectedModel] = React.useState<'claude' | 'gemini'>('gemini');
@@ -207,6 +209,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           iterations_limit={subscriptionStatus.iterations_limit}
           plan_type={subscriptionStatus.plan_type}
           onUpgradeClick={onUpgradeClick}
+          onBuyMoreClick={onBuyMoreClick}
         />
       )}
     </div>
