@@ -1531,11 +1531,11 @@ body {
 
 .chat-input-container {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   gap: 8px;
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 8px 12px;
+  padding: 12px;
   background: var(--white);
   transition: border-color 0.15s ease;
 }
@@ -1623,11 +1623,12 @@ body {
   color: var(--text-secondary);
 }
 
-/* Inline controls */
-.input-controls-inline {
+/* Bottom controls */
+.input-controls-bottom {
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: flex-end;
   flex-shrink: 0;
 }
 

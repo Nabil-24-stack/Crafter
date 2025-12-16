@@ -58,7 +58,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           rows={1}
         />
 
-        <div className="input-controls-inline">
+        <div className="input-controls-bottom">
           {showModelSelector && (
             <select
               className="model-selector-inline"
