@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crafter - Pricing</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .header h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .header p {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+
+    .pricing-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .pricing-card.featured {
+      border: 3px solid #667eea;
+    }
+
+    .badge {
+      position: absolute;
+      top: -12px;
+      right: 24px;
+      background: #667eea;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .plan-name {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a202c;
+      margin-bottom: 8px;
+    }
+
+    .plan-price {
+      font-size: 48px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .plan-price span {
+      font-size: 18px;
+      color: #718096;
+      font-weight: 400;
+    }
+
+    .plan-description {
+      color: #718096;
+      font-size: 15px;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .features li {
+      padding: 12px 0;
+      color: #4a5568;
+      font-size: 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .features li::before {
+      content: "✓";
+      color: #48bb78;
+      font-weight: bold;
+      font-size: 18px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .cta-button {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cta-button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .cta-button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .cta-button.secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #e2e8f0;
+    }
+
+    .cta-button.secondary:hover {
+      border-color: #667eea;
+      background: #f7fafc;
+    }
+
+    .cta-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .iteration-packs {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .iteration-packs h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .iteration-packs p {
+      color: #718096;
+      text-align: center;
+      margin-bottom: 32px;
+      font-size: 15px;
+    }
+
+    .packs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .pack-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .pack-card:hover {
+      border-color: #667eea;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    }
+
+    .pack-iterations {
+      font-size: 36px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 8px;
+    }
+
+    .pack-price {
+      font-size: 24px;
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 16px;
+    }
+
+    .pack-buy {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pack-buy:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .header p {
+        font-size: 16px;
+      }
+
+      .pricing-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Choose Your Plan</h1>
+      <p>Get started with AI-powered design iteration today</p>
+    </div>
+
+    <div class="pricing-cards">
+      <!-- Free Plan -->
+      <div class="pricing-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <span>AUD / month</span></div>
+        <div class="plan-description">Perfect for trying out Crafter</div>
+        <ul class="features">
+          <li>10 iterations per month</li>
+          <li>Gemini AI model only</li>
+          <li>Maximum 3 variations per iteration</li>
+          <li>Single frame only</li>
+          <li>Community support</li>
+        </ul>
+        <button class="cta-button secondary" disabled>Current Plan</button>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="pricing-card featured">
+        <div class="badge">Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$18 <span>AUD / month</span></div>
+        <div class="plan-description">For professional designers who iterate frequently</div>
+        <ul class="features">
+          <li>40 iterations per month</li>
+          <li>Both Claude Sonnet 4.5 & Gemini AI</li>
+          <li>Maximum 10 variations per iteration</li>
+          <li>Multi-frame flows supported</li>
+          <li>Priority support</li>
+          <li>Early access to new features</li>
+        </ul>
+        <button class="cta-button primary" id="subscribe-btn" onclick="subscribeToPro()">
+          Upgrade to Pro
+        </button>
+      </div>
+    </div>
+
+    <!-- Iteration Packs -->
+    <div class="iteration-packs">
+      <h2>Need More Iterations?</h2>
+      <p>One-time iteration packs for when you need extra iterations this month</p>
+      <div class="packs-grid">
+        <div class="pack-card" onclick="buyPack(10)">
+          <div class="pack-iterations">10</div>
+          <div class="pack-price">$5 AUD</div>
+          <button class="pack-buy">Buy Pack</button>
+        </div>
+        <div class="pack-card" onclick="buyPack(20)">
+          <div class="pack-iterations">20</div>
+          <div class="pack-price">$9 AUD</div>
+          <button class="pack-buy">Buy Pack</button>
+        </div>
+        <div class="pack-card" onclick="buyPack(50)">
+          <div class="pack-iterations">50</div>
+          <div class="pack-price">$20 AUD</div>
+          <button class="pack-buy">Buy Pack</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get user info from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+    const userEmail = urlParams.get('email');
+
+    async function subscribeToPro() {
+      if (!userId || !userEmail) {
+        alert('Missing user information. Please reopen this page from the Crafter plugin.');
+        return;
+      }
+
+      const btn = document.getElementById('subscribe-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span>';
+
+      try {
+        const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            user_email: userEmail,
+            success_url: window.location.origin + '/success.html',
+            cancel_url: window.location.href
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          throw new Error('Failed to create checkout session');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to create checkout session. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = 'Upgrade to Pro';
+      }
+    }
+
+    async function buyPack(packSize) {
+      if (!userId || !userEmail) {
+        alert('Missing user information. Please reopen this page from the Crafter plugin.');
+        return;
+      }
+
+      try {
+        const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=create-pack-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            user_email: userEmail,
+            pack_size: packSize,
+            success_url: window.location.origin + '/success.html',
+            cancel_url: window.location.href
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          throw new Error('Failed to create checkout session');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to create checkout session. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html>
