@@ -775,21 +775,8 @@ const App = () => {
 
     // Check usage limit before proceeding
     if (!subscriptionStatus?.can_iterate) {
-      // Show upgrade modal
-      const shouldUpgrade = confirm(
-        subscriptionStatus?.plan_type === 'free'
-          ? `You've reached your ${subscriptionStatus?.iterations_limit} iteration limit for this month. Upgrade to Pro for 40 iterations/month!`
-          : `You've reached your iteration limit. Purchase more iterations to continue.`
-      );
-
-      if (shouldUpgrade) {
-        if (subscriptionStatus?.plan_type === 'free') {
-          handleUpgrade();
-        } else {
-          // Buy iteration pack
-          handleBuyIterations();
-        }
-      }
+      // Show custom limit reached modal
+      setShowLimitReachedModal(true);
       return;
     }
 
