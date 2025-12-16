@@ -54,12 +54,6 @@ export const IterationCounter: React.FC<IterationCounterProps> = ({
         </button>
       ) : (
         <div className="pro-plan-badge">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="pro-icon">
-            <path
-              d="M8 1L10.5 6.5L16 7.5L12 11.5L13 17L8 14L3 17L4 11.5L0 7.5L5.5 6.5L8 1Z"
-              fill="currentColor"
-            />
-          </svg>
           Pro Plan
         </div>
       )}
