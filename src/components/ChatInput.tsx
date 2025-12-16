@@ -81,9 +81,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onClick={onSend}
               disabled={disabled || !value.trim()}
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 10L17.5 3.33334L10.8333 18.3333L9.16667 11.6667L2.5 10Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              Send
             </button>
           )}
         </div>

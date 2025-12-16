@@ -1661,17 +1661,16 @@ body {
 
 /* Inline send button */
 .send-button-inline {
-  width: 32px;
-  height: 32px;
+  padding: 8px 16px;
   border-radius: 8px;
   border: none;
   background: var(--loading-blue);
-  color: var(--white);
+  color: #161616;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
@@ -1681,8 +1680,8 @@ body {
 
 .send-button-inline:disabled {
   background: #E5E7EB;
+  color: #9CA3AF;
   cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .send-button-inline:active:not(:disabled) {
