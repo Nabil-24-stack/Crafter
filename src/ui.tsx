@@ -104,6 +104,7 @@ const App = () => {
     extra_iterations: number;
     total_available: number;
     can_iterate: boolean;
+    current_period_end?: string;
   } | null>(null);
 
   // Design system state
@@ -244,6 +245,13 @@ const App = () => {
 
   // Calculate next reset date
   const getResetDate = (): string => {
+    // For Pro users with active subscription, use their period end date
+    if (subscriptionStatus?.current_period_end) {
+      const periodEnd = new Date(subscriptionStatus.current_period_end);
+      return periodEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    }
+
+    // For free users or users without period end, iterations reset on 1st of next month
     const now = new Date();
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     return nextMonth.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
