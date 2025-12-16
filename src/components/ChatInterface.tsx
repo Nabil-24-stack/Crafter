@@ -207,6 +207,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <IterationCounter
           iterations_used={subscriptionStatus.iterations_used}
           iterations_limit={subscriptionStatus.iterations_limit}
+          total_available={subscriptionStatus.total_available}
           plan_type={subscriptionStatus.plan_type}
           onUpgradeClick={onUpgradeClick}
           onBuyMoreClick={onBuyMoreClick}

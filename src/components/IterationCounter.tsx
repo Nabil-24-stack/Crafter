@@ -8,6 +8,7 @@ import * as React from 'react';
 interface IterationCounterProps {
   iterations_used: number;
   iterations_limit: number;
+  total_available: number;
   plan_type: 'free' | 'pro';
   onUpgradeClick?: () => void;
   onBuyMoreClick?: () => void;
@@ -16,6 +17,7 @@ interface IterationCounterProps {
 export const IterationCounter: React.FC<IterationCounterProps> = ({
   iterations_used,
   iterations_limit,
+  total_available,
   plan_type,
   onUpgradeClick,
   onBuyMoreClick,
@@ -31,7 +33,7 @@ export const IterationCounter: React.FC<IterationCounterProps> = ({
     <div className="iteration-counter">
       <div className="iteration-count-wrapper">
         <div className="iteration-count">
-          {iterations_used}/{iterations_limit} iterations
+          {iterations_used}/{iterations_limit + (total_available - iterations_limit)} iterations
         </div>
         {showBuyMore && onBuyMoreClick && (
           <button

@@ -104,37 +104,8 @@
       </p>
 
       <p class="text-base text-muted-foreground mb-8 fade-in-up delay-2">
-        You can close this window and return to Figma to start creating amazing designs!
+        You can close this window and return to Figma. Restart the plugin to see your account updated!
       </p>
-
-      <!-- Info Card -->
-      <div class="bg-background/50 border border-primary/20 rounded-xl p-6 fade-in-up delay-3">
-        <div class="flex items-start gap-4">
-          <div class="flex-shrink-0">
-            <svg class="w-6 h-6 text-primary mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="text-left">
-            <h3 class="font-semibold text-white mb-2">What's Next?</h3>
-            <p id="info-text" class="text-sm text-muted-foreground">
-              Return to the Crafter plugin in Figma to start using your new features. Your iteration counter has been updated automatically.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Features Unlocked -->
-      <div id="features-box" class="mt-8 grid grid-cols-2 gap-4 fade-in-up delay-3">
-        <div class="bg-background/50 border border-gray-800 rounded-lg p-4">
-          <div id="feature-1-value" class="text-primary font-bold text-2xl mb-1">40</div>
-          <div id="feature-1-label" class="text-xs text-muted-foreground">Iterations/Month</div>
-        </div>
-        <div class="bg-background/50 border border-gray-800 rounded-lg p-4">
-          <div id="feature-2-value" class="text-primary font-bold text-2xl mb-1">10</div>
-          <div id="feature-2-label" class="text-xs text-muted-foreground">Max Variations</div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -149,20 +120,6 @@
       // Iteration pack purchase
       document.getElementById('success-message').textContent =
         `Thank you for your purchase! You've successfully added ${packSize} iterations to your account.`;
-
-      document.getElementById('info-text').textContent =
-        `Return to the Crafter plugin in Figma to start using your additional iterations. Your iteration counter has been updated automatically.`;
-
-      // Update features box to show pack info
-      const featuresBox = document.getElementById('features-box');
-      featuresBox.innerHTML = `
-        <div class="bg-background/50 border border-gray-800 rounded-lg p-6 col-span-2">
-          <div class="text-center">
-            <div class="text-primary font-bold text-4xl mb-2">+${packSize}</div>
-            <div class="text-sm text-muted-foreground">Additional iterations added to your account</div>
-          </div>
-        </div>
-      `;
     } else if (purchaseType === 'subscription') {
       // Pro subscription purchase (default content is already for this case)
       // No changes needed as the default content is for subscription
