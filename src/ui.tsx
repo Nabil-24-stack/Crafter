@@ -200,7 +200,8 @@ const App = () => {
         setSubscriptionStatus({
           ...subscriptionStatus,
           iterations_used: data.iterations_used,
-          total_available: data.iterations_remaining,
+          iterations_limit: data.iterations_limit,
+          total_available: data.total_available,
         });
       }
 

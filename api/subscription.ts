@@ -238,7 +238,9 @@ async function handleRecordIteration(req: VercelRequest, res: VercelResponse) {
       success: true,
       message: 'Iteration recorded',
       iterations_used: current_iterations_used + 1,
-      iterations_remaining: iterations_limit - (current_iterations_used + 1) + total_pack_iterations,
+      iterations_limit,
+      extra_iterations: total_pack_iterations,
+      total_available: iterations_limit + total_pack_iterations,
       plan_type
     });
   }
@@ -260,7 +262,9 @@ async function handleRecordIteration(req: VercelRequest, res: VercelResponse) {
       success: true,
       message: 'Iteration recorded (using pack)',
       iterations_used: current_iterations_used,
-      iterations_remaining: total_pack_iterations - 1,
+      iterations_limit,
+      extra_iterations: total_pack_iterations - 1,
+      total_available: iterations_limit + (total_pack_iterations - 1),
       plan_type
     });
   }
