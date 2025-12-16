@@ -2085,7 +2085,7 @@ body {
 .limit-reached-modal {
   background: white;
   border-radius: 12px;
-  padding: 32px;
+  padding: 16px;
   max-width: 400px;
   width: 90%;
   position: relative;
