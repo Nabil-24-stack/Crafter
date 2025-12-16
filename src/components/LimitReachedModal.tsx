@@ -32,7 +32,7 @@ export const LimitReachedModal: React.FC<LimitReachedModalProps> = ({
           </div>
 
           <h2 className="limit-reached-title">
-            You have met your monthly iterations.
+            You have used all your iterations.
           </h2>
 
           <p className="limit-reached-description">
