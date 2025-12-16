@@ -24,7 +24,11 @@ export const LimitReachedModal: React.FC<LimitReachedModalProps> = ({
 
         <div className="limit-reached-content">
           <div className="limit-reached-icon">
-            <img src="Info.png" alt="Info" />
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="32" r="30" stroke="#161616" strokeWidth="4"/>
+              <circle cx="32" cy="20" r="3" fill="#161616"/>
+              <rect x="29" y="28" width="6" height="20" rx="3" fill="#161616"/>
+            </svg>
           </div>
 
           <h2 className="limit-reached-title">
