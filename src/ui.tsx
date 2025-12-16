@@ -12,6 +12,7 @@ import {
   VariationStatus,
 } from './types';
 import { ChatInterface } from './components/ChatInterface';
+import { LimitReachedModal } from './components/LimitReachedModal';
 import { generateLayout, iterateLayout } from './claudeService';
 import { subscribeToReasoningChunks, unsubscribeFromReasoningChunks } from './supabaseClient';
 import type { RealtimeChannel } from '@supabase/supabase-js';
@@ -129,6 +130,7 @@ const App = () => {
   // Generation state
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [activeJobIds, setActiveJobIds] = React.useState<string[]>([]);
+  const [showLimitReachedModal, setShowLimitReachedModal] = React.useState(false);
 
   // Realtime channels for reasoning chunk streaming
   const reasoningChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
@@ -238,6 +240,19 @@ const App = () => {
     const planType = subscriptionStatus?.plan_type || 'free';
     const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}#iteration-packs`;
     window.open(pricingUrl, '_blank');
+  };
+
+  // Calculate next reset date
+  const getResetDate = (): string => {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return nextMonth.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  };
+
+  // Handle view plans from limit reached modal
+  const handleViewPlansFromModal = () => {
+    setShowLimitReachedModal(false);
+    handleBuyMore();
   };
 
   // Handle manage subscription click
@@ -781,7 +796,7 @@ const App = () => {
     // Record the iteration usage
     const canProceed = await recordIteration();
     if (!canProceed) {
-      alert('Failed to record iteration. Please try again.');
+      setShowLimitReachedModal(true);
       return;
     }
 
@@ -1776,6 +1791,15 @@ const App = () => {
         onManageSubscription={handleManageSubscription}
         onBuyMoreClick={handleBuyMore}
       />
+
+      {/* Limit Reached Modal */}
+      {showLimitReachedModal && (
+        <LimitReachedModal
+          onClose={() => setShowLimitReachedModal(false)}
+          onViewPlans={handleViewPlansFromModal}
+          resetDate={getResetDate()}
+        />
+      )}
     </div>
   );
 };
