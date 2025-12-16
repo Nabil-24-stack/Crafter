@@ -230,27 +230,13 @@ const App = () => {
   };
 
   // Handle manage subscription click
-  const handleManageSubscription = async () => {
-    if (!userId) return;
+  const handleManageSubscription = () => {
+    if (!userId || !userEmail) return;
 
-    try {
-      // Create customer portal session
-      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=portal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create portal session');
-      }
-
-      const data = await response.json();
-      window.open(data.portal_url, '_blank');
-    } catch (error) {
-      console.error('Error opening customer portal:', error);
-      alert('Failed to open subscription management. Please try again.');
-    }
+    // Open pricing page with current plan type
+    const planType = subscriptionStatus?.plan_type || 'free';
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}`;
+    window.open(pricingUrl, '_blank');
   };
 
   // Check for stored auth token on mount
