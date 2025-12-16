@@ -327,7 +327,7 @@
           body: JSON.stringify({
             user_id: userId,
             user_email: userEmail,
-            success_url: window.location.origin + '/success.html',
+            success_url: window.location.origin + '/success.html?type=subscription',
             cancel_url: window.location.href
           }),
         });
@@ -361,7 +361,7 @@
             user_id: userId,
             user_email: userEmail,
             pack_size: packSize,
-            success_url: window.location.origin + '/success.html',
+            success_url: window.location.origin + `/success.html?type=pack&pack_size=${packSize}`,
             cancel_url: window.location.href
           }),
         });
