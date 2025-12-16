@@ -260,7 +260,12 @@ const App = () => {
   // Handle view plans from limit reached modal
   const handleViewPlansFromModal = () => {
     setShowLimitReachedModal(false);
-    handleBuyMore();
+    if (!userId || !userEmail) return;
+
+    // Open pricing page at the top (no hash)
+    const planType = subscriptionStatus?.plan_type || 'free';
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}`;
+    window.open(pricingUrl, '_blank');
   };
 
   // Handle manage subscription click
