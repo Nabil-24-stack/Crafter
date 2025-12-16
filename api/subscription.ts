@@ -108,6 +108,11 @@ async function handleCheckStatus(req: VercelRequest, res: VercelResponse) {
       .select()
       .single();
 
+    // Calculate period end for new free user (one month from now)
+    const now = new Date();
+    const nextPeriod = new Date(now);
+    nextPeriod.setMonth(nextPeriod.getMonth() + 1);
+
     return res.status(200).json({
       plan_type: 'free',
       status: 'free',
@@ -115,6 +120,7 @@ async function handleCheckStatus(req: VercelRequest, res: VercelResponse) {
       iterations_limit: 10,
       extra_iterations: 0,
       total_available: 10,
+      current_period_end: nextPeriod.toISOString(),
       can_iterate: true
     });
   }
@@ -151,6 +157,19 @@ async function handleCheckStatus(req: VercelRequest, res: VercelResponse) {
   const remaining_from_plan = Math.max(0, iterations_limit - iterations_used);
   const total_available = iterations_limit + extra_iterations;
 
+  // Calculate period end
+  let period_end: string | undefined;
+  if (subscription.current_period_end) {
+    // Pro users have Stripe-managed period end
+    period_end = subscription.current_period_end;
+  } else if (usage?.created_at) {
+    // Free users: period ends one month from when they started using the plugin this month
+    const usageStart = new Date(usage.created_at);
+    const nextPeriod = new Date(usageStart);
+    nextPeriod.setMonth(nextPeriod.getMonth() + 1);
+    period_end = nextPeriod.toISOString();
+  }
+
   res.status(200).json({
     plan_type,
     status: subscription.status,
@@ -158,7 +177,7 @@ async function handleCheckStatus(req: VercelRequest, res: VercelResponse) {
     iterations_limit,
     extra_iterations,
     total_available,
-    current_period_end: subscription.current_period_end || undefined,
+    current_period_end: period_end,
     can_iterate: iterations_used < total_available
   });
 }
