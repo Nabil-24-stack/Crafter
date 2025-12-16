@@ -149,7 +149,7 @@ async function handleCheckStatus(req: VercelRequest, res: VercelResponse) {
   const iterations_limit = plan_type === 'pro' ? 40 : 10;
   const iterations_used = usage.iterations_used || 0;
   const remaining_from_plan = Math.max(0, iterations_limit - iterations_used);
-  const total_available = remaining_from_plan + extra_iterations;
+  const total_available = iterations_limit + extra_iterations;
 
   res.status(200).json({
     plan_type,
@@ -159,7 +159,7 @@ async function handleCheckStatus(req: VercelRequest, res: VercelResponse) {
     extra_iterations,
     total_available,
     current_period_end: subscription.current_period_end || undefined,
-    can_iterate: total_available > 0
+    can_iterate: iterations_used < total_available
   });
 }
 
