@@ -15,6 +15,7 @@ interface ChatInputProps {
   onModelChange: (model: 'claude' | 'gemini') => void;
   isGenerating: boolean;
   onStop: () => void;
+  planType?: 'free' | 'pro';
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -28,7 +29,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onModelChange,
   isGenerating,
   onStop,
+  planType,
 }) => {
+  // Only show model selector for Pro users
+  const showModelSelector = planType === 'pro';
 
   return (
     <div className="chat-input-container">
@@ -43,15 +47,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       />
 
       <div className="input-controls">
-        <select
-          className="model-selector"
-          value={model}
-          onChange={(e) => onModelChange(e.target.value as 'claude' | 'gemini')}
-          disabled={isGenerating}
-        >
-          <option value="gemini">Gemini 3 Pro</option>
-          <option value="claude">Claude 4.5</option>
-        </select>
+        {showModelSelector && (
+          <select
+            className="model-selector"
+            value={model}
+            onChange={(e) => onModelChange(e.target.value as 'claude' | 'gemini')}
+            disabled={isGenerating}
+          >
+            <option value="gemini">Gemini 3 Pro</option>
+            <option value="claude">Claude 4.5</option>
+          </select>
+        )}
 
         {isGenerating ? (
           <button className="stop-button" onClick={onStop}>

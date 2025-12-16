@@ -75,6 +75,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     prevIsGeneratingRef.current = isGenerating;
   }, [isGenerating]);
 
+  // Force free users to use Gemini only
+  React.useEffect(() => {
+    if (subscriptionStatus?.plan_type === 'free' && selectedModel !== 'gemini') {
+      setSelectedModel('gemini');
+    }
+  }, [subscriptionStatus?.plan_type, selectedModel]);
+
   // Check if chat is too long
   const showWarning = shouldShowChatWarning(chat.messages);
 
@@ -192,6 +199,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onModelChange={setSelectedModel}
         isGenerating={isGenerating}
         onStop={onStop}
+        planType={subscriptionStatus?.plan_type || 'free'}
       />
 
       {/* Login Modal */}
