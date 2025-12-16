@@ -1,131 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment Successful - Crafter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#36E4D8',
+            background: 'hsl(240 10% 3.9%)',
+            foreground: 'hsl(0 0% 98%)',
+            muted: 'hsl(240 3.7% 15.9%)',
+            'muted-foreground': 'hsl(240 5% 64.9%)',
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: white;
-      border-radius: 16px;
-      padding: 60px 40px;
-      max-width: 500px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-
-    .checkmark {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #48bb78;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      animation: scaleIn 0.5s ease-out;
-    }
-
-    .checkmark svg {
-      width: 50px;
-      height: 50px;
-      stroke: white;
-      stroke-width: 3;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      animation: checkmark 0.8s ease-out 0.2s forwards;
-      stroke-dasharray: 48;
-      stroke-dashoffset: 48;
-    }
-
     @keyframes scaleIn {
       from {
-        transform: scale(0);
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
       }
       to {
-        transform: scale(1);
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
       }
     }
 
     @keyframes checkmark {
-      to {
+      0% {
+        stroke-dashoffset: 48;
+      }
+      100% {
         stroke-dashoffset: 0;
       }
     }
 
-    h1 {
-      font-size: 32px;
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 16px;
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(54, 228, 216, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(54, 228, 216, 0.8);
+      }
     }
 
-    p {
-      font-size: 16px;
-      color: #718096;
-      line-height: 1.6;
-      margin-bottom: 32px;
+    .checkmark-circle {
+      animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                 glow 2s ease-in-out infinite 0.5s;
     }
 
-    .cta-button {
-      display: inline-block;
-      padding: 16px 32px;
-      font-size: 16px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .checkmark-path {
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: checkmark 0.5s ease-out 0.4s forwards;
     }
 
-    .cta-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .note {
-      margin-top: 32px;
-      padding: 16px;
-      background: #f7fafc;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #4a5568;
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
     }
+
+    .delay-1 { animation-delay: 0.6s; opacity: 0; }
+    .delay-2 { animation-delay: 0.8s; opacity: 0; }
+    .delay-3 { animation-delay: 1s; opacity: 0; }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="checkmark">
-      <svg viewBox="0 0 52 52">
-        <path d="M14 27l10 10L38 17" />
-      </svg>
-    </div>
-    <h1>Payment Successful!</h1>
-    <p>Thank you for subscribing to Crafter. Your account has been upgraded and you can now enjoy all Pro features.</p>
-    <p>You can close this window and return to Figma to start creating amazing designs!</p>
-    <div class="note">
-      <strong>What's Next?</strong><br>
-      Return to the Crafter plugin in Figma to start using your new features. Your iteration counter has been updated automatically.
+<body class="bg-background text-foreground antialiased min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-2xl w-full">
+    <div class="bg-muted border border-gray-800 rounded-2xl p-12 text-center">
+      <!-- Animated Checkmark -->
+      <div class="flex justify-center mb-8">
+        <div class="checkmark-circle w-24 h-24 bg-gradient-to-br from-primary to-emerald-400 rounded-full flex items-center justify-center">
+          <svg class="w-14 h-14" viewBox="0 0 52 52">
+            <path class="checkmark-path" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M14 27l10 10L38 17" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 fade-in-up delay-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+        Payment Successful!
+      </h1>
+
+      <p class="text-lg text-muted-foreground mb-6 fade-in-up delay-2">
+        Thank you for subscribing to Crafter. Your account has been upgraded and you can now enjoy all Pro features.
+      </p>
+
+      <p class="text-base text-muted-foreground mb-8 fade-in-up delay-2">
+        You can close this window and return to Figma to start creating amazing designs!
+      </p>
+
+      <!-- Info Card -->
+      <div class="bg-background/50 border border-primary/20 rounded-xl p-6 fade-in-up delay-3">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0">
+            <svg class="w-6 h-6 text-primary mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="text-left">
+            <h3 class="font-semibold text-white mb-2">What's Next?</h3>
+            <p class="text-sm text-muted-foreground">
+              Return to the Crafter plugin in Figma to start using your new features. Your iteration counter has been updated automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Unlocked -->
+      <div class="mt-8 grid grid-cols-2 gap-4 fade-in-up delay-3">
+        <div class="bg-background/50 border border-gray-800 rounded-lg p-4">
+          <div class="text-primary font-bold text-2xl mb-1">40</div>
+          <div class="text-xs text-muted-foreground">Iterations/Month</div>
+        </div>
+        <div class="bg-background/50 border border-gray-800 rounded-lg p-4">
+          <div class="text-primary font-bold text-2xl mb-1">10</div>
+          <div class="text-xs text-muted-foreground">Max Variations</div>
+        </div>
+      </div>
     </div>
   </div>
 </body>
