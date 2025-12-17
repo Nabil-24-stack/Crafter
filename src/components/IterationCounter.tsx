@@ -1,6 +1,6 @@
 /**
- * IterationCounter - Displays user's iteration usage and plan status
- * Shows at bottom of chat interface
+ * IterationCounter - Displays user's iteration usage, plan status, and profile
+ * Shows at bottom of chat interface with avatar, counter, and action buttons
  */
 
 import * as React from 'react';
@@ -12,6 +12,9 @@ interface IterationCounterProps {
   plan_type: 'free' | 'pro';
   onUpgradeClick?: () => void;
   onBuyMoreClick?: () => void;
+  userEmail?: string;
+  onLogout?: () => void;
+  onManageSubscription?: () => void;
 }
 
 export const IterationCounter: React.FC<IterationCounterProps> = ({
@@ -21,23 +24,94 @@ export const IterationCounter: React.FC<IterationCounterProps> = ({
   plan_type,
   onUpgradeClick,
   onBuyMoreClick,
+  userEmail,
+  onLogout,
+  onManageSubscription,
 }) => {
-  // Show "Buy more iterations" when:
-  // - Free plan: >= 8 iterations
-  // - Pro plan: >= 30 iterations
-  const showBuyMore =
-    (plan_type === 'free' && iterations_used >= 8) ||
-    (plan_type === 'pro' && iterations_used >= 30);
+  const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+  const profileRef = React.useRef<HTMLDivElement>(null);
+
+  // Get first letter of email for avatar
+  const getInitial = () => {
+    return userEmail ? userEmail.charAt(0).toUpperCase() : 'U';
+  };
+
+  // Close menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="iteration-counter">
-      <div className="iteration-count-wrapper">
+      {/* Left: Profile Avatar */}
+      <div className="profile-container-bottom" ref={profileRef}>
+        <button
+          className="profile-button-bottom"
+          onClick={() => setShowProfileMenu(!showProfileMenu)}
+          title={userEmail}
+          aria-label="User profile"
+        >
+          {getInitial()}
+        </button>
+        {showProfileMenu && (
+          <div className="profile-menu-bottom">
+            <div className="profile-menu-email">{userEmail}</div>
+            {plan_type === 'free' && onUpgradeClick && (
+              <button className="profile-menu-item" onClick={() => {
+                setShowProfileMenu(false);
+                onUpgradeClick();
+              }}>
+                Upgrade
+              </button>
+            )}
+            {plan_type === 'pro' && onManageSubscription && (
+              <button className="profile-menu-item" onClick={() => {
+                setShowProfileMenu(false);
+                onManageSubscription();
+              }}>
+                Manage subscription
+              </button>
+            )}
+            {onLogout && (
+              <button className="profile-menu-item" onClick={onLogout}>
+                Log out
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Center: Iteration Count and Plan Type */}
+      <div className="iteration-info">
         <div className="iteration-count">
           {iterations_used}/{iterations_limit + (total_available - iterations_limit)} iterations
         </div>
-        {showBuyMore && onBuyMoreClick && (
+        <div className="plan-label">
+          {plan_type === 'free' ? 'Free plan' : 'Pro plan'}
+        </div>
+      </div>
+
+      {/* Right: Action Buttons */}
+      <div className="iteration-actions">
+        {plan_type === 'free' && onUpgradeClick && (
           <button
-            className="buy-more-button"
+            className="upgrade-button-bottom"
+            onClick={onUpgradeClick}
+            aria-label="Upgrade to Pro plan"
+          >
+            Upgrade
+          </button>
+        )}
+        {onBuyMoreClick && (
+          <button
+            className="buy-more-button-bottom"
             onClick={onBuyMoreClick}
             aria-label="Buy more iterations"
           >
@@ -45,20 +119,6 @@ export const IterationCounter: React.FC<IterationCounterProps> = ({
           </button>
         )}
       </div>
-
-      {plan_type === 'free' ? (
-        <button
-          className="upgrade-button"
-          onClick={onUpgradeClick}
-          aria-label="Upgrade to Pro plan"
-        >
-          Upgrade Plan
-        </button>
-      ) : (
-        <div className="pro-plan-badge">
-          Pro Plan
-        </div>
-      )}
     </div>
   );
 };

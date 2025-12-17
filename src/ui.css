@@ -2026,10 +2026,12 @@ body {
    Iteration Counter (Bottom of Chat Interface)
    ============================================================================ */
 
+/* Main container - three column layout */
 .iteration-counter {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 12px 16px;
   border-top: 1px solid #E5E7EB;
   background: #FFFFFF;
@@ -2038,36 +2040,80 @@ body {
   z-index: 10;
 }
 
-.iteration-count-wrapper {
+/* Left: Profile Avatar at Bottom */
+.profile-container-bottom {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-button-bottom {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #36E4D8;
+  color: #161616;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.profile-button-bottom:hover {
+  background: #2DD4C7;
+  transform: scale(1.05);
+}
+
+.profile-button-bottom:active {
+  transform: scale(0.95);
+}
+
+.profile-menu-bottom {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* Center: Iteration Info (Count + Plan Type) */
+.iteration-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
 }
 
 .iteration-count {
   font-size: 14px;
   font-weight: 500;
   color: #161616;
+  line-height: 1.4;
 }
 
-.buy-more-button {
-  background: transparent;
-  border: none;
-  padding: 4px 10px;
+.plan-label {
   font-size: 12px;
-  font-weight: 500;
-  color: #161616;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: underline;
-  white-space: nowrap;
+  color: #6B7280;
+  line-height: 1.4;
 }
 
-.buy-more-button:hover {
-  color: #4B5563;
+/* Right: Action Buttons */
+.iteration-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.upgrade-button {
+.upgrade-button-bottom {
   background: transparent;
   border: 1px solid #E5E7EB;
   border-radius: 6px;
@@ -2077,26 +2123,30 @@ body {
   color: #161616;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
-.upgrade-button:hover {
+.upgrade-button-bottom:hover {
   background: #F9FAFB;
   border-color: #D1D5DB;
 }
 
-.pro-plan-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.buy-more-button-bottom {
+  background: transparent;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 6px 12px;
   font-size: 13px;
   font-weight: 500;
-  color: #6B7280;
+  color: #161616;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
-.pro-icon {
-  width: 16px;
-  height: 16px;
-  color: #36E4D8;
+.buy-more-button-bottom:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
 }
 
 /* Limit Reached Modal */

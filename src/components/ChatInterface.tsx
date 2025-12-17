@@ -165,13 +165,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <ChatHeader
         chatName={chat.name}
         onNewChat={onNewChat}
-        isAuthenticated={isAuthenticated}
-        onLogin={onLogin}
-        userEmail={userEmail}
-        onLogout={onLogout}
-        planType={subscriptionStatus?.plan_type || 'free'}
-        onUpgradeClick={onUpgradeClick}
-        onManageSubscription={onManageSubscription}
       />
 
       {showWarning && (
@@ -219,6 +212,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           plan_type={subscriptionStatus.plan_type}
           onUpgradeClick={onUpgradeClick}
           onBuyMoreClick={onBuyMoreClick}
+          userEmail={userEmail}
+          onLogout={onLogout}
+          onManageSubscription={onManageSubscription}
         />
       )}
     </div>
