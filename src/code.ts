@@ -1568,6 +1568,13 @@ async function handleExportMultipleFramesPNG(payload: any) {
       return;
     }
 
+    // DEBUG: Log imageData fingerprints to verify uniqueness
+    console.log('🔍 DEBUG: Exported frames imageData verification:', exportedFrames.map(f => ({
+      name: f.frameName,
+      imageDataLength: f.imageData.length,
+      imageDataHash: f.imageData.substring(0, 50) // First 50 chars as fingerprint
+    })));
+
     figma.ui.postMessage({
       type: 'multiple-frames-png-exported',
       payload: {

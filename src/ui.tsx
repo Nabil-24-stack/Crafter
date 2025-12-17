@@ -932,6 +932,23 @@ const App = () => {
 
     // Check if this is a flow (multiple frames) or single frame
     if (selectedFrameInfo.isFlow && selectedFrameInfo.frames) {
+      // Multi-frame iteration is Pro-only feature
+      if (subscriptionStatus?.plan_type !== 'pro') {
+        setIsGenerating(false);
+        // Show error message to user
+        const errorMessage: ChatMessage = {
+          id: `${Date.now()}-error`,
+          role: 'assistant',
+          content: 'Multi-frame iteration is only available on the Pro plan. Please upgrade to iterate across multiple screens at once.',
+          timestamp: Date.now(),
+        };
+        setChat((prev) => ({
+          ...prev,
+          messages: [...prev.messages, errorMessage],
+        }));
+        return;
+      }
+
       // Export multiple frames for flow iteration
       parent.postMessage(
         {
@@ -1226,6 +1243,12 @@ const App = () => {
       const variationPrompts = await generateVariationPrompts(iterPrompt, variations, ds, model);
       console.log('Generated flow variation prompts:', variationPrompts);
 
+      // DEBUG: Verify variation prompts are different
+      console.log('🔍 DEBUG: Variation prompts preview:', variationPrompts.map((p, i) => ({
+        index: i,
+        promptPreview: p.substring(0, 100) + (p.length > 100 ? '...' : '')
+      })));
+
       // Build chat history for context
       const chatHistory = buildChatHistory();
 
@@ -1241,6 +1264,14 @@ const App = () => {
           const targetFrame = frames[frameIndex];
 
           console.log(`Starting flow variation ${index + 1} on frame "${targetFrame.frameName}" (${frameIndex + 1}/${frames.length})`);
+
+          // DEBUG: Verify correct imageData is being sent for this variation
+          console.log(`🔍 DEBUG: Variation ${index + 1} → Frame "${targetFrame.frameName}"`, {
+            frameIndex,
+            imageDataLength: targetFrame.imageData.length,
+            imageDataHash: targetFrame.imageData.substring(0, 50),
+            promptPreview: varPrompt.substring(0, 80) + '...'
+          });
 
           // Update status: designing
           updateVariationStatus(index, 'designing', `AI is designing flow improvements for ${targetFrame.frameName}`);
