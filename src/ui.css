@@ -2050,7 +2050,7 @@ body {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: #36E4D8;
+  background: #CBCBCB;
   color: #161616;
   font-size: 14px;
   font-weight: 600;
@@ -2062,7 +2062,7 @@ body {
 }
 
 .profile-button-bottom:hover {
-  background: #2DD4C7;
+  background: #B8B8B8;
   transform: scale(1.05);
 }
 
