@@ -1524,7 +1524,6 @@ body {
 /* Chat Input */
 /* Chat input wrapper */
 .chat-input-wrapper {
-  border-top: 1px solid var(--border-color);
   background: var(--white);
   padding: 12px;
 }
