@@ -15,7 +15,7 @@
     async function testStartJob() {
       output.textContent = 'Testing /api/start-job...\n';
       try {
-        const response = await fetch('https://crafter-ai-kappa.vercel.app/api/start-job', {
+        const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/start-job', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -40,7 +40,7 @@
 
       output.textContent = `Testing /api/job-status for ${jobId}...\n`;
       try {
-        const response = await fetch(`https://crafter-ai-kappa.vercel.app/api/job-status?job_id=${jobId}`);
+        const response = await fetch(`https://crafter-ai-kappa-eight.vercel.app/api/job-status?job_id=${jobId}`);
 
         output.textContent += `Status: ${response.status}\n`;
         const data = await response.json();
