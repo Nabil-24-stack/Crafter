@@ -326,6 +326,21 @@ async function handleCreateCheckout(req: VercelRequest, res: VercelResponse) {
 
   let customerId = existingSub?.stripe_customer_id;
 
+  // Verify customer exists in Stripe, or create new one
+  if (customerId) {
+    try {
+      await stripe.customers.retrieve(customerId);
+    } catch (error: any) {
+      // Customer doesn't exist (likely test mode ID), create new one
+      if (error.code === 'resource_missing') {
+        console.log(`Customer ${customerId} not found, creating new one`);
+        customerId = null;
+      } else {
+        throw error;
+      }
+    }
+  }
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user_email,
@@ -382,6 +397,21 @@ async function handleCreatePackCheckout(req: VercelRequest, res: VercelResponse)
     .single();
 
   let customerId = subscription?.stripe_customer_id;
+
+  // Verify customer exists in Stripe, or create new one
+  if (customerId) {
+    try {
+      await stripe.customers.retrieve(customerId);
+    } catch (error: any) {
+      // Customer doesn't exist (likely test mode ID), create new one
+      if (error.code === 'resource_missing') {
+        console.log(`Customer ${customerId} not found, creating new one`);
+        customerId = null;
+      } else {
+        throw error;
+      }
+    }
+  }
 
   if (!customerId) {
     const customer = await stripe.customers.create({
