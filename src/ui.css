@@ -61,7 +61,7 @@ body {
 
 .google-login-button:hover {
   background: #F9FAFB;
-  border-color: #D1D5DB;
+  border-color: #B5B9C2;
 }
 
 .google-login-button:active {
@@ -1049,7 +1049,7 @@ body {
   --success-green: #33C520;
   --loading-blue: #36E4D8;
   --error-red: #900B09;
-  --border-color: #EAECF0;
+  --border-color: #CBCFD6;
   --white: #FFFFFF;
 }
 
@@ -1633,7 +1633,7 @@ body {
 /* Inline model selector */
 .model-selector-inline {
   padding: 6px 10px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 12px;
   font-family: inherit;
@@ -1867,7 +1867,7 @@ body {
 
 .top-login-button {
   background: white;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 13px;
@@ -1879,7 +1879,7 @@ body {
 
 .top-login-button:hover {
   background: #F9FAFB;
-  border-color: #D1D5DB;
+  border-color: #B5B9C2;
 }
 
 /* Login Modal */
@@ -2006,7 +2006,7 @@ body {
 
 .chat-header-login-button {
   background: white;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 13px;
@@ -2018,7 +2018,7 @@ body {
 
 .chat-header-login-button:hover {
   background: #F9FAFB;
-  border-color: #D1D5DB;
+  border-color: #B5B9C2;
 }
 
 /* ============================================================================
@@ -2032,7 +2032,7 @@ body {
   justify-content: space-between;
   gap: 8px;
   padding: 12px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid var(--border-color);
   background: #FFFFFF;
   position: sticky;
   bottom: 0;
@@ -2114,7 +2114,7 @@ body {
 
 .upgrade-button-bottom {
   background: transparent;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 13px;
@@ -2127,7 +2127,7 @@ body {
 
 .upgrade-button-bottom:hover {
   background: #F9FAFB;
-  border-color: #D1D5DB;
+  border-color: #B5B9C2;
 }
 
 .buy-more-button-bottom {
