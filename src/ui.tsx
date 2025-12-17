@@ -136,6 +136,9 @@ const App = () => {
   // Realtime channels for reasoning chunk streaming
   const reasoningChannelsRef = React.useRef<Map<string, RealtimeChannel>>(new Map());
 
+  // AbortController for cancelling iterations when Stop is clicked
+  const abortControllerRef = React.useRef<AbortController | null>(null);
+
   // Generate unique ID
   function generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -1042,6 +1045,10 @@ const App = () => {
     try {
       console.log('Starting iteration with exported PNG...');
 
+      // Create and store new AbortController for this iteration
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
       // Update status: generating variation prompts
       updateIterationStatus('in-progress');
 
@@ -1055,6 +1062,12 @@ const App = () => {
       // Start all iteration variations using the pure SVG pipeline
       const variationPromises = variationPrompts.map(async (varPrompt, index) => {
         try {
+          // Check if operation was cancelled before starting
+          if (signal.aborted) {
+            console.log(`Variation ${index + 1} cancelled before starting`);
+            return;
+          }
+
           // Update status: designing
           updateVariationStatus(index, 'designing', 'AI is designing');
 
@@ -1088,8 +1101,23 @@ const App = () => {
 
               // Store the channel so we can unsubscribe later
               reasoningChannelsRef.current.set(jobId, reasoningChannel);
-            }
+            },
+            signal
           );
+
+          // Check if operation was cancelled after receiving result
+          if (signal.aborted) {
+            console.log(`Variation ${index + 1} cancelled after completion`);
+            // Clean up subscription
+            if (result.job_id && reasoningChannelsRef.current.has(result.job_id)) {
+              const channel = reasoningChannelsRef.current.get(result.job_id);
+              if (channel) {
+                await unsubscribeFromReasoningChunks(channel);
+                reasoningChannelsRef.current.delete(result.job_id);
+              }
+            }
+            return;
+          }
 
           // Send SVG to plugin for rendering
           if (result.svg) {
@@ -1132,6 +1160,13 @@ const App = () => {
             throw new Error('No SVG returned from generation');
           }
         } catch (err) {
+          // Check if error is due to cancellation
+          if (err instanceof Error && err.message === 'Operation cancelled') {
+            console.log(`Variation ${index + 1} cancelled`);
+            // Don't update status - handleStop already did it
+            return;
+          }
+
           console.error(`Error iterating variation ${index + 1}:`, err);
 
           // Stop the live streaming indicator on error
@@ -1624,8 +1659,23 @@ const App = () => {
     console.log('Stopping iteration...');
     setIsGenerating(false);
 
-    // Note: Job cancellation removed - MVP uses direct Railway calls (no job queue)
-    console.log('Stop requested - MVP iterations will complete but new ones will not start');
+    // Abort all ongoing API calls
+    if (abortControllerRef.current) {
+      console.log('Aborting ongoing iterations...');
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    // Clean up all reasoning channel subscriptions
+    console.log('Cleaning up reasoning subscriptions...');
+    for (const [jobId, channel] of reasoningChannelsRef.current.entries()) {
+      try {
+        await unsubscribeFromReasoningChunks(channel);
+        reasoningChannelsRef.current.delete(jobId);
+      } catch (err) {
+        console.error(`Error unsubscribing from channel for job ${jobId}:`, err);
+      }
+    }
 
     // Update all in-progress variations to 'stopped' status
     if (currentMessageRef.current) {

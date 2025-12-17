@@ -13,9 +13,14 @@ const MAX_POLL_ATTEMPTS = 120; // Max 6 minutes (120 * 3s) - increased for visio
 /**
  * Helper function to poll job status
  */
-async function pollJobStatus(jobId: string): Promise<any> {
+async function pollJobStatus(jobId: string, signal?: AbortSignal): Promise<any> {
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
-    const response = await fetch(`${JOB_STATUS_URL}?job_id=${jobId}`);
+    // Check if aborted before making request
+    if (signal?.aborted) {
+      throw new Error('Operation cancelled');
+    }
+
+    const response = await fetch(`${JOB_STATUS_URL}?job_id=${jobId}`, { signal });
 
     if (!response.ok) {
       throw new Error(`Failed to check job status: ${response.statusText}`);
@@ -32,7 +37,17 @@ async function pollJobStatus(jobId: string): Promise<any> {
     }
 
     // Job still processing, wait and retry
-    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(resolve, POLL_INTERVAL_MS);
+
+      // If signal is aborted during wait, clear timeout and reject
+      if (signal) {
+        signal.addEventListener('abort', () => {
+          clearTimeout(timeout);
+          reject(new Error('Operation cancelled'));
+        }, { once: true });
+      }
+    });
   }
 
   throw new Error('Job timed out. Please try again.');
@@ -46,7 +61,8 @@ export async function generateLayout(
   prompt: string,
   designSystem: DesignSystemData,
   apiKey: string,
-  model: 'claude' | 'gemini' = 'claude'
+  model: 'claude' | 'gemini' = 'claude',
+  signal?: AbortSignal
 ): Promise<GenerationResult> {
   // Use mock mode if specified
   if (apiKey === 'MOCK_API_KEY' || !apiKey) {
@@ -66,6 +82,7 @@ export async function generateLayout(
         designSystem,
         model,
       }),
+      signal,
     });
 
     if (!startResponse.ok) {
@@ -78,7 +95,7 @@ export async function generateLayout(
     console.log('Generation job started:', job_id);
 
     // Poll for results
-    const output = await pollJobStatus(job_id);
+    const output = await pollJobStatus(job_id, signal);
 
     return output as GenerationResult;
   } catch (error) {
@@ -125,6 +142,7 @@ function generateMockLayout(prompt: string, designSystem: DesignSystemData): Gen
  * Uses async job queue to avoid timeouts
  *
  * @param onJobStarted - Optional callback called immediately when job_id is available (before polling)
+ * @param signal - Optional AbortSignal to cancel the operation
  */
 export async function iterateLayout(
   imageData: string,
@@ -133,7 +151,8 @@ export async function iterateLayout(
   designSystem: DesignSystemData,
   model: 'claude' | 'gemini' = 'claude',
   chatHistory?: string,
-  onJobStarted?: (jobId: string) => void
+  onJobStarted?: (jobId: string) => void,
+  signal?: AbortSignal
 ): Promise<IterationResult> {
   try {
     console.log('iterateLayout called with:', {
@@ -159,6 +178,7 @@ export async function iterateLayout(
         model,
         chatHistory,
       }),
+      signal,
     });
 
     if (!startResponse.ok) {
@@ -176,7 +196,7 @@ export async function iterateLayout(
     }
 
     // Poll for results
-    const output = await pollJobStatus(job_id);
+    const output = await pollJobStatus(job_id, signal);
 
     // Include job_id in the result for realtime subscriptions
     return {
