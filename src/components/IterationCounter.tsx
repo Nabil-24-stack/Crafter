@@ -100,15 +100,6 @@ export const IterationCounter: React.FC<IterationCounterProps> = ({
 
       {/* Right: Action Buttons */}
       <div className="iteration-actions">
-        {plan_type === 'free' && onUpgradeClick && (
-          <button
-            className="upgrade-button-bottom"
-            onClick={onUpgradeClick}
-            aria-label="Upgrade to Pro plan"
-          >
-            Upgrade
-          </button>
-        )}
         {onBuyMoreClick && (
           <button
             className="buy-more-button-bottom"
@@ -116,6 +107,15 @@ export const IterationCounter: React.FC<IterationCounterProps> = ({
             aria-label="Buy more iterations"
           >
             Buy more iterations
+          </button>
+        )}
+        {plan_type === 'free' && onUpgradeClick && (
+          <button
+            className="upgrade-button-bottom"
+            onClick={onUpgradeClick}
+            aria-label="Upgrade to Pro plan"
+          >
+            Upgrade
           </button>
         )}
       </div>

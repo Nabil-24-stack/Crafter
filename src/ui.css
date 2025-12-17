@@ -2031,8 +2031,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
+  gap: 8px;
+  padding: 12px;
   border-top: 1px solid #E5E7EB;
   background: #FFFFFF;
   position: sticky;
@@ -2088,7 +2088,7 @@ body {
 .iteration-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
   flex: 1;
 }
 
@@ -2133,20 +2133,19 @@ body {
 
 .buy-more-button-bottom {
   background: transparent;
-  border: 1px solid #E5E7EB;
-  border-radius: 6px;
-  padding: 6px 12px;
+  border: none;
+  padding: 4px 0;
   font-size: 13px;
   font-weight: 500;
   color: #161616;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s;
   white-space: nowrap;
+  text-decoration: underline;
 }
 
 .buy-more-button-bottom:hover {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
+  color: #4B5563;
 }
 
 /* Limit Reached Modal */
