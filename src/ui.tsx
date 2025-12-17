@@ -148,7 +148,7 @@ const App = () => {
   const fetchSubscriptionStatus = async (user_id: string) => {
     try {
       console.log('Fetching subscription status for user:', user_id);
-      const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/subscription?action=check-status', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=check-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id }),
@@ -184,7 +184,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/subscription?action=record-iteration', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=record-iteration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId }),
@@ -223,7 +223,7 @@ const App = () => {
     if (!userId || !userEmail) return;
 
     // Open pricing page
-    const pricingUrl = `https://crafter-ai-kappa-eight.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}`;
     window.open(pricingUrl, '_blank');
   };
 
@@ -232,7 +232,7 @@ const App = () => {
     if (!userId || !userEmail) return;
 
     // Open pricing page (shows iteration packs section)
-    const pricingUrl = `https://crafter-ai-kappa-eight.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}#iteration-packs`;
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}#iteration-packs`;
     window.open(pricingUrl, '_blank');
   };
 
@@ -242,7 +242,7 @@ const App = () => {
 
     // Open pricing page scrolled to iteration packs
     const planType = subscriptionStatus?.plan_type || 'free';
-    const pricingUrl = `https://crafter-ai-kappa-eight.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}#iteration-packs`;
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}#iteration-packs`;
     window.open(pricingUrl, '_blank');
   };
 
@@ -267,7 +267,7 @@ const App = () => {
 
     // Open pricing page at the top (no hash)
     const planType = subscriptionStatus?.plan_type || 'free';
-    const pricingUrl = `https://crafter-ai-kappa-eight.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}`;
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}`;
     window.open(pricingUrl, '_blank');
   };
 
@@ -277,7 +277,7 @@ const App = () => {
 
     // Open pricing page with current plan type
     const planType = subscriptionStatus?.plan_type || 'free';
-    const pricingUrl = `https://crafter-ai-kappa-eight.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}`;
+    const pricingUrl = `https://crafter-ai-kappa.vercel.app/pricing.html?user_id=${userId}&email=${encodeURIComponent(userEmail)}&plan=${planType}`;
     window.open(pricingUrl, '_blank');
   };
 
@@ -655,7 +655,7 @@ const App = () => {
     const state = Math.random().toString(36).substring(7);
 
     // Open OAuth popup with Supabase Auth
-    const authUrl = `https://crafter-ai-kappa-eight.vercel.app/api/auth?action=figma&state=${state}`;
+    const authUrl = `https://crafter-ai-kappa.vercel.app/api/auth?action=figma&state=${state}`;
     window.open(authUrl, '_blank', 'width=600,height=700');
 
     // Start polling for auth completion
@@ -673,7 +673,7 @@ const App = () => {
 
       try {
         const response = await fetch(
-          `https://crafter-ai-kappa-eight.vercel.app/api/auth?action=poll&state=${state}`
+          `https://crafter-ai-kappa.vercel.app/api/auth?action=poll&state=${state}`
         );
 
         if (response.ok) {
@@ -752,7 +752,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/analyze-variation-needs', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/analyze-variation-needs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -974,7 +974,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/generate-variation-prompts', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-variation-prompts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1360,7 +1360,7 @@ const App = () => {
     model: 'claude' | 'gemini'
   ) => {
     try {
-      const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/analyze-flow-needs', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/analyze-flow-needs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1590,7 +1590,7 @@ const App = () => {
     try {
       // Generate summary using the same model that generated the variations
       console.log(`Calling summary API with ${selectedModel}...`);
-      const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/generate-iteration-summary', {
+      const response = await fetch('https://crafter-ai-kappa.vercel.app/api/generate-iteration-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Use direct Figma OAuth (not Supabase's generic provider)
     const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
-    const REDIRECT_URI = 'https://crafter-ai-kappa-eight.vercel.app/api/auth?action=callback';
+    const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
     const figmaAuthUrl = `https://www.figma.com/oauth?client_id=${FIGMA_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=file_content:read,library_assets:read,library_content:read,current_user:read&state=${state}&response_type=code`;
 
     return res.redirect(figmaAuthUrl);
@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const FIGMA_CLIENT_ID = process.env.FIGMA_CLIENT_ID!;
       const FIGMA_CLIENT_SECRET = process.env.FIGMA_CLIENT_SECRET!;
-      const REDIRECT_URI = 'https://crafter-ai-kappa-eight.vercel.app/api/auth?action=callback';
+      const REDIRECT_URI = 'https://crafter-ai-kappa.vercel.app/api/auth?action=callback';
 
       // Exchange code for access token with Figma
       const tokenResponse = await fetch('https://api.figma.com/v1/oauth/token', {

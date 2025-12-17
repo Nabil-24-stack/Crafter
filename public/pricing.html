@@ -321,7 +321,7 @@
       `;
 
       try {
-        const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/subscription?action=create-checkout', {
+        const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=create-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -354,7 +354,7 @@
       }
 
       try {
-        const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/subscription?action=create-pack-checkout', {
+        const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=create-pack-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -399,7 +399,7 @@
 
       try {
         // Open Stripe Customer Portal where user can cancel subscription
-        const response = await fetch('https://crafter-ai-kappa-eight.vercel.app/api/subscription?action=portal', {
+        const response = await fetch('https://crafter-ai-kappa.vercel.app/api/subscription?action=portal', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

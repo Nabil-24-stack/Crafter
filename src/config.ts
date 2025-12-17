@@ -6,10 +6,10 @@
 
 export const config = {
   // Backend API endpoint - Vercel deployment
-  BACKEND_URL: 'https://crafter-ai-kappa-eight.vercel.app/api/generate',
+  BACKEND_URL: 'https://crafter-ai-kappa.vercel.app/api/generate',
 
   // Multi-phase generation endpoint (optimized single-call with smart component limiting)
-  BACKEND_URL_MULTI_PHASE: 'https://crafter-ai-kappa-eight.vercel.app/api/generate-multi-phase',
+  BACKEND_URL_MULTI_PHASE: 'https://crafter-ai-kappa.vercel.app/api/generate-multi-phase',
 
   // Use multi-phase generation (same speed, better component handling)
   USE_MULTI_PHASE: false, // You can enable this after testing
