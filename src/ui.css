@@ -2133,7 +2133,7 @@ body {
 .buy-more-button-bottom {
   background: transparent;
   border: none;
-  padding: 4px 0;
+  padding: 6px 12px;
   font-size: 13px;
   font-weight: 500;
   color: #161616;
