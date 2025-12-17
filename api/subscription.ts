@@ -401,7 +401,7 @@ async function handleCreatePackCheckout(req: VercelRequest, res: VercelResponse)
     payment_method_types: ['card'],
     line_items: [{ price: PACK_PRICE_IDS[pack_size], quantity: 1 }],
     success_url: success_url || `${process.env.PAYMENT_PORTAL_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: cancel_url || `${process.env.PAYMENT_PORTAL_URL}/buy-iterations`,
+    cancel_url: cancel_url || `${process.env.PAYMENT_PORTAL_URL}/pricing`,
     metadata: { user_id, pack_size: pack_size.toString(), type: 'iteration_pack' },
   });
 
@@ -429,7 +429,7 @@ async function handlePortal(req: VercelRequest, res: VercelResponse) {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: subscription.stripe_customer_id,
-    return_url: return_url || `${process.env.PAYMENT_PORTAL_URL}/account`,
+    return_url: return_url || `${process.env.PAYMENT_PORTAL_URL}/pricing`,
   });
 
   res.status(200).json({ portal_url: session.url });

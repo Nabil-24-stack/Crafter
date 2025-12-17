@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful - Crafter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#36E4D8',
+            background: 'hsl(240 10% 3.9%)',
+            foreground: 'hsl(0 0% 98%)',
+            muted: 'hsl(240 3.7% 15.9%)',
+            'muted-foreground': 'hsl(240 5% 64.9%)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes scaleIn {
+      from {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes checkmark {
+      0% {
+        stroke-dashoffset: 48;
+      }
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(54, 228, 216, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(54, 228, 216, 0.8);
+      }
+    }
+
+    .checkmark-circle {
+      animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                 glow 2s ease-in-out infinite 0.5s;
+    }
+
+    .checkmark-path {
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: checkmark 0.5s ease-out 0.4s forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.6s; opacity: 0; }
+    .delay-2 { animation-delay: 0.8s; opacity: 0; }
+    .delay-3 { animation-delay: 1s; opacity: 0; }
+  </style>
+</head>
+<body class="bg-background text-foreground antialiased min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-2xl w-full">
+    <div class="bg-muted border border-gray-800 rounded-2xl p-12 text-center">
+      <!-- Animated Checkmark -->
+      <div class="flex justify-center mb-8">
+        <div class="checkmark-circle w-24 h-24 bg-gradient-to-br from-primary to-emerald-400 rounded-full flex items-center justify-center">
+          <svg class="w-14 h-14" viewBox="0 0 52 52">
+            <path class="checkmark-path" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M14 27l10 10L38 17" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <h1 id="success-title" class="text-4xl md:text-5xl font-bold mb-4 fade-in-up delay-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+        Payment Successful!
+      </h1>
+
+      <p id="success-message" class="text-lg text-muted-foreground mb-6 fade-in-up delay-2">
+        Thank you for subscribing to Crafter. Your account has been upgraded and you can now enjoy all Pro features.
+      </p>
+
+      <p class="text-base text-muted-foreground mb-8 fade-in-up delay-2">
+        You can close this window and return to Figma. Restart the plugin to see your account updated!
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Get purchase type from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const purchaseType = urlParams.get('type');
+    const packSize = urlParams.get('pack_size');
+
+    // Update content based on purchase type
+    if (purchaseType === 'pack' && packSize) {
+      // Iteration pack purchase
+      document.getElementById('success-message').textContent =
+        `Thank you for your purchase! You've successfully added ${packSize} iterations to your account.`;
+    } else if (purchaseType === 'subscription') {
+      // Pro subscription purchase (default content is already for this case)
+      // No changes needed as the default content is for subscription
+    }
+  </script>
+</body>
+</html>
