@@ -268,6 +268,7 @@ async function handleRecordIteration(req: VercelRequest, res: VercelResponse) {
     const packToUse = packs[0];
     const newRemaining = packToUse.iterations_remaining - 1;
 
+    // Update pack iterations remaining
     await supabase
       .from('iteration_packs')
       .update({
@@ -277,13 +278,23 @@ async function handleRecordIteration(req: VercelRequest, res: VercelResponse) {
       })
       .eq('id', packToUse.id);
 
+    // Also increment usage_tracking.iterations_used when using pack iterations
+    await supabase
+      .from('usage_tracking')
+      .update({ iterations_used: current_iterations_used + 1 })
+      .eq('user_id', user_id)
+      .eq('month', currentMonth);
+
+    const new_iterations_used = current_iterations_used + 1;
+    const remaining_extra_iterations = total_pack_iterations - 1;
+
     return res.status(200).json({
       success: true,
       message: 'Iteration recorded (using pack)',
-      iterations_used: current_iterations_used,
+      iterations_used: new_iterations_used,
       iterations_limit,
-      extra_iterations: total_pack_iterations - 1,
-      total_available: iterations_limit + (total_pack_iterations - 1),
+      extra_iterations: remaining_extra_iterations,
+      total_available: Math.max(new_iterations_used, iterations_limit) + remaining_extra_iterations,
       plan_type
     });
   }
