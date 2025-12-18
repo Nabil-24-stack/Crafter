@@ -22,7 +22,7 @@ import { IterationCounter } from './IterationCounter';
 interface ChatInterfaceProps {
   chat: Chat;
   designSystem: DesignSystemData | null;
-  selectedFrameInfo: { frameId: string; frameName: string } | null;
+  selectedFrameInfo: { frameId: string; frameName: string; isFlow?: boolean } | null;
   isGenerating: boolean;
   isAuthenticated: boolean;
   onSendMessage: (prompt: string, model: 'claude' | 'gemini') => void;
@@ -93,6 +93,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     if (!selectedFrameInfo) {
       return 'Select a frame or multiple frames to iterate on.';
+    }
+
+    // Check if multi-frame is selected but user is on Free plan
+    if (selectedFrameInfo.isFlow === true && subscriptionStatus?.plan_type !== 'pro') {
+      return 'Multi-frame iteration is only available on Pro plan. Upgrade to use this feature.';
     }
 
     return 'How do you want to iterate this design?';
@@ -182,7 +187,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
 
       <ChatInput
-        disabled={!selectedFrameInfo || isGenerating}
+        disabled={
+          !selectedFrameInfo ||
+          isGenerating ||
+          (selectedFrameInfo?.isFlow === true && subscriptionStatus?.plan_type !== 'pro')
+        }
         placeholder={getPlaceholder()}
         value={inputValue}
         onChange={setInputValue}

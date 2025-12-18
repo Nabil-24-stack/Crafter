@@ -932,23 +932,6 @@ const App = () => {
 
     // Check if this is a flow (multiple frames) or single frame
     if (selectedFrameInfo.isFlow && selectedFrameInfo.frames) {
-      // Multi-frame iteration is Pro-only feature
-      if (subscriptionStatus?.plan_type !== 'pro') {
-        setIsGenerating(false);
-        // Show error message to user
-        const errorMessage: ChatMessage = {
-          id: `${Date.now()}-error`,
-          role: 'assistant',
-          content: 'Multi-frame iteration is only available on the Pro plan. Please upgrade to iterate across multiple screens at once.',
-          timestamp: Date.now(),
-        };
-        setChat((prev) => ({
-          ...prev,
-          messages: [...prev.messages, errorMessage],
-        }));
-        return;
-      }
-
       // Export multiple frames for flow iteration
       parent.postMessage(
         {
