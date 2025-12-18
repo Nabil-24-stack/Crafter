@@ -92,7 +92,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
 
     if (!selectedFrameInfo) {
-      return 'Select a frame or multiple frames to iterate on.';
+      // Different placeholder based on plan type
+      if (subscriptionStatus?.plan_type === 'pro') {
+        return 'Select a frame or multiple frames to iterate on.';
+      }
+      return 'Select a frame to iterate on.';
     }
 
     // Check if multi-frame is selected but user is on Free plan
