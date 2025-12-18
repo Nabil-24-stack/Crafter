@@ -11,6 +11,7 @@ interface MessageListProps {
   onExpandVariation: (messageId: string, variationIndex: number) => void;
   hasSelectedFrame: boolean;
   onPromptClick?: (prompt: string) => void;
+  isMultiFrameOnFreePlan?: boolean;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -18,6 +19,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   onExpandVariation,
   hasSelectedFrame,
   onPromptClick,
+  isMultiFrameOnFreePlan,
 }) => {
   const examplePrompts = [
     'Design what the empty state could look like.',
@@ -31,18 +33,24 @@ export const MessageList: React.FC<MessageListProps> = ({
         <div className="empty-state">
           {hasSelectedFrame ? (
             <>
-              <p className="empty-state-heading">Here's some prompts for you to start:</p>
-              <div className="example-prompts">
-                {examplePrompts.map((prompt, index) => (
-                  <button
-                    key={index}
-                    className="example-prompt-button"
-                    onClick={() => onPromptClick?.(prompt)}
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
+              {isMultiFrameOnFreePlan ? (
+                <p className="empty-state-text">Multi-frame iteration is only available on Pro plan.</p>
+              ) : (
+                <>
+                  <p className="empty-state-heading">Here's some prompts for you to start:</p>
+                  <div className="example-prompts">
+                    {examplePrompts.map((prompt, index) => (
+                      <button
+                        key={index}
+                        className="example-prompt-button"
+                        onClick={() => onPromptClick?.(prompt)}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <p className="empty-state-text">Select a Frame to iterate on</p>

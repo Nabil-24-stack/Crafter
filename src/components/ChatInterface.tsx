@@ -193,6 +193,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onExpandVariation={onExpandVariation}
         hasSelectedFrame={!!selectedFrameInfo}
         onPromptClick={handlePromptClick}
+        isMultiFrameOnFreePlan={selectedFrameInfo?.isFlow === true && subscriptionStatus?.plan_type !== 'pro'}
       />
 
       <ChatInput
