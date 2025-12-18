@@ -151,6 +151,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       return;
     }
 
+    // Check if multi-frame is selected but user is on Free plan
+    if (selectedFrameInfo.isFlow === true && subscriptionStatus?.plan_type !== 'pro') {
+      return; // Don't allow action - input is already disabled, this is just a safeguard
+    }
+
     if (!isAuthenticated) {
       // Store the prompt and show login modal
       setPendingPrompt({
